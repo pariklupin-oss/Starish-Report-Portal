@@ -1,5 +1,7 @@
+import {createTablePdf} from './table-pdf.js';
 import { derived, glueDays, summary } from './report-model.js';
 export async function createReportPdf(data, regularBytes, boldBytes) {
+    if(data.table)return createTablePdf(data,regularBytes,boldBytes);
     if(!globalThis.PDFLib||!globalThis.fontkit)throw Error('PDF library unavailable. Upload pdf-lib.min.js and fontkit.umd.min.js.');
     const { PDFDocument,rgb }=globalThis.PDFLib;const fontkit=globalThis.fontkit;
     const doc = await PDFDocument.create();
