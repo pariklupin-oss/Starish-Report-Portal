@@ -4,3 +4,5 @@
 .excel-report th{background:#e3efd9;color:#111;border:1px solid #aab6a5;text-transform:none;white-space:nowrap}.excel-report td{border:1px solid #bdc6b7;padding:9px 12px;white-space:nowrap}.excel-report h2{background:#548235;color:white;padding:10px;margin:0}.excel-report tfoot td{background:#dcebd0;font-weight:700}.excel-report table{font-size:14px}.excel-report{padding:18px}.toolbar>.card{flex:1}.excel-report tbody tr:nth-child(even){background:#f7faf4}
 
 .filters[hidden]{display:none!important}
+
+#filters label[hidden]{display:none!important}
