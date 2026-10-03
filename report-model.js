@@ -115,6 +115,8 @@ export function summary(type, entries, changeover = '2026-09-10') {
                     value += area;
             }
             add(meter + ' area (litres)', missing ? fmt(value) + '; ' + missing + ' days unavailable' : fmt(value));
+            const validDays = days.length - missing;
+            add(meter + ' average (litres/day)', validDays ? fmt(value / validDays, 2) + ' (' + validDays + ' valid days)' : 'Unavailable');
         }
     }
     else if (type.includes('Timesheet')) {
