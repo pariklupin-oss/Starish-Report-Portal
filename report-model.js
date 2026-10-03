@@ -35,6 +35,10 @@ export function derived(r) {
             out[r.type === 'Boardline Production' ? 'Speed (metres/hour)' : 'Speed (units/hour)'] = run && run > 0 && qty !== null ? fmt(qty / run) : 'Unavailable';
         }
     }
+    if (r.type === 'Stage Report') {
+        const raw = f['GAP-2 (hrs)'];
+        if (raw !== undefined && raw !== null && String(raw).trim() !== '' && Number.isFinite(Number(raw))) out['GAP-2 (hrs)'] = Number(raw).toFixed(2);
+    }
     return out;
 }
 export function glueDays(entries, changeover) { const dates = [...new Set(entries.filter(r => r.type === 'Glue Kitchen Stock' && /maize starch/i.test(r.fields['Material Name'] || '')).map(r => r.date))].sort().reverse(); return dates.map(date => { const stocks = entries.filter(r => r.date === date && r.type === 'Glue Kitchen Stock' && /maize starch/i.test(r.fields['Material Name'] || '')); const board = entries.filter(r => r.date === date && r.type === 'Boardline Production'); const total = (rows, key) => rows.reduce((a, r) => a + (number(r.fields, key) || 0), 0); let starch = 0, batches = 0, batchKnown = true, starchKnown = true; for (const r of stocks) {
