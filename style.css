@@ -6,3 +6,16 @@
 .filters[hidden]{display:none!important}
 
 #filters label[hidden]{display:none!important}
+/* Corporate shell with compact spreadsheet reports. */
+:root{--navy:#0c2946;--ink:#20364d;--green:#008b76;--bg:#f4f7fa;--border:#dfe7ee}
+header{background:#fff;color:var(--navy);border-bottom:1px solid var(--border);box-shadow:0 2px 10px #102d4c08;padding:18px 26px}
+.brand{color:var(--green)}.brand span{color:var(--navy)}.brand small{color:#6b7f90}
+#shell{align-items:stretch}nav{background:var(--navy);width:190px;min-height:calc(100vh - 84px);padding:28px 12px;border-right:1px solid #163a59}
+nav button{color:#ccdae6;border-radius:7px;padding:13px 16px;font-size:14px}nav button:hover{background:#193c59;color:white}nav button.active{background:var(--green);color:white;box-shadow:0 4px 10px #001a2933}
+main{width:calc(100% - 190px);max-width:none;padding:28px 32px;min-width:0}.title-row{margin-bottom:18px}h1{font-size:27px;letter-spacing:-.5px;margin-bottom:4px}.eyebrow{letter-spacing:1.4px}
+button{transition:background .15s,box-shadow .15s}button:hover:not(:disabled){box-shadow:0 3px 9px #102d4c18}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #76caba;outline-offset:2px}
+.card{border-radius:12px;box-shadow:0 3px 14px #16334d06}.filters{background:white;gap:14px;border-radius:10px;padding:14px 18px;margin-bottom:18px}.toolbar{gap:10px;margin-bottom:14px}input,select{min-height:40px;border-color:#d4dfe8}.secondary{background:#fff;color:#28455f}
+.excel-report{padding:18px;max-height:70vh;position:relative;border-color:#d6e0d3}.excel-report h2{background:transparent;color:var(--navy);font-size:20px;letter-spacing:-.3px;padding:0 0 8px;margin:0;border-bottom:1px solid #e4ece2}.excel-report>p{font-size:12px;color:#65788a;margin:10px 0 14px}.excel-report table{font-size:13px;font-variant-numeric:tabular-nums}.excel-report th{position:sticky;top:-18px;z-index:1;background:#e5efde;color:#20381d;border:1px solid #b7c8b0;padding:11px 12px;font-size:12px;font-weight:700}.excel-report td{padding:8px 12px;border:1px solid #c9d5c3;white-space:nowrap}.excel-report tbody tr:nth-child(even){background:#f7faf5}.excel-report tbody tr:hover{background:#edf5e8}.excel-report tfoot td{background:#dcebd1;color:#183e26;font-weight:800;border-top:2px solid #93ad85}.excel-report td button{font-size:11px;padding:6px 10px}.table-wrap:not(.excel-report) th{background:#eef3f7;color:#28455f}.footer{margin-top:22px;font-size:11px}
+@media(max-width:1000px){main{padding:22px}nav{width:170px}main{width:calc(100% - 170px)}}
+@media(max-width:700px){header{padding:12px;gap:8px}.brand span{font-size:12px}nav{width:100%;min-height:0;border:0;padding:10px 12px;display:flex;gap:8px}nav button{padding:10px 16px;font-size:13px;margin:0}main{width:100%;padding:16px}.title-row{margin-bottom:12px}h1{font-size:23px}.filters{padding:12px;gap:10px}.toolbar select,.toolbar input{max-width:100%}.excel-report{padding:12px;max-height:65vh}.excel-report h2{font-size:17px}.excel-report th{top:-12px}.excel-report td{padding:8px 10px}.excel-report table{font-size:12px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
