@@ -1,4 +1,4 @@
-const CACHE='starish-static-v36-boiler-excel';
+const CACHE='starish-static-v37-water-test-daily';
 const STATIC=['./','./index.html','./logo_starish.webp','./style.css','./style.css?v=27','./app.js','./boiler-import.js','./config.js','./report-model.js','./report-inputs.js','./analysis-model.js','./report-table.js','./stage-report.js','./report-pdf.js','./table-pdf.js','./manifest.webmanifest','./icon-192.png','./icon-512.png','./pdf-lib.min.js','./fontkit.umd.min.js','./report-font.ttf','./report-font-bold.ttf'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(STATIC.map(url=>c.add(url)))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('starish-static-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
