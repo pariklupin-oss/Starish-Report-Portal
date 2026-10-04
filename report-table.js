@@ -1,20 +1,7 @@
+import {reportInputs} from './report-inputs.js';
 import {derived,glueDays,hours,fieldNames} from './report-model.js';
 const numeric=v=>v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))?Number(v):null;
 const fmt=(v,d=2)=>v===null?'Unavailable':Number(v).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
-// Exclude only an incomplete zero-meter shadow with matching shift, source, weight and times.
-function reportInputs(type,entries){
- const input=entries.filter(r=>r.type===type);if(type!=='Boardline Production')return input;
- const empty=v=>v===undefined||v===null||String(v).trim()==='';
- const zero=v=>empty(v)||numeric(v)===0;
- return input.filter(r=>!input.some(other=>{
- if(other===r||!zero(r.fields['Metres'])||!(numeric(other.fields['Metres'])>0)||!zero(r.fields['Breakdown Minutes']))return false;
- const source=r.sourceId||r.source;if(!source||source!==(other.sourceId||other.source)||r.date!==other.date||r.shift!==other.shift)return false;
- if(!['Tonnage (kg)','Start Time','End Time'].every(k=>!empty(r.fields[k])&&String(r.fields[k])===String(other.fields[k])))return false;
- if(!(numeric(r.fields['Tonnage (kg)'])>0))return false;
- // Retain any row with conflicting job identifiers, remarks or other supplied data.
- return Object.entries(r.fields).every(([k,v])=>['Metres','Breakdown Minutes'].includes(k)||empty(v)||String(v)===String(other.fields[k]??''));
- }));
-}
 function overlappingBoardline(records){
  const groups=new Map();for(const r of records){const key=r.date+'|'+r.shift;const span=hours(r.fields['Start Time'],r.fields['End Time']);if(span===null)continue;const parts=String(r.fields['Start Time']).split(':').map(Number),start=parts[0]*60+parts[1]+(parts[2]||0)/60;const interval=[start,start+span*60];if(!groups.has(key))groups.set(key,[]);groups.get(key).push(interval);}
  for(const intervals of groups.values()){intervals.sort((a,b)=>a[0]-b[0]);let end=-Infinity;for(const [a,b] of intervals){if(a<end)return true;end=Math.max(end,b);}}return false;
