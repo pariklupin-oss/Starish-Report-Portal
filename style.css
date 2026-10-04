@@ -29,17 +29,19 @@ main{background:#e8f0f5}.eyebrow{color:#007d68}.filters{background:#f4fafd;borde
 .excel-report{background:#fff;border:1px solid #bdd6cc;box-shadow:0 5px 18px #092b4210}.excel-report h2{color:#103b4b;border-bottom-color:#cfe9df}.excel-report th{background:#c8f1e2;color:#104f40;border-color:#9ccdbb}.excel-report td{border-color:#c7ddd4}.excel-report tbody tr:nth-child(even){background:#f0f8f4}.excel-report tbody tr:hover{background:#dff2e8}.excel-report tfoot td{background:#007f67;color:white;border-color:#39a991;border-top:2px solid #006752}
 .table-wrap:not(.excel-report) th{background:#d8eee7;color:#164f43}.secondary{border-color:#b9d4dd;color:#174559}input,select,textarea{border-color:#bdd3dc}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline-color:#30bfa0}
 
-/* Text header: keep mobile content at the device width. */
-.brand-text{min-width:0;font-size:20px;color:#fff}
-.brand-text span{color:#fff;letter-spacing:.6px}
-.brand-text small{color:#b4d7df;font-size:11px}
-header{max-width:100%;flex-wrap:wrap}
-#identity{overflow-wrap:anywhere;min-width:0}
-#shell,main,#content,.table-wrap{min-width:0;max-width:100%}
-.table-wrap{overflow-x:auto}
+/* Prevent oversized branding from widening the mobile viewport. */
+html,body{width:100%;min-width:0}header{max-width:100%;flex-wrap:wrap}.brand-logo{min-width:0;max-width:100%;flex:0 1 250px}.brand-logo img{max-width:100%;height:auto}#shell,main,#content{min-width:0}.table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}#reportChooser select{max-width:100%}
+@media(max-width:700px){header{padding:12px;align-items:center;row-gap:10px}.brand-logo{flex:0 1 100%;max-width:100%}.brand-logo img{width:185px!important}.brand-logo>small{color:#bedee5}#identity{margin-left:0;flex:1;min-width:0;overflow-wrap:anywhere}#logout,#install{flex:none}#shell{display:block;width:100%}#nav{width:100%;max-width:100%;min-height:0;overflow-x:auto}main{width:100%;max-width:100%;padding:14px}#reportChooser{width:100%}#reportChooser label{width:100%}#reportChooser select{width:100%}.toolbar input,.toolbar select{min-width:0;max-width:100%}.filters label{min-width:0}.filters input,.filters select{min-width:0;font-size:16px}.excel-report{width:100%}.excel-report table{width:max-content;min-width:100%}dialog{width:calc(100% - 20px);max-width:calc(100% - 20px)}}
+
+/* Prevent toolbar flex shrinking the employee overview on narrow screens. */
 @media(max-width:700px){
-.brand-text{flex:1 1 180px}
-.brand-text span{font-size:16px}
-#identity{margin-left:0;max-width:100%}
-.toolbar>*,.filters>*{min-width:0}
+ main,.toolbar,.title-row,.card{min-width:0}
+ .toolbar>.card{flex:0 0 100%;width:100%;max-width:100%}
+ .toolbar>.card .toolbar{display:flex;flex-direction:column;align-items:stretch}
+ .toolbar>.card label,.toolbar>.card input,.toolbar>.card select{width:100%;max-width:100%;min-width:0}
+ .toolbar>.card h2,.toolbar>.card small{overflow-wrap:normal;word-break:normal}
+ .toolbar>.card small{display:block}
+ .toolbar>button{max-width:100%;white-space:normal}
+ .title-row{flex-wrap:wrap;gap:12px}
+ #taskEmployeeSearch,#taskEmployee{font-size:16px;width:100%;max-width:100%}
 }
