@@ -1,4 +1,3 @@
-import {summaryTable} from './boiler-summary.js';
 import {reportInputs} from './report-inputs.js';
 import {derived,glueDays,hours,fieldNames} from './report-model.js';
 const numeric=v=>v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))?Number(v):null;
@@ -9,7 +8,6 @@ function overlappingBoardline(records){
 }
 const duration=v=>{if(v===null)return 'Unavailable';const minutes=Math.round(v);return Math.floor(minutes/60)+':'+String(minutes%60).padStart(2,'0');};
 export function buildReportTable(type,entries,options={}){
- if(type==='Boiler')return summaryTable(entries,options);
  const input=reportInputs(type,entries),rows=[];let columns=[],totals=null;
  if(type==='Glue Consumption'){
  columns=['Date','Starch (kg)','Batches','Boardline tonnes','Glue (kg/ton)','Data checks'];
@@ -19,6 +17,13 @@ export function buildReportTable(type,entries,options={}){
  const groups=new Map();for(const r of input){const machine=board?'BOARDLINE':r.fields['Machine / Process']||type,date=options.mode==='cumulative'?'Selected period':r.date,key=JSON.stringify([date,machine,r.shift]);if(!groups.has(key))groups.set(key,{date,machine,shift:r.shift,records:[]});groups.get(key).records.push(r);}
  function productionLine(records,date,machine,shift){const sum=k=>{const ns=records.map(r=>numeric(r.fields[k]));return ns.every(v=>v!==null)?ns.reduce((a,b)=>a+b,0):null;};const elapsed=records.map(r=>hours(r.fields['Start Time'],r.fields['End Time'])),breakdowns=records.map(r=>numeric(r.fields['Breakdown Minutes']));const bd=breakdowns.every(v=>v!==null)?breakdowns.reduce((a,b)=>a+b,0):null,run=elapsed.every(v=>v!==null)&&bd!==null?elapsed.reduce((a,b)=>a+b,0)-bd/60:null,qty=sum(board?'Metres':'Actual Quantity');const values={Date:date,Machine:machine,Shift:shift,'Speed/Min':run>0&&qty!==null?fmt(qty/(run*60),1):'Unavailable',Breakdown:duration(bd),'Running Hrs':run!==null&&run>=0?fmt(run):'Unavailable',};if(board){values['Tonnage (kg)']=fmt(sum('Tonnage (kg)'),0);values.Meter=fmt(qty,0);values['Eff %']=run>0&&qty!==null?fmt(qty/(run*4000)*100,1):'Unavailable';}else{values['Number of Jobs']=fmt(sum('Number of Jobs'),0);values['Actual Quantity']=fmt(qty,0);}if(board&&overlappingBoardline(records)){values['Running Hrs']='Verify overlapping records';values['Speed/Min']='Unavailable';values['Eff %']='Unavailable';}return {id:records.length===1?records[0].id:'',recordIds:records.map(r=>r.id),values};}
  for(const group of groups.values())rows.push(productionLine(group.records,group.date,group.machine,group.shift));if(input.length){totals=productionLine(input,'TOTAL','TOTAL','').values;}
+ }else if(type==='Daily Dispatch'){
+ columns=['Customer','No. of Vehicles','Vehicle Numbers','Invoices','Qty','Amount (Rs)'];
+ const groups=new Map(),allVehicles=new Set();
+ for(const r of input){const customer=String(r.fields.Customer||'').trim()||'(Customer missing)',vehicle=String(r.fields['Vehicle Number']||r.fields.Vehicle||'').trim(),key=customer.toUpperCase();if(!groups.has(key))groups.set(key,{customer,vehicles:new Set(),records:[]});const g=groups.get(key);if(vehicle){g.vehicles.add(vehicle);allVehicles.add(vehicle);}g.records.push(r);}
+ const totalQty=input.reduce((a,r)=>a+(numeric(r.fields.Quantity)||0),0),totalAmount=input.reduce((a,r)=>a+(numeric(r.fields['Amount (Rs)'])||0),0);
+ for(const g of [...groups.values()].sort((a,b)=>String(a.customer).localeCompare(String(b.customer))))rows.push({id:'',recordIds:g.records.map(r=>r.id),values:{Customer:g.customer,'No. of Vehicles':g.vehicles.size,'Vehicle Numbers':[...g.vehicles].sort().join(', '),Invoices:g.records.length,Qty:fmt(g.records.reduce((a,r)=>a+(numeric(r.fields.Quantity)||0),0),0),'Amount (Rs)':fmt(g.records.reduce((a,r)=>a+(numeric(r.fields['Amount (Rs)'])||0),0),0)}});
+ totals={Customer:'TOTAL','No. of Vehicles':allVehicles.size,'Vehicle Numbers':'',Invoices:input.length,Qty:fmt(totalQty,0),'Amount (Rs)':fmt(totalAmount,0)};
  }else{
  const fields=new Set(type==='Diesel Consumption'?['Opening Litres','Received Litres','Issued Litres','Receiver Name','Used For']:fieldNames(type));for(const r of input)for(const k of Object.keys({...r.fields,...derived(r)}))fields.add(k);if(type==='Water Meter')fields.add('Area Consumption (litres)');columns=['Date','Shift',...[...fields].filter(k=>!['Review','Review status','Pending approval'].includes(k)&&(type!=='Diesel Consumption'||!/(Cans|Barrels|Container Type|Container Quantity)$/.test(k)))];
  for(const r of input){const values={Date:r.date,Shift:r.shift,...r.fields,...derived(r)};if(type==='Water Meter'){const meter=String(r.fields['Meter Name']).toUpperCase(),down=meter==='BOARDLINE'?'PRINTING':meter==='GLUE'?'BOARDLINE':null;const raw=numeric(values['Consumption (litres)']);const downstream=down?input.filter(x=>x.date===r.date&&x.shift===r.shift&&String(x.fields['Meter Name']).toUpperCase()===down).map(x=>numeric(derived(x)['Consumption (litres)'])):[0];const subtraction=downstream.length&&downstream.every(v=>v!==null&&v>=0)?downstream.reduce((a,b)=>a+b,0):null;values['Area Consumption (litres)']=raw!==null&&subtraction!==null&&raw>=subtraction?fmt(raw-subtraction):'Unavailable - verify readings';}rows.push({id:r.id,values});}
