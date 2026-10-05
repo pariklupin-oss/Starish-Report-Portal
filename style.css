@@ -32,16 +32,3 @@ main{background:#e8f0f5}.eyebrow{color:#007d68}.filters{background:#f4fafd;borde
 /* Prevent oversized branding from widening the mobile viewport. */
 html,body{width:100%;min-width:0}header{max-width:100%;flex-wrap:wrap}.brand-logo{min-width:0;max-width:100%;flex:0 1 250px}.brand-logo img{max-width:100%;height:auto}#shell,main,#content{min-width:0}.table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}#reportChooser select{max-width:100%}
 @media(max-width:700px){header{padding:12px;align-items:center;row-gap:10px}.brand-logo{flex:0 1 100%;max-width:100%}.brand-logo img{width:185px!important}.brand-logo>small{color:#bedee5}#identity{margin-left:0;flex:1;min-width:0;overflow-wrap:anywhere}#logout,#install{flex:none}#shell{display:block;width:100%}#nav{width:100%;max-width:100%;min-height:0;overflow-x:auto}main{width:100%;max-width:100%;padding:14px}#reportChooser{width:100%}#reportChooser label{width:100%}#reportChooser select{width:100%}.toolbar input,.toolbar select{min-width:0;max-width:100%}.filters label{min-width:0}.filters input,.filters select{min-width:0;font-size:16px}.excel-report{width:100%}.excel-report table{width:max-content;min-width:100%}dialog{width:calc(100% - 20px);max-width:calc(100% - 20px)}}
-
-/* Prevent toolbar flex shrinking the employee overview on narrow screens. */
-@media(max-width:700px){
- main,.toolbar,.title-row,.card{min-width:0}
- .toolbar>.card{flex:0 0 100%;width:100%;max-width:100%}
- .toolbar>.card .toolbar{display:flex;flex-direction:column;align-items:stretch}
- .toolbar>.card label,.toolbar>.card input,.toolbar>.card select{width:100%;max-width:100%;min-width:0}
- .toolbar>.card h2,.toolbar>.card small{overflow-wrap:normal;word-break:normal}
- .toolbar>.card small{display:block}
- .toolbar>button{max-width:100%;white-space:normal}
- .title-row{flex-wrap:wrap;gap:12px}
- #taskEmployeeSearch,#taskEmployee{font-size:16px;width:100%;max-width:100%}
-}

@@ -1,3 +1,4 @@
+import {summaryTable} from './boiler-summary.js';
 import {reportInputs} from './report-inputs.js';
 import {derived,glueDays,hours,fieldNames} from './report-model.js';
 const numeric=v=>v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))?Number(v):null;
@@ -8,6 +9,8 @@ function overlappingBoardline(records){
 }
 const duration=v=>{if(v===null)return 'Unavailable';const minutes=Math.round(v);return Math.floor(minutes/60)+':'+String(minutes%60).padStart(2,'0');};
 export function buildReportTable(type,entries,options={}){
+ if(type==='Boiler')return summaryTable(entries,options);
+ if(type==='Boiler')return summaryTable(entries,options);
  const input=reportInputs(type,entries),rows=[];let columns=[],totals=null;
  if(type==='Glue Consumption'){
  columns=['Date','Starch (kg)','Batches','Boardline tonnes','Glue (kg/ton)','Data checks'];
