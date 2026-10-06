@@ -39,3 +39,15 @@ body.owner-compact main{max-width:none;padding:18px}body.owner-compact .table-wr
 /* Compact employee To Do table and today's work dashboard. */
 .task-day-heading{display:flex;align-items:baseline;gap:12px;margin:4px 0 12px}.task-day-heading small{font-weight:500}.task-counts.task-daily-kpis{display:grid;grid-template-columns:repeat(4,minmax(110px,1fr));gap:10px;margin:0}.task-daily-kpis>div{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1px solid var(--border);border-radius:9px;padding:10px 14px}.task-daily-kpis>div small{font-size:12px}.task-daily-kpis>div strong{font-size:22px;color:var(--green);font-variant-numeric:tabular-nums}.task-efficiency-note{margin:7px 0 15px}.task-list-table{max-height:68vh;padding:0}.task-list-table table{table-layout:auto;min-width:680px}.task-list-table th,.task-list-table td{padding:8px 10px}.task-list-table th:first-child,.task-list-table td:first-child{width:96px}.task-list-table th:nth-child(3),.task-list-table td:nth-child(3){width:145px;white-space:nowrap}.task-list-table th:nth-child(4),.task-list-table td:nth-child(4){width:180px;white-space:nowrap}.task-list-table th:last-child,.task-list-table td:last-child{width:100px;white-space:nowrap}.task-list-table td small{margin-top:2px}.task-table-check{display:flex;align-items:center;gap:6px;color:var(--muted);white-space:nowrap;font-size:12px}.task-table-check input{width:20px;height:20px;margin:0;accent-color:var(--green)}.task-row-complete td{background:#f0f8f4}.task-row-complete td:nth-child(2) b{text-decoration:line-through;color:#567568}
 @media(max-width:700px){.task-counts.task-daily-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.task-daily-kpis>div{padding:9px 11px}.task-daily-kpis>div strong{font-size:20px}.task-day-heading{display:block}.task-list-table{max-height:62vh}}
+
+/* Wider report workspace with optional navigation and full-screen tables. */
+.brand-logo img{width:145px!important;max-width:100%;height:auto}
+.title-row{gap:12px;flex-wrap:wrap}.layout-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+body.nav-collapsed #nav{display:none!important}
+body.nav-collapsed main{width:100%;max-width:none}
+#content .excel-report:fullscreen{width:100vw;height:100vh;height:100dvh;max-height:none!important;overflow:auto;border:0;border-radius:0;padding:12px;background:#fff}
+#content .excel-report:fullscreen table{width:max-content;min-width:100%}
+#content .excel-report.table-fullscreen{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;max-height:none!important;overflow:auto;z-index:1000;margin:0!important;border:0;border-radius:0;padding:12px;background:#fff}
+.table-fullscreen-close{position:sticky;top:0;float:right;z-index:5;margin:0 0 8px 8px}
+#content .excel-report.table-fullscreen table{width:max-content;min-width:100%}
+@media(max-width:700px){.brand-logo img{width:118px!important}.title-row{align-items:flex-start}.title-row h1{margin-bottom:0}.layout-actions{gap:6px}.layout-actions button{padding:8px 10px;font-size:12px}body.nav-collapsed main{width:100%;padding:12px}}
