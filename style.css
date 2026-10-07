@@ -59,7 +59,7 @@ body.nav-collapsed main{width:100%;max-width:none}
 .complaint-dashboard strong{display:block;font-size:28px;line-height:1.2;color:#075943;font-variant-numeric:tabular-nums}
 .complaint-progress-table{padding:14px;max-height:72vh}
 .complaint-progress-table h2{margin:0 0 10px;color:var(--navy)}
-.complaint-progress-table table{min-width:1750px}
+.complaint-progress-table table{min-width:1250px}
 .complaint-progress-table td{max-width:300px;overflow-wrap:anywhere}
 .complaint-progress-table td:nth-child(1),.complaint-progress-table td:nth-child(2),.complaint-progress-table td:nth-child(8),.complaint-progress-table td:nth-child(9),.complaint-progress-table td:nth-child(14){white-space:nowrap}
 .complaint-progress-table td small{margin-top:5px;white-space:normal}
@@ -69,4 +69,4 @@ body.nav-collapsed main{width:100%;max-width:none}
 .complaint-action-check:has(input:disabled),.complaint-action-check.disabled{opacity:.55;cursor:not-allowed}
 .complaint-actions small{max-width:150px}
 .complaint-done{display:inline-block;color:#176b48;background:#e0f3e9;padding:6px 9px;border-radius:8px;white-space:nowrap}
-@media(max-width:700px){.complaint-dashboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.complaint-dashboard .card{padding:12px}.complaint-dashboard strong{font-size:24px}.complaint-progress-table{max-height:65vh;padding:10px}.complaint-progress-table table{min-width:1750px}.complaint-action-check{padding:8px}}
+@media(max-width:700px){.complaint-dashboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.complaint-dashboard .card{padding:12px}.complaint-dashboard strong{font-size:24px}.complaint-progress-table{max-height:65vh;padding:10px}.complaint-progress-table table{min-width:1250px}.complaint-action-check{padding:8px}}
