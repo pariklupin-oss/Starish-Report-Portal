@@ -70,3 +70,22 @@ body.nav-collapsed main{width:100%;max-width:none}
 .complaint-actions small{max-width:150px}
 .complaint-done{display:inline-block;color:#176b48;background:#e0f3e9;padding:6px 9px;border-radius:8px;white-space:nowrap}
 @media(max-width:700px){.complaint-dashboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.complaint-dashboard .card{padding:12px}.complaint-dashboard strong{font-size:24px}.complaint-progress-table{max-height:65vh;padding:10px}.complaint-progress-table table{min-width:1250px}.complaint-action-check{padding:8px}}
+/* v33 — clickable complaint status cards + Head verification */
+.complaint-dashboard{grid-template-columns:repeat(5,minmax(130px,1fr))}
+.complaint-dashboard .cstat{text-align:left;cursor:pointer;font:inherit;border:2px solid var(--border);border-radius:12px;transition:transform .12s,box-shadow .12s}
+.complaint-dashboard .cstat:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(16,45,76,.12)}
+.complaint-dashboard .cstat span{display:block;font-size:11px;color:#7a8c9b;margin-top:2px}
+.cstat-pending strong{color:#b45309}.cstat-progress strong{color:#1d4ed8}.cstat-review strong{color:#7c3aed}.cstat-complete strong{color:#047857}
+.complaint-dashboard .cstat.active{border-color:var(--navy);background:#eef5fb;box-shadow:0 0 0 3px rgba(16,45,76,.12)}
+.cstat-pending.active{border-color:#d97706}.cstat-progress.active{border-color:#2563eb}.cstat-review.active{border-color:#7c3aed}.cstat-complete.active{border-color:#059669}
+.complaint-progress .toolbar input{flex:1;min-width:180px}
+.complaint-progress-table h2{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.complaint-progress-table h2 button{font-size:12px;padding:5px 10px}
+.complaint-progress-table tr.urgent-row td:first-child{border-left:4px solid #dc2626}
+.complaint-wait{display:inline-block;color:#6d28d9;background:#f1eafe;padding:6px 9px;border-radius:8px;white-space:nowrap;font-size:12px}
+table.complaint-detail{width:100%;border-collapse:collapse;margin:8px 0}
+table.complaint-detail th{text-align:left;width:38%;color:#566d7e;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+table.complaint-detail td{padding:6px 8px;border-bottom:1px solid var(--border);overflow-wrap:anywhere}
+.verify-choice{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin:12px 0;display:grid;gap:8px}
+.verify-choice label{display:flex;gap:8px;align-items:center;font-weight:600}
+@media (max-width:760px){.complaint-dashboard{grid-template-columns:repeat(2,minmax(0,1fr))}.complaint-dashboard .cstat:first-child{grid-column:1/-1}}
