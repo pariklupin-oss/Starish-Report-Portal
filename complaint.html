@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102d4c"><meta name="referrer" content="no-referrer">
+<title>Raise Maintenance Complaint | Starish</title><link rel="icon" href="./icon-192.png">
+<script src="./config.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#eef3f7;color:#102d4c}
+header{background:#102d4c;color:#fff;padding:18px 16px 22px;text-align:center}header small{letter-spacing:.12em;font-weight:700;opacity:.85}header h1{margin:6px 0 0;font-size:22px}
+main{max-width:560px;margin:-12px auto 24px;padding:0 12px}
+.card{background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 4px 16px rgba(16,45,76,.08)}
+label{display:block;font-size:13px;font-weight:600;color:#3d556a;margin:12px 0 5px}
+input,select,textarea{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1.5px solid #c9d6e1;border-radius:10px;background:#fff;color:#102d4c}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#0f9b74;box-shadow:0 0 0 3px rgba(15,155,116,.15)}
+textarea{min-height:90px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips label{margin:0;flex:1 1 45%;border:1.5px solid #c9d6e1;border-radius:10px;padding:11px 10px;text-align:center;font-size:14px;cursor:pointer;color:#102d4c}
+.chips input{display:none}.chips input:checked+span{color:#fff}.chips label:has(input:checked){background:#0f9b74;border-color:#0f9b74;color:#fff}
+.chips.pri label:has(input[value=Urgent]:checked){background:#c0392b;border-color:#c0392b}
+button{width:100%;margin-top:18px;padding:14px;font:inherit;font-size:17px;font-weight:700;color:#fff;background:#0f9b74;border:0;border-radius:12px;cursor:pointer}button:disabled{opacity:.6}
+.req{color:#c0392b}.hp{position:absolute;left:-5000px}.msg{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:14px}.err{background:#fdecea;color:#a12a1f}
+.done{text-align:center}.done .tick{font-size:54px;color:#0f9b74}.done .tok{font-size:24px;font-weight:800;margin:8px 0}.muted{color:#5d7183;font-size:13px}
+</style></head><body>
+<header><small>STARISH AUTOPAC PVT. LTD.</small><h1>Raise Maintenance Complaint</h1></header>
+<main><div class="card" id="box">
+<form id="f" autocomplete="on">
+<label>Your name <span class="req">*</span></label><input name="name" required maxlength="80" autocomplete="name">
+<label>Mobile number</label><input name="mobile" inputmode="numeric" maxlength="14" autocomplete="tel">
+<label>Machine <span class="req">*</span></label><select name="machine" id="machine" required><option value="">Loading machines…</option></select>
+<label>Unit / part</label><input name="unit" maxlength="150" placeholder="e.g. NC cutter, motor, roller">
+<label>Issue type</label><div class="chips" id="type"></div>
+<label>Problem description <span class="req">*</span></label><textarea name="description" required maxlength="3000" placeholder="What is the problem?"></textarea>
+<label>Priority</label><div class="chips pri"><label><input type="radio" name="priority" value="Normal" checked><span>Normal</span></label><label><input type="radio" name="priority" value="Urgent"><span>Urgent (machine stopped)</span></label></div>
+<label>Job card / Posting No.</label><input name="postingNo" maxlength="100">
+<input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<button type="submit" id="go">Submit complaint</button>
+<div id="msg"></div>
+</form></div>
+<p class="muted" style="text-align:center">The complaint goes directly to the Maintenance Head.</p></main>
+<script>
+const $=s=>document.querySelector(s),url=(window.PORTAL_CONFIG||{}).apiUrl;
+const FALLBACK=["Auto Stitching & Gluing","Auto folder","Auto folder & gluer machine","B Flute","Board line","Chain Feeder Printing","Diesel generator","Double Backer","EL machine","Forklift","EV Forklift","Diesel Forklift","Electrical (Lights, Switches etc.)","Glue kitchen","Grease gun","Hand trolley","Hot plate","Jf printing","Manual strapping machine","Security gate","Semiauto stitching machine","Slitter scorer","Slitter square machine","Smartcech printing","Other"];
+$('#type').innerHTML=['Mechanical','Electrical','Pneumatic / Hydraulic','Other'].map((t,i)=>`<label><input type="radio" name="issueType" value="${t}" ${i?'':'checked'}><span>${t}</span></label>`).join('');
+function api(action,data){const nonce=Array.from(crypto.getRandomValues(new Uint8Array(24)),v=>v.toString(16).padStart(2,'0')).join('');
+ return new Promise((resolve,reject)=>{const fr=document.createElement('iframe'),fm=document.createElement('form'),inp=document.createElement('input');fr.name='api_'+nonce;fr.hidden=fm.hidden=true;fm.method='POST';fm.action=url;fm.target=fr.name;inp.type='hidden';inp.name='payload';inp.value=JSON.stringify({action,data,token:'',nonce,requestId:data&&data.requestId||crypto.randomUUID(),origin:location.origin});fm.append(inp);
+ const t=setTimeout(()=>done(Error('Connection timed out. Check internet and try again.')),60000);
+ function rec(e){let h;try{h=new URL(e.origin).hostname}catch{return}if(!(h==='script.google.com'||h.endsWith('.googleusercontent.com')))return;if(e.data?.channel!=='starish-api'||e.data.nonce!==nonce)return;e.data.result?.ok?done(null,e.data.result):done(Error(e.data.result?.error||'Request failed'));}
+ function done(err,res){clearTimeout(t);removeEventListener('message',rec);fr.remove();fm.remove();err?reject(err):resolve(res);}
+ addEventListener('message',rec);document.body.append(fr,fm);fm.submit();});}
+function fill(list){const sel=$('#machine'),pre=new URLSearchParams(location.search).get('machine')||'';sel.innerHTML='<option value="">Select machine</option>'+list.map(m=>`<option>${m.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</option>`).join('');const hit=list.find(m=>m.toLowerCase()===pre.toLowerCase());if(hit)sel.value=hit;}
+fill(FALLBACK);api('publicMachines',{}).then(r=>{if(r.machines&&r.machines.length)fill(r.machines)}).catch(()=>{});
+try{const s=JSON.parse(localStorage.getItem('qrReporter')||'{}');if(s.name)$('[name=name]').value=s.name;if(s.mobile)$('[name=mobile]').value=s.mobile;}catch{}
+let reqId=crypto.randomUUID();
+$('#f').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),d=Object.fromEntries(fd.entries());d.requestId=reqId;
+ const go=$('#go');go.disabled=true;go.textContent='Submitting…';$('#msg').innerHTML='';
+ try{if(!navigator.onLine)throw Error('No internet connection.');const r=await api('publicComplaint',d);
+  try{localStorage.setItem('qrReporter',JSON.stringify({name:d.name,mobile:d.mobile}))}catch{}
+  $('#box').innerHTML=`<div class="done"><div class="tick">✓</div><div>Complaint submitted</div><div class="tok">${r.tokenNo}</div><div class="muted">${r.machine} · ${r.priority} priority<br>The Maintenance Head has been notified. Keep this token number for follow-up.</div><button onclick="location.reload()">Raise another complaint</button></div>`;
+ }catch(err){$('#msg').innerHTML=`<div class="msg err">${String(err.message).replace(/</g,'&lt;')}</div>`;go.disabled=false;go.textContent='Submit complaint';}};
+</script></body></html>
