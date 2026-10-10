@@ -1,4 +1,4 @@
-const CACHE='starish-portal-v71';
+const CACHE='starish-portal-v72';
 const STATIC=['./','./index.html','./logo_starish.webp','./style.css','./style.css?v=31','./app.js','./app.js?v=51','./boiler-summary.js','./boiler-import.js','./boiler-import.js?v=40','./config.js','./report-model.js','./report-inputs.js','./analysis-model.js','./report-table.js','./stage-report.js','./manifest.webmanifest','./icon-192.png','./icon-512.png','./Portal_Task_Bulk_Upload.xlsx','./task-excel.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(STATIC.map(url=>c.add(url)))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('starish-static-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
