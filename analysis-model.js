@@ -62,5 +62,4 @@ export function dateAnalysis(type,entries,{from,to,metric,changeover,categoryFie
   return {date,value,records:count,validDays};
  });
 }
-
 export function metricMethod(type,metric,period='Month'){if(type==='Boiler'){const m=METRICS.find(m=>m[0]===metric);return m?.[3]==='avg'?'Average of available daily summary values':m?.[3]==='sum'?'Sum of available daily summary values':'Daily summary count';}return type==='Glue Consumption'&&metric==='Glue (kg/ton)'?'Total starch / total Boardline tonnes for matched complete days':/Speed\/Min|Eff %/.test(metric)?`Calculated from ${period==='Date'?'that date’s':'monthly'} total output and running hours`:balances.test(metric)?'Latest recorded balance':rates.test(metric)?'Average of valid records':'Sum of valid report values';}
