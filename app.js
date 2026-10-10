@@ -39,7 +39,7 @@ function api(action,data={},mutation=false){const url=window.PORTAL_CONFIG?.apiU
  if(!navigator.onLine)return Promise.reject(Error('Internet is required to read or save data.'));
  const nonce=Array.from(crypto.getRandomValues(new Uint8Array(24)),v=>v.toString(16).padStart(2,'0')).join(''),requestId=crypto.randomUUID();
  return new Promise((resolve,reject)=>{const frame=document.createElement('iframe'),form=document.createElement('form'),input=document.createElement('input');frame.name='api_'+nonce;frame.hidden=true;form.hidden=true;form.method='POST';form.action=url;form.target=frame.name;input.type='hidden';input.name='payload';input.value=JSON.stringify({action,data,token,nonce,requestId,origin:location.origin});form.append(input);
- const timeout=setTimeout(()=>finish(Error(mutation?'Save confirmation timed out. Refresh and check the record before retrying.':'The portal server is taking too long. Check your internet and try again.')),30000);
+ const timeout=setTimeout(()=>finish(Error(mutation?'Save confirmation timed out. Refresh and check the record before retrying.':'The portal server is taking too long. Check your internet and try again.')),90000);
  function receive(e){let host;try{const u=new URL(e.origin);if(u.protocol!=='https:')return;host=u.hostname;}catch{return;}
  if(!(host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com')))return;
  if(e.data?.channel!=='starish-api'||e.data.nonce!==nonce)return;
