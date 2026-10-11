@@ -64,7 +64,7 @@ function render(){document.body.classList.toggle('owner-compact',state.user.role
  if(tab==='Reports')html=admin()?simpleReportsHtml():reportsHtml();
  if(tab==='Boiler Entry')html=boilerEntryHtml();
  if(tab==='Analysis')html=analysisHtml();
- if(tab==='Tasks')html=allTaskViewer()?simpleTasksHtml():tasksHtml();
+ if(tab==='Tasks')html=tasksHtml();
  if(tab==='Department Management')html=departmentManagementHtml();
  if(tab==='Department SOP')html=departmentSopHtml();
  if(tab==='Task report')html=taskReportHtml();
