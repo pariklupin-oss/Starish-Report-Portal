@@ -30,6 +30,8 @@ create table if not exists public.users (
   department text,
   role public.portal_role not null default 'employee',
   is_active boolean not null default true,
+  -- Preserve portal section/form/entry permissions during migration.
+  access jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
