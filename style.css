@@ -128,3 +128,61 @@ body.owner-compact main{max-width:none;padding:18px}body.owner-compact .table-wr
  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(prefers-reduced-motion:reduce){nav#nav{transition:none}}
+
+/* Starish theme 3: Slate Grey + Safety Amber. Brand logo stays unchanged. */
+:root{
+ --navy:#25333B;--ink:#1F2B33;--green:#B54708;--muted:#657178;--bg:#F5F6F7;--border:#D8DEE2;
+ --accent:#B54708;--accent-foreground:#FFFFFF;--surface:#FFFFFF;--surface-soft:#FBEFE3;
+ --status-pending:#8A4B00;--status-progress:#265EA8;--status-completed:#237443;--status-approved:#086B75;--status-alert:#B42318;
+}
+body{background:#F5F6F7;color:#1F2B33}
+header{background:#25333B;color:#F4F6F7;border-bottom:1px solid #3E4B52;box-shadow:0 4px 18px #18232924}
+.brand-logo>small{color:#D1D9DC}
+#identity{color:#F4F6F7}
+header button{background:#B54708;color:#fff}
+nav{background:linear-gradient(180deg,#25333B,#1E292F);border-right-color:#46535A}
+nav button{color:#D5DDE0}
+nav button:hover{background:#3A484F;color:#fff}
+nav button.active{background:#B54708;color:#fff;border-left:3px solid #F3B46B;box-shadow:0 4px 10px #111a1d30}
+main{background:#F5F6F7}
+.eyebrow,.link{color:#8A4B00}
+.filters{background:#fff;border-color:#D8DEE2}
+.card,.summary-card{background:#fff;border-color:#D8DEE2}
+.kpis .card{background:#FBEFE3;border-color:#E9C9A7}
+.kpis strong{color:#25333B}
+.kpis .card small{color:#5B4A3C}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline-color:#B54708}
+.secondary{background:#fff;color:#25333B;border-color:#C9D1D5}
+.danger{background:#A43B34}
+.table-wrap:not(.excel-report) th{background:#F7E6D2;color:#493322}
+.excel-report{background:#fff;border-color:#D8DEE2}
+.excel-report h2{background:transparent;color:#25333B;border-bottom-color:#E2E6E8}
+.excel-report th{background:#F3D9BB;color:#49301C;border-color:#D5B48E}
+.excel-report td{border-color:#E0E3E5}
+.excel-report tbody tr:nth-child(even){background:#FAF7F3}
+.excel-report tbody tr:hover{background:#FFF1E1}
+.excel-report tfoot td{background:#F3D9BB;color:#49301C;border-color:#D5B48E}
+.task-filter-tab{background:#EEF1F2;color:#34434A;border-color:#D2D9DC}
+.task-filter-tab.active{background:#B54708;color:#fff;border-color:#B54708;box-shadow:0 3px 10px #8a390c24}
+.task-card-employee{color:#8A4B00}
+.task-card-complete{background:#F0F8F2;border-color:#B7D9C1}
+.task-card-complete-button{background:#237443;color:#fff;border-color:#1D6339}
+.task-card-reason{background:#FFF3E3;color:#71450E}
+.production-report-heading h2{color:#25333B}
+.production-machine-icon{background:#FBE7D2}
+.production-shift{background:#FFF1D8;color:#704810}
+.production-shift.night{background:#E8EFF8;color:#34547B}
+.production-total-card{background:#FBEFE3;border-color:#E9C9A7;color:#49301C}
+.production-total-icon{background:#B54708;color:#fff}
+.production-total-card>div:not(.production-total-icon){border-left-color:#E1BD99}
+.production-total-card small{color:#624B36}
+.production-total-card strong{color:#49301C}
+.badge{background:#FFF0D6;color:#8A4B00}
+.badge.approved{background:#E4F3E9;color:#176B3A}
+.overdue{background:#FDECEC;color:#B42318}
+.notice{background:#FFF2D8;color:#71450E}
+.history{border-left-color:#B54708}
+.empty:before{color:#B54708}
+#message{background:#25333B;color:#fff}
+dialog{background:#fff;color:#1F2B33}
+dialog::backdrop{background:#25333B99}
