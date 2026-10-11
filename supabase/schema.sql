@@ -6,7 +6,7 @@ create extension if not exists pgcrypto;
 
 do $$ begin
   create type public.portal_role as enum (
-    'owner', 'admin', 'manager', 'maintenance_head', 'maintenance', 'employee'
+    'owner', 'admin', 'manager', 'hr_head', 'maintenance_head', 'maintenance', 'employee'
   );
 exception when duplicate_object then null; end $$;
 
@@ -196,7 +196,10 @@ using (
   )
 )
 with check (
-  assigned_to = (select auth.uid()) or public.has_portal_role(
+  (
+    assigned_to = (select auth.uid())
+    and status <> 'Approved'::public.task_status
+  ) or public.has_portal_role(
     array['owner','admin','manager','maintenance_head']::public.portal_role[]
   )
 );
@@ -228,7 +231,7 @@ using (
   posted_by = (select auth.uid())
   or assigned_to = (select auth.uid())
   or public.has_portal_role(
-    array['owner','admin','manager','maintenance_head','maintenance']::public.portal_role[]
+    array['owner','admin','manager','maintenance_head']::public.portal_role[]
   )
 );
 drop policy if exists complaints_create_authenticated on public.maintenance_complaints;
