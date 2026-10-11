@@ -186,3 +186,62 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 #message{background:#25333B;color:#fff}
 dialog{background:#fff;color:#1F2B33}
 dialog::backdrop{background:#25333B99}
+
+
+/* Mobile typography: clearer labels, stronger values, and higher text contrast. */
+@media(max-width:768px){
+  :root{--ink:#26333a;--muted:#53616a}
+  body{font-size:16px;line-height:1.55;color:#26333a}
+  h1,#pageTitle{font-size:26px;line-height:1.22;font-weight:750;letter-spacing:-.35px}
+  h2{font-size:20px;line-height:1.3;font-weight:700}
+  h3{font-size:18px;line-height:1.35;font-weight:700}
+  .eyebrow{font-size:12px;line-height:1.4;letter-spacing:1.25px;font-weight:750}
+  small,.muted{font-size:14px;line-height:1.5;color:#53616a;font-weight:500}
+  .brand-logo>small{font-size:12px;line-height:1.45;font-weight:600}
+  #identity{font-size:13px;font-weight:650;line-height:1.4}
+  nav#nav button{font-size:15px;font-weight:650;line-height:1.4}
+  button{font-size:15px;font-weight:700;line-height:1.35}
+  header button{font-size:13px}
+  label,.filters label,.login label,.form-grid label{font-size:14px;line-height:1.4;font-weight:650;color:#46545b}
+  input,select,textarea{font-size:16px;line-height:1.4}
+  #content,#dialogBody{font-size:16px;line-height:1.55}
+  #content p,.task-summary p,.notice,.empty,.error{font-size:15px;line-height:1.5}
+  .section-heading{font-size:15px;font-weight:650}
+  .report-row,.notification{font-size:15px;line-height:1.45}
+  .record-meta,.pagination{font-size:14px;font-weight:550}
+  #message{font-size:15px;line-height:1.45;font-weight:650}
+  .summary-card h2{font-size:19px;line-height:1.35;font-weight:750;color:#26333a}
+  .summary-card .metric{font-size:14px;line-height:1.45;color:#53616a}
+  .summary-card .metric b{font-size:16px;line-height:1.4;font-weight:750;color:#26333a}
+  .summary-card .link,.link{font-size:14px;line-height:1.4;font-weight:750}
+  .kpis>*.card small{font-size:13px}
+  .kpis strong{font-size:27px;line-height:1.2;font-weight:750}
+  .badge{font-size:13px;line-height:1.35;font-weight:700}
+  .table-wrap:not(.excel-report) th{font-size:12px;font-weight:750;color:#39474e}
+  .table-wrap:not(.excel-report) td{font-size:14px;line-height:1.45}
+  .responsive-data-table td{font-size:14px;line-height:1.45}
+  .responsive-data-table td:before{font-size:12px;color:#526068}
+  .responsive-data-table td small{font-size:13px}
+  .excel-report table{font-size:14px}
+  .excel-report th{font-size:12px;font-weight:750}
+  .excel-report td{font-size:14px}
+  .details dt{font-size:13px;line-height:1.4;font-weight:650;color:#53616a}
+  .details dd{font-size:16px;line-height:1.45;font-weight:650;color:#26333a}
+  .footer{font-size:13px;line-height:1.5}
+  .task-card-employee{font-size:13px}
+  .task-card-title{font-size:17px;line-height:1.4;font-weight:750}
+  .task-card-meta small{font-size:12px;color:#53616a;font-weight:650}
+  .task-card-meta b{font-size:14px;font-weight:700;color:#26333a}
+  .task-card-reason{font-size:14px;line-height:1.5}
+  .production-report-heading h2{font-size:21px;font-weight:750}
+  .production-report-heading p{font-size:15px;color:#53616a}
+  .production-card-date small,.production-machine small{font-size:12px;line-height:1.35;font-weight:650;color:#53616a}
+  .production-card-date b{font-size:16px;line-height:1.4;font-weight:700;color:#34444b}
+  .production-machine h3{font-size:18px;line-height:1.35;font-weight:750}
+  .production-shift{font-size:13px;font-weight:750}
+  .production-stat small,.production-detail-metrics small{font-size:12px;line-height:1.35;color:#53616a}
+  .production-stat strong{font-size:22px;line-height:1.2;font-weight:750}
+  .production-detail-metrics b{font-size:13px;font-weight:700}
+  .production-total-card small{font-size:11px;font-weight:650}
+  .production-total-card strong{font-size:22px;line-height:1.2;font-weight:750}
+}
