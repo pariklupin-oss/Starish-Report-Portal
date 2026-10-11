@@ -245,3 +245,19 @@ dialog::backdrop{background:#25333B99}
   .production-total-card small{font-size:11px;font-weight:650}
   .production-total-card strong{font-size:22px;line-height:1.2;font-weight:750}
 }
+
+/* Mobile font override: include the sign-in view and controls on compact screens. */
+@media(max-width:768px){
+ body,button,input,select,textarea{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+ body{font-size:16px!important;line-height:1.55!important;color:#26333a}
+ .login h1{font-size:27px!important;line-height:1.22!important;font-weight:750!important;letter-spacing:-.35px}
+ .login p{font-size:15px!important;line-height:1.5!important;color:#3f4e55}
+ .login .eyebrow{font-size:12px!important;font-weight:750!important;color:#8a4b00}
+ .login label{font-size:14px!important;line-height:1.4!important;font-weight:700!important;color:#46545b}
+ .login input,.login select,.login textarea{font-size:16px!important;line-height:1.4!important;font-weight:500}
+ #content,#dialogBody{font-size:16px;line-height:1.55}
+ #content h1,#content h2,#content h3{font-weight:750}
+ #content p,.report-row,.notification{font-size:15px;line-height:1.5}
+ .responsive-data-table td,.excel-report td{font-size:14px;line-height:1.45}
+ .responsive-data-table td:before{font-size:12px;font-weight:750}
+}
