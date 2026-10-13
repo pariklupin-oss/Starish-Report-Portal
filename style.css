@@ -328,3 +328,7 @@ dialog::backdrop{background:#25333B99}
  .task-list-row .task-card-meta-personal{gap:8px 14px}
  .task-list-row .task-card-title{font-size:15px}
 }
+
+/* Keep manager employee-task rows in the same flat list presentation. */
+.task-list-row .task-card-actions-personal{grid-column:2;grid-row:1/6;align-self:center}
+@media(max-width:768px){.task-list-row .task-card-actions-personal{grid-column:1;grid-row:auto;justify-content:flex-end}}
