@@ -294,3 +294,15 @@ dialog::backdrop{background:#25333B99}
 /* Searchable same-day Job Card picker in the Quality issue form. */
 .quality-job-matches{max-height:min(45vh,340px);overflow:auto;border:1px solid var(--border);border-radius:10px;background:#fff;box-shadow:0 8px 24px #15334c18;margin-top:6px;z-index:5}.quality-job-matches[hidden]{display:none}.quality-job-matches button{display:grid;grid-template-columns:1fr;gap:3px;width:100%;text-align:left;padding:11px 13px;border:0;border-bottom:1px solid var(--border);border-radius:0;background:#fff;color:var(--navy);min-height:58px}.quality-job-matches button:hover,.quality-job-matches button:focus{background:#fff3dc;outline:2px solid #d18a21;outline-offset:-2px}.quality-job-matches button span{font-weight:650}.quality-job-matches button small{font-size:12px;color:var(--muted);white-space:normal;line-height:1.35}.quality-job-matches .empty{margin:0;padding:12px}
 @media(max-width:700px){.quality-job-matches{max-height:42vh}.quality-job-matches button{padding:13px;min-height:64px}}
+
+/* Employee checklist: compact detail line and actions aligned on the right. */
+.task-card-meta-personal{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:9px;padding-top:9px;border-top:1px solid #e5edf0}
+.task-card-meta-personal>span{display:flex;align-items:center;gap:6px;flex-direction:row}
+.task-card-meta-personal small{font-size:10px;text-transform:none;letter-spacing:0;color:#647789}
+.task-card-meta-personal b{font-size:12px}
+.task-card-actions-personal{justify-content:flex-end}
+.task-date-search{align-items:end;gap:10px;margin:10px 0}
+.task-date-search label{min-width:min(100%,230px)}
+.task-date-search input{min-height:42px}
+.task-card-actions-personal button{min-width:112px}
+@media(max-width:700px){.task-card-meta-personal{gap:10px 16px}.task-card-actions-personal button{flex:1 1 auto;min-width:0}.task-date-search label{flex:1 1 100%}.task-date-search button{flex:1 1 auto}}
