@@ -306,3 +306,25 @@ dialog::backdrop{background:#25333B99}
 .task-date-search input{min-height:42px}
 .task-card-actions-personal button{min-width:112px}
 @media(max-width:700px){.task-card-meta-personal{gap:10px 16px}.task-card-actions-personal button{flex:1 1 auto;min-width:0}.task-date-search label{flex:1 1 100%}.task-date-search button{flex:1 1 auto}}
+
+/* Employee tasks: render as a single connected list, not separate cards. */
+.task-list-feed{display:grid;grid-template-columns:minmax(0,1fr);gap:0;min-width:0;background:#fff;border:1px solid #cbdde5;border-radius:12px;overflow:hidden}
+.task-list-row{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:12px;padding:11px 14px;border:0;border-bottom:1px solid #dce4e8;border-radius:0;box-shadow:none;background:#fff;min-width:0}
+.task-list-row:last-child{border-bottom:0}
+.task-list-row.task-card-complete{background:#f2faf5}
+.task-list-row .task-card-content{display:grid;grid-template-columns:minmax(0,1fr) max-content;align-items:center;gap:5px 16px}
+.task-list-row .task-card-title-row,.task-list-row .task-card-meta-personal,.task-list-row .task-card-reason{grid-column:1;min-width:0}
+.task-list-row .task-card-title-row{align-items:center}
+.task-list-row .task-card-meta-personal{margin:0;padding:0;border:0}
+.task-list-row .task-card-actions-personal{grid-column:2;grid-row:1/4;align-self:center;margin:0;flex-wrap:wrap;justify-content:flex-end}
+.task-list-row .task-card-check{padding:0}
+.task-list-row .task-card-check input[type=checkbox]{width:26px;height:26px}
+@media(max-width:768px){
+ .task-list-row{grid-template-columns:36px minmax(0,1fr);gap:9px;padding:10px 9px}
+ .task-list-row .task-card-content{grid-template-columns:minmax(0,1fr);gap:6px}
+ .task-list-row .task-card-title-row,.task-list-row .task-card-meta-personal,.task-list-row .task-card-reason,.task-list-row .task-card-actions-personal{grid-column:1}
+ .task-list-row .task-card-actions-personal{grid-row:auto;justify-content:flex-end;gap:6px}
+ .task-list-row .task-card-actions-personal button{flex:0 1 auto;width:auto;min-width:0;padding:8px 10px;font-size:12px}
+ .task-list-row .task-card-meta-personal{gap:8px 14px}
+ .task-list-row .task-card-title{font-size:15px}
+}
