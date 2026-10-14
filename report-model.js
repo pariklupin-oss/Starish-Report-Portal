@@ -66,7 +66,8 @@ export function summary(type, entries, changeover = '2026-09-10') {
     const fmt = (n, d = 0) => n.toLocaleString('en-IN', { maximumFractionDigits: d });
     const out = [];
     const add = (label, value) => out.push({ label, value: String(value) });
-    if (type === 'Sales Return') { add('Returned quantity', fmt(sum('Return Qty'))); add('Return entries', rows.length); add('Customers', new Set(rows.map(r => String(r.fields.Customer || '').trim()).filter(Boolean)).size); add('Items', new Set(rows.map(r => String(r.fields['Item Code'] || r.fields['Item Name'] || '').trim()).filter(Boolean)).size); }\n    else if (type === 'Glue Consumption') {
+    if (type === 'Sales Return') { add('Returned quantity', fmt(sum('Return Qty'))); add('Return entries', rows.length); add('Customers', new Set(rows.map(r => String(r.fields.Customer || '').trim()).filter(Boolean)).size); add('Items', new Set(rows.map(r => String(r.fields['Item Code'] || r.fields['Item Name'] || '').trim()).filter(Boolean)).size); }
+    else if (type === 'Glue Consumption') {
         const gs = glueDays(entries, changeover);
         const complete = gs.filter(g => g.consumption !== null);
         const kg = complete.reduce((a, g) => a + g.starch, 0), ton = complete.reduce((a, g) => a + g.tonnes, 0);
