@@ -29,11 +29,13 @@ button{width:100%;margin-top:18px;padding:14px;font:inherit;font-size:17px;font-
 <label>Problem description <span class="req">*</span></label><textarea name="description" required maxlength="3000" placeholder="What is the problem?"></textarea>
 <label>Priority</label><div class="chips pri"><label><input type="radio" name="priority" value="Normal" checked><span>Normal</span></label><label><input type="radio" name="priority" value="Urgent"><span>Urgent (machine stopped)</span></label></div>
 <label>Job card / Posting No.</label><input name="postingNo" maxlength="100">
+<label>Photo / video (optional)</label><div id="cmPick" class="cm-box"></div>
 <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 <button type="submit" id="go">Submit complaint</button>
 <div id="msg"></div>
 </form></div>
 <p class="muted" style="text-align:center">The complaint goes directly to the Maintenance Head.</p></main>
+<script src="./complaint-media.js?v=1"></script>
 <script>
 const $=s=>document.querySelector(s),url=(window.PORTAL_CONFIG||{}).apiUrl;
 const FALLBACK=["Auto Stitching & Gluing","Auto folder","Auto folder & gluer machine","B Flute","Board line","Chain Feeder Printing","Diesel generator","Double Backer","EL machine","Forklift","EV Forklift","Diesel Forklift","Electrical (Lights, Switches etc.)","Glue kitchen","Grease gun","Hand trolley","Hot plate","Jf printing","Manual strapping machine","Security gate","Semiauto stitching machine","Slitter scorer","Slitter square machine","Smartcech printing","Other"];
@@ -48,10 +50,20 @@ function fill(list){const sel=$('#machine'),pre=new URLSearchParams(location.sea
 fill(FALLBACK);api('publicMachines',{}).then(r=>{if(r.machines&&r.machines.length)fill(r.machines)}).catch(()=>{});
 try{const s=JSON.parse(localStorage.getItem('qrReporter')||'{}');if(s.name)$('[name=name]').value=s.name;if(s.mobile)$('[name=mobile]').value=s.mobile;}catch{}
 let reqId=crypto.randomUUID();
+const cmQueue=[];(function(){const box=$('#cmPick');box.innerHTML=cmPickerHtml()+'<div class="cm-grid" data-cm-queue></div>';const q=box.querySelector('[data-cm-queue]');
+ const draw=()=>{q.innerHTML=cmQueue.map((it,i)=>`<div class="cm-item"><${it.kind==='video'?'video muted playsinline':'img alt="Photo"'} src="${it.url}"></${it.kind==='video'?'video':'img'}><small>${it.kind} · ${(it.blob.size/1048576).toFixed(1)} MB</small><button type="button" data-cm-rm="${i}">✕</button></div>`).join('');q.querySelectorAll('[data-cm-rm]').forEach(b=>b.onclick=()=>{cmQueue.splice(+b.dataset.cmRm,1);draw();});};
+ cmBindPicker(box,async(item,st)=>{if(cmQueue.length>=5){st('Maximum 5 photos/videos');return;}item.url=URL.createObjectURL(item.blob);cmQueue.push(item);draw();st(cmQueue.length+' ready — they upload after you submit');});})();
+async function cmSend(ticket,show){let ok=0;for(let i=0;i<cmQueue.length;i++){const it=cmQueue[i];try{show('Uploading '+(i+1)+' of '+cmQueue.length+'… please keep this page open');
+ const u=await api('publicComplaintMediaUpload',{ticket,mime:it.mime,size:it.blob.size,duration:it.duration||0,requestId:crypto.randomUUID()});
+ const res=await fetch(u.uploadUrl,{method:'PUT',headers:{'Content-Type':it.mime,'x-upsert':'false'},body:it.blob});if(!res.ok)throw Error('Upload failed ('+res.status+')');
+ await api('publicComplaintMediaDone',{ticket,id:u.id,requestId:crypto.randomUUID()});ok++;}catch(e){show(e.message);await new Promise(r=>setTimeout(r,1500));}}
+ show(cmQueue.length?ok+' of '+cmQueue.length+' photo/video uploaded':'');}
 $('#f').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),d=Object.fromEntries(fd.entries());d.requestId=reqId;
  const go=$('#go');go.disabled=true;go.textContent='Submitting…';$('#msg').innerHTML='';
  try{if(!navigator.onLine)throw Error('No internet connection.');const r=await api('publicComplaint',d);
   try{localStorage.setItem('qrReporter',JSON.stringify({name:d.name,mobile:d.mobile}))}catch{}
-  $('#box').innerHTML=`<div class="done"><div class="tick">✓</div><div>Complaint submitted</div><div class="tok">${r.tokenNo}</div><div class="muted">${r.machine} · ${r.priority} priority<br>The Maintenance Head has been notified. Keep this token number for follow-up.</div><button onclick="location.reload()">Raise another complaint</button></div>`;
+  $('#box').innerHTML=`<div class="done"><div class="tick">✓</div><div>Complaint submitted</div><div class="tok">${r.tokenNo}</div><div class="muted">${r.machine} · ${r.priority} priority<br>The Maintenance Head has been notified. Keep this token number for follow-up.</div><div class="muted" id="cmUp"></div><button onclick="location.reload()">Raise another complaint</button></div>`;
+  if(cmQueue.length&&r.mediaTicket)await cmSend(r.mediaTicket,t=>{const el=document.getElementById('cmUp');if(el)el.textContent=t;});
+  else if(cmQueue.length){const el=document.getElementById('cmUp');if(el)el.textContent='Photos/videos could not be sent (server not updated yet).';}
  }catch(err){$('#msg').innerHTML=`<div class="msg err">${String(err.message).replace(/</g,'&lt;')}</div>`;go.disabled=false;go.textContent='Submit complaint';}};
 </script></body></html>
