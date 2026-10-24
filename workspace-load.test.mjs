@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {createWorkspaceLoader,workspaceNeedsReload} from './workspace-load.js';
+assert.equal(workspaceNeedsReload({workspaceView:'Reports',_workspaceFrom:'a',_workspaceTo:'b'},{view:'Quality',from:'a',to:'b'}),true);
+assert.equal(workspaceNeedsReload({workspaceView:'Reports',_workspaceFrom:'a',_workspaceTo:'b'},{view:'Analysis',from:'a',to:'b'}),false);
+assert.equal(workspaceNeedsReload({workspaceView:'Reports',_workspaceFrom:'a',_workspaceTo:'b'},{view:'Reports',from:'c',to:'d'}),true);
+assert.equal(workspaceNeedsReload({},{view:'Tasks',from:'a',to:'b'}),false);
+let request={view:'Reports',revision:0},resolve,fetches=[];
+const load=createWorkspaceLoader({getRequest:()=>({...request}),requestKey:r=>JSON.stringify(r),fetchWorkspace:r=>{fetches.push(r);return new Promise(done=>{resolve=done;});}});
+const first=load();assert.equal(load(),first);await Promise.resolve();assert.equal(fetches.length,1);
+request={view:'Tasks',revision:0};const second=load();request={view:'Quality',revision:0};const third=load();resolve('Reports');await first;await new Promise(done=>setTimeout(done,0));assert.equal(fetches.length,2);assert.equal(fetches[1].view,'Quality');resolve('Quality');await Promise.all([second,third]);
+const next=load();await Promise.resolve();request={view:'Quality',revision:1};const afterMutation=load();resolve('old');await next;await new Promise(done=>setTimeout(done,0));assert.equal(fetches.at(-1).revision,1);resolve('fresh');await afterMutation;
+console.log('Client workspace checks passed: view/date changes, duplicate reads, mutation refresh and latest-view queue.');
