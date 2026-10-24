@@ -1,8 +1,8 @@
 import {METRICS,SHIFT_FIELDS,parseSummarySheet} from './boiler-summary.js';
 import {readTaskWorkbook} from './task-excel.js';
 import {analysisMetrics,monthlyAnalysis,dateAnalysis,metricMethod} from './analysis-model.js';
-import {buildReportTable} from './report-table.js?v=94';
-import {REPORT_NAMES,fieldNames,inputType,MATERIALS,METERS,DEPARTMENTS,derived,summary,glueDays} from './report-model.js?v=94';
+import {buildReportTable} from './report-table.js?v=95';
+import {REPORT_NAMES,fieldNames,inputType,MATERIALS,METERS,DEPARTMENTS,derived,summary,glueDays} from './report-model.js?v=95';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateIST=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const types=REPORT_NAMES.filter(t=>!['Employee Task','Boiler Hourly Log','Boiler Water Tests'].includes(t));

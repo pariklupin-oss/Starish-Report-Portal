@@ -1,6 +1,6 @@
 import {summaryTable} from './boiler-summary.js';
 import {reportInputs} from './report-inputs.js';
-import {derived,glueDays,hours,fieldNames} from './report-model.js';
+import {derived,glueDays,hours,fieldNames} from './report-model.js?v=95';
 const numeric=v=>v!==''&&v!==null&&v!==undefined&&Number.isFinite(Number(v))?Number(v):null;
 const fmt=(v,d=2)=>v===null?'Unavailable':Number(v).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
 function overlappingBoardline(records){
