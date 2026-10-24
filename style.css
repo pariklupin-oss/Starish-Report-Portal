@@ -332,3 +332,6 @@ dialog::backdrop{background:#25333B99}
 /* Keep manager employee-task rows in the same flat list presentation. */
 .task-list-row .task-card-actions-personal{grid-column:2;grid-row:1/6;align-self:center}
 @media(max-width:768px){.task-list-row .task-card-actions-personal{grid-column:1;grid-row:auto;justify-content:flex-end}}
+
+/* Compact supplied company logo; retain full artwork at every size. */
+header .brand-logo{flex:0 1 280px;flex-direction:row;align-items:center;gap:12px}header .brand-logo img{width:72px!important;height:72px;flex:none;object-fit:contain;border-radius:6px}header .brand-logo>small{max-width:160px;font-size:12px;font-weight:650}@media(max-width:700px){header .brand-logo{flex:1 1 100%}header .brand-logo img{width:64px!important;height:64px}}
