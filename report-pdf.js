@@ -62,7 +62,7 @@ export async function createReportPdf(data, regularBytes, boldBytes) {
             ensure(74);
             line(`${g.date} | Starch: ${g.starch.toFixed(2)} kg | Batches: ${g.batches === null ? 'Pending' : g.batches.toFixed(2)}`, bold, 11);
             line(`Boardline: ${g.tonnes.toFixed(3)} tonnes | Glue: ${g.consumption === null ? 'Unavailable' : g.consumption.toFixed(2) + ' kg/ton'}`);
-            line(g.missingShifts.length ? 'Missing shifts: ' + g.missingShifts.join(', ') : 'Day and Night production received', regular, 9, muted);
+            line(g.missingShifts.length === 2 ? 'No Boardline entry' : g.missingShifts.length ? 'Only ' + (g.missingShifts[0] === 'DAY' ? 'NIGHT' : 'DAY') + ' shift received' : 'Day and Night production received', regular, 9, muted);
             y -= 8;
         }
         line(`Batch rule: before ${data.batchChangeover}: 200 kg; from ${data.batchChangeover}: 150 kg. Entry-specific batch sizes take precedence.`, regular, 9, muted);
