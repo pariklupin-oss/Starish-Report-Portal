@@ -48,9 +48,9 @@ function cmRecordVideo(){return new Promise(async(resolve,reject)=>{
   rec.onstop=()=>{stopAll();dlg.close();if(cancelled)return;resolve({blob:new Blob(parts,{type:cmBaseMime(mime)}),mime:cmBaseMime(mime),kind:'video',duration:sec});};
   rec.start(1000);go.textContent='Stop';tick=setInterval(()=>{sec++;t.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');if(sec>=CM_MAX_VIDEO_S)finish();},1000);};
 });}
-function cmPickerHtml(){return `<div class="cm-btns"><label class="cm-file">📷 Photo<input type="file" accept="image/*" data-cm-photo multiple></label><button type="button" class="secondary" data-cm-rec>🎥 Record video (1 min)</button><label class="cm-file">🎞️ Choose video<input type="file" accept="video/*" data-cm-video></label></div><div class="cm-status" data-cm-status></div>`;}
+function cmPickerHtml(){return `<div class="cm-status" style="color:#b45309;font-weight:600">Storage full: photo/video upload is temporarily disabled. Please submit the complaint without photo/video.</div>`;}
 /* Wires the three buttons; onItem(item) gets each ready (compressed) photo/video. */
-function cmBindPicker(root,onItem){
+function cmBindPicker(root,onItem){if(!root.querySelector('[data-cm-photo]'))return;/*27-10-2026 media off*/
  const st=root.querySelector('[data-cm-status]'),status=s=>{if(st)st.textContent=s||'';};
  const run=async fn=>{try{const items=await fn();for(const it of [].concat(items||[]))await onItem(it,status);}catch(e){if(e.message!=='cancelled')status(e.message);}};
  root.querySelector('[data-cm-photo]').onchange=e=>{const files=[...e.target.files];e.target.value='';run(async()=>{const out=[];for(const f of files){status('Preparing photo…');out.push(await cmPhoto(f));}return out;});};
