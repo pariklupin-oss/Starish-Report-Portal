@@ -54,7 +54,7 @@ export function glueDays(entries, changeover) { const dates = [...new Set(entrie
         batchKnown = false;
     else
         batches += kg / size;
-} const kg = total(board, 'Tonnage (kg)'); const missingShifts = ['DAY', 'NIGHT'].filter(sh => !board.some(r => r.shift.toUpperCase() === sh)); const complete = missingShifts.length === 0 && board.every(r => number(r.fields, 'Tonnage (kg)') !== null); return { date, starch, batches: batchKnown ? batches : null, tonnes: kg / 1000, consumption: complete && starchKnown && kg > 0 ? starch / (kg / 1000) : null, missingShifts }; }); }
+} const kg = total(board, 'Tonnage (kg)'); const missingShifts = ['DAY', 'NIGHT'].filter(sh => !board.some(r => r.shift.toUpperCase() === sh)); const complete = board.length > 0 && missingShifts.length < 2 && board.every(r => number(r.fields, 'Tonnage (kg)') !== null); return { date, starch, batches: batchKnown ? batches : null, tonnes: kg / 1000, consumption: complete && starchKnown && kg > 0 ? starch / (kg / 1000) : null, missingShifts }; }); }
 export const MATERIALS = ['Modified - Cold Pasting (PCM300-30)', 'Caustic Soda', 'Maize Starch', 'BORAX', 'CP/88/LV CHEMICAL', 'XLR8(50 KG S)', 'H2R (35 KGS CAN)'];
 export const METERS = ['MAIN', 'PRINTING', 'BOARDLINE', 'GLUE', 'CANTEEN', 'LABOUR', 'BOILER'];
 export const DEPARTMENTS = { Security: ['Water Meter', 'DG Operation', 'Diesel Consumption'], 'Glue Kitchen': ['Glue Kitchen Stock', 'Glue Consumption'], Boiler: ['Boiler', 'Boiler Hourly Log', 'Boiler Water Tests'], Maintenance: ['Maintenance Timesheet'], 'Loading & Dispatch': ['Loading Timesheet', 'Daily Dispatch', 'Waste Bundle'], Production: ['Boardline Production', 'Printing Production', 'Folder Gluer Production', 'Auto Stitching Production', 'Manual Production'] };
