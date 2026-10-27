@@ -14,7 +14,7 @@ export function buildReportTable(type,entries,options={}){
  const input=reportInputs(type,entries),rows=[];let columns=[],totals=null;
  if(type==='Glue Consumption'){
  columns=['Date','Starch (kg)','Batches','Boardline tonnes','Glue (kg/ton)','Data checks'];
- for(const g of glueDays(entries,options.changeover))rows.push({id:'',values:{Date:g.date,'Starch (kg)':fmt(g.starch),'Batches':fmt(g.batches),'Boardline tonnes':fmt(g.tonnes,3),'Glue (kg/ton)':fmt(g.consumption),'Data checks':g.missingShifts.length?'Missing '+g.missingShifts.join(', '):'Both shifts available'}});
+ for(const g of glueDays(entries,options.changeover))rows.push({id:'',values:{Date:g.date,'Starch (kg)':fmt(g.starch),'Batches':fmt(g.batches),'Boardline tonnes':fmt(g.tonnes,3),'Glue (kg/ton)':fmt(g.consumption),'Data checks':g.missingShifts.length===2?'No Boardline entry':g.missingShifts.length?'Only '+(g.missingShifts[0]==='DAY'?'NIGHT':'DAY')+' shift (check if other shift ran)':'Both shifts available'}});
  }else if(type.includes('Production')){
  const board=type==='Boardline Production';columns=['Date','Machine','Shift',...(board?['Tonnage (kg)','Meter']:['Number of Jobs','Actual Quantity']),'Speed/Min','Breakdown','Running Hrs',...(board?['Eff %']:[])];
  const groups=new Map();for(const r of input){const machine=board?'BOARDLINE':r.fields['Machine / Process']||type,date=options.mode==='cumulative'?'Selected period':r.date,key=JSON.stringify([date,machine,r.shift]);if(!groups.has(key))groups.set(key,{date,machine,shift:r.shift,records:[]});groups.get(key).records.push(r);}
