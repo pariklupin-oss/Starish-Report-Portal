@@ -48,7 +48,7 @@ function cmRecordVideo(){return new Promise(async(resolve,reject)=>{
   rec.onstop=()=>{stopAll();dlg.close();if(cancelled)return;resolve({blob:new Blob(parts,{type:cmBaseMime(mime)}),mime:cmBaseMime(mime),kind:'video',duration:sec});};
   rec.start(1000);go.textContent='Stop';tick=setInterval(()=>{sec++;t.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');if(sec>=CM_MAX_VIDEO_S)finish();},1000);};
 });}
-function cmPickerHtml(){return `<div class="cm-status" style="color:#b45309;font-weight:600">Storage full: photo/video upload is temporarily disabled. Please submit the complaint without photo/video.</div>`;}
+function cmPickerHtml(){return `<div class="cm-status" style="color:#b45309;font-weight:600">Storage is full, so photo/video upload is disabled. Please submit the complaint here and share the photos/videos on WhatsApp.</div>`;}
 /* Wires the three buttons; onItem(item) gets each ready (compressed) photo/video. */
 function cmBindPicker(root,onItem){if(!root.querySelector('[data-cm-photo]'))return;/*27-10-2026 media off*/
  const st=root.querySelector('[data-cm-status]'),status=s=>{if(st)st.textContent=s||'';};
