@@ -25,10 +25,12 @@ export function stageGapSeconds(value,hoursValue) {
  const d=civilDate(text);
  return d&&d.parts[0]>=1898&&d.parts[0]<=1901?Math.round((d.stamp-BASE)/1000):null;
 }
+// 19-11-2026: GAP ab din / ghante / minute me: 79d 13h 50m, 9h 55m, 29m (pehle 1909:50:00).
 export function formatStageDuration(seconds) {
  if(seconds===null||!Number.isFinite(seconds))return '';
- const total=Math.abs(Math.round(seconds));
- return (seconds<0?'-':'')+Math.floor(total/3600)+':'+pad(Math.floor(total/60)%60)+':'+pad(total%60);
+ const mins=Math.round(Math.abs(seconds)/60),d=Math.floor(mins/1440),h=Math.floor(mins%1440/60),m=mins%60,p=[];
+ if(d)p.push(d+'d');if(d||h)p.push(h+'h');p.push(m+'m');
+ return (seconds<0&&mins?'-':'')+p.join(' ');
 }
 export function formatStageTimestamp(value) {
  if(blank(value))return '';
