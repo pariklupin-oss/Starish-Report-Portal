@@ -41,11 +41,15 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.chip{background:#e4ecf3;color:var(--navy);padding:6px 10px;font-size:13px;border-radius:999px}
 .pend{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;background:#e6f0fa;color:#1d4673}.pend.bad{background:var(--holdbg);color:var(--hold)}.pend button{padding:6px 10px;font-size:13px}
 #sync{font-size:11px;opacity:.85}
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:60px;z-index:4}.tabs button{flex:1;background:transparent;color:var(--muted);border-radius:0;padding:12px;border-bottom:3px solid transparent}.tabs button.on{color:var(--navy);border-bottom-color:var(--accent)}
+.btnrow{display:flex;gap:8px;margin-top:10px}.btnrow button{flex:1;padding:12px;font-size:15px}.asg{background:#7a4dbd}.badge.Open{background:#fff4e0;color:#8a5300}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}.tile b{display:block;font-size:15px}.tile .big2{font-size:22px;font-weight:800;color:var(--navy);margin:4px 0}.tile.zero{opacity:.55}.mini{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.mini span{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--okbg);color:var(--ok)}.mini .h{background:var(--holdbg);color:var(--hold)}.mini .p{background:var(--pendbg);color:var(--pend)}
 [hidden]{display:none!important}
 </style></head>
 <body>
 <header><img src="../logo-starish-2026.jpg" alt="Starish"><div class="t"><b>Maintenance Work Log</b><small id="who">Starish Autopac Pvt. Ltd.</small><small id="sync" hidden>Updating…</small></div><button id="install" hidden>Install</button><button id="logout" hidden>Sign out</button></header>
 <div id="iosTip" class="card" style="margin:12px 16px 0" hidden><b>Install this app:</b> tap the Share button in Safari, then <b>Add to Home Screen</b>. <button type="button" class="secondary" id="iosClose" style="padding:4px 10px;margin-left:6px">OK</button></div>
+<nav class="tabs" id="tabs" hidden><button type="button" data-tab="work" class="on">Work</button><button type="button" data-tab="hold">Hold / Pending <span id="holdCnt"></span></button><button type="button" data-tab="report">Report</button></nav>
 <main>
  <section id="login" class="card" hidden>
   <h1>Sign in</h1><p class="muted">Sign in with the mobile number and PIN given by the Maintenance Head.</p>
@@ -58,9 +62,11 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
   <div id="pendBox"></div>
   <div class="card"><div class="row"><div><label style="margin-top:0">Date</label><input type="date" id="day"></div><div class="fit" style="display:flex;align-items:flex-end"><button class="secondary" id="refresh">Refresh</button></div></div>
    <div class="seg" id="scopeSeg" style="margin-top:12px" hidden><button type="button" data-scope="mine" class="on">My work</button><button type="button" data-scope="all">All team</button></div></div>
-  <div id="cmpBox"></div>
+  <div id="workView"><div id="cmpBox"></div>
   <div id="stats" class="stats"></div>
-  <div id="list"></div>
+  <div id="list" hidden></div><p class="muted" style="text-align:center;margin:6px 0 80px">Finished work is shown in the Report tab.</p></div>
+  <div id="holdView" hidden><div id="holdCmp"></div><div id="openBox"></div></div>
+  <div id="reportView" hidden></div>
   <p class="foot" id="foot" hidden>Employee-wise reports are in the <a href="../" target="_blank" rel="noopener">Report Portal</a> → Maintenance Work Log.</p>
  </section>
  <div id="boot" class="card empty">Loading…</div>
@@ -95,10 +101,10 @@ function api(action,data={}){const url=window.PORTAL_CONFIG?.apiUrl;
   function finish(err,res){clearTimeout(timeout);window.removeEventListener('message',receive);form.remove();frame.remove();err?reject(err):resolve(res);}
   window.addEventListener('message',receive);document.body.append(frame,form);form.submit();});}
 
-const S={day:todayIST(),data:null,scope:'mine'};
-function showLogin(){$('#boot').hidden=true;$('#app').hidden=true;$('#addBtn').hidden=true;$('#logout').hidden=true;$('#login').hidden=false;$('#who').textContent='Starish Autopac Pvt. Ltd.';}
+const S={day:todayIST(),data:null,scope:'mine',tab:'work'};
+function showLogin(){$('#tabs').hidden=true;$('#boot').hidden=true;$('#app').hidden=true;$('#addBtn').hidden=true;$('#logout').hidden=true;$('#login').hidden=false;$('#who').textContent='Starish Autopac Pvt. Ltd.';}
 function saveCache(){try{localStorage.setItem('wl-cache',JSON.stringify({day:S.day,data:S.data}));}catch{}}
-function showApp(){$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;$('#addBtn').hidden=false;$('#logout').hidden=false;
+function showApp(){$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;$('#tabs').hidden=false;$('#addBtn').hidden=S.tab!=='work';$('#logout').hidden=false;
  $('#who').textContent=S.data.me.name+(S.data.supervisor?' · Supervisor':'');$('#scopeSeg').hidden=!S.data.supervisor;$('#foot').hidden=!S.data.supervisor;if(S.data.supervisor&&!S._scopeSet){S.scope='all';S._scopeSet=true;syncSeg();}render();}
 let loadSeq=0;
 async function load(){if(!token)return showLogin();const seq=++loadSeq,day=S.day;$('#refresh').disabled=true;$('#sync').hidden=!S.data;
@@ -118,7 +124,7 @@ function render(){const d=S.data,me=String(d.me.email).toLowerCase();
  const myMin=all.filter(r=>(r.employeeIds||[]).includes(me)).reduce((s,r)=>s+Number(r.minutes||0),0);
  const open=rows.filter(r=>r.status!=='Completed').length;
  $('#stats').innerHTML=`<div><b>${rows.length}</b><small>Jobs</small></div><div><b>${S.scope==='mine'?fmt(myMin):fmt(rows.reduce((s,r)=>s+Number(r.minutes||0)*(r.employees||[]).length,0))}</b><small>${S.scope==='mine'?'My time':'Man-hours'}</small></div><div><b>${open}</b><small>Hold / Pending</small></div>`;
- renderComplaints();
+ renderComplaints('#cmpBox',false);renderComplaints('#holdCmp',true);renderOpen();renderReport();['work','hold','report'].forEach(t=>$('#'+t+'View').hidden=S.tab!==t);$('#scopeSeg').hidden=!d.supervisor||S.tab!=='work';
  const can=r=>d.supervisor||String(r.enteredById).toLowerCase()===me;
  const sorted=rows.slice().sort((a,b)=>(a.shift===b.shift?0:a.shift==='Day'?-1:1)||String(a.startTime).localeCompare(String(b.startTime)));
  $('#list').innerHTML=sorted.length?sorted.map(r=>`<div class="card entry ${esc(r.status)}"><div class="top"><div><div class="m">${esc(r.machine)}</div><div class="meta">${esc(r.issueType)} · ${esc(r.shift)} shift · ${esc(r.startTime)}–${esc(r.endTime)} (${fmt(r.minutes)})</div></div><span class="badge ${esc(r.status)}">${esc(r.status)}</span></div><div class="desc">${esc(r.description)}</div>${r.reason?`<div class="reason"><b>Reason:</b> ${esc(r.reason)}</div>`:''}<div class="meta">Team: ${esc((r.employees||[]).join(', '))}<br>Entered by ${esc(r.enteredBy)}</div>${can(r)?`<div class="acts"><button class="secondary" data-edit="${esc(r.id)}">Edit</button><button class="danger" data-del="${esc(r.id)}">Delete</button></div>`:''}</div>`).join(''):`<div class="card empty">No work entered for ${esc(S.day)}.<br>Tap <b>+ Add work</b> to add your work.</div>`;
@@ -128,17 +134,60 @@ function render(){const d=S.data,me=String(d.me.email).toLowerCase();
 const hm=iso=>{try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso));}catch{return '';}};
 const isoHM=iso=>{try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso));}catch{return '';}};
 const isoDay=iso=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date(iso));}catch{return '';}};
-function renderComplaints(){const d=S.data,list=(d.complaints||[]).slice().sort((a,b)=>(b.mine-a.mine)||((b.priority==='Urgent')-(a.priority==='Urgent'))||String(a.raisedAt).localeCompare(String(b.raisedAt)));
- const show=d.supervisor?list:list.filter(c=>c.mine);
- if(!show.length){$('#cmpBox').innerHTML='';return;}
- $('#cmpBox').innerHTML=`<div class="sec">${d.supervisor?'Open complaints ('+show.length+')':'My complaints ('+show.length+')'} <span class="muted" style="font-weight:400">· tap a job to update</span></div>`+show.map(c=>`<div class="card cmp tap ${c.priority==='Urgent'?'urgent':''} ${c.workRunning?'run':''}" data-cupd="${esc(c.tokenNo)}"><div class="top" style="display:flex;justify-content:space-between;gap:8px"><div><div class="tok">${esc(c.tokenNo)}</div><div class="m" style="font-weight:700;font-size:16px">${esc(c.machine)}${c.unit?' · '+esc(c.unit):''}</div><div class="meta">${esc(c.issueType)} · Raised ${esc(hm(c.raisedAt))}</div><div class="meta">Raised by: <b>${esc(c.reportedBy||'—')}</b></div></div><div style="text-align:right">${c.priority==='Urgent'?'<span class="badge Urgent">Urgent</span><br>':''}<span class="badge Info">${esc(c.workRunning?'Working':c.status)}</span></div></div><div class="desc">${esc(c.description)}</div>${c.maintenanceRemarks?`<div class="reason"><b>Last note:</b> ${esc(c.maintenanceRemarks)}</div>`:''}<div class="meta">Assigned to: <b>${esc(c.assignedTo||'Not assigned yet')}</b></div><button type="button" class="big upd">Update work</button></div>`).join('');
- document.querySelectorAll('[data-cupd]').forEach(el=>el.onclick=()=>updateForm(list.find(x=>x.tokenNo===el.dataset.cupd)));}
+const isHoldC=c=>['On Hold','Waiting for Spares'].includes(c.status);
+function renderComplaints(boxSel,holdMode){const box=$(boxSel),d=S.data,list=(d.complaints||[]).slice().sort((a,b)=>(b.mine-a.mine)||((b.priority==='Urgent')-(a.priority==='Urgent'))||String(a.raisedAt).localeCompare(String(b.raisedAt)));
+ list.sort((a,b)=>(a.assignedTo?1:0)-(b.assignedTo?1:0));const show=(d.supervisor?list:list.filter(c=>c.mine)).filter(c=>isHoldC(c)===!!holdMode);
+ if(!show.length){box.innerHTML=holdMode?'':'<div class="card empty">No open complaints right now.</div>';return;}
+ box.innerHTML=`<div class="sec">${holdMode?'Complaints on hold / pending ('+show.length+')':d.supervisor?'Open complaints ('+show.length+')':'My complaints ('+show.length+')'} <span class="muted" style="font-weight:400">· tap a job to update</span></div>`+show.map(c=>`<div class="card cmp ${c.priority==='Urgent'?'urgent':''} ${c.workRunning?'run':''}"><div class="top" style="display:flex;justify-content:space-between;gap:8px"><div><div class="tok">${esc(c.tokenNo)}</div><div class="m" style="font-weight:700;font-size:16px">${esc(c.machine)}${c.unit?' · '+esc(c.unit):''}</div><div class="meta">${esc(c.issueType)} · Raised ${esc(hm(c.raisedAt))}</div><div class="meta">Raised by: <b>${esc(c.reportedBy||'—')}</b></div></div><div style="text-align:right">${c.priority==='Urgent'?'<span class="badge Urgent">Urgent</span><br>':''}<span class="badge ${c.assignedTo?'Info':'Open'}">${esc(c.workRunning?'Working':c.assignedTo?c.status:'Not assigned')}</span></div></div><div class="desc">${esc(c.description)}</div>${c.maintenanceRemarks?`<div class="reason"><b>Last note:</b> ${esc(c.maintenanceRemarks)}</div>`:''}<div class="meta">Assigned to: <b>${esc(c.assignedTo||'Not assigned yet')}</b></div><div class="btnrow">${d.supervisor?`<button type="button" class="asg" data-casg="${esc(c.tokenNo)}">${c.assignedTo?'Reassign':'Assign'}</button>`:''}${c.assignedTo||!d.supervisor?`<button type="button" class="upd" data-cupd="${esc(c.tokenNo)}">Update work</button>`:''}</div></div>`).join('');
+ box.querySelectorAll('[data-cupd]').forEach(el=>el.onclick=()=>updateForm(list.find(x=>x.tokenNo===el.dataset.cupd)));
+ box.querySelectorAll('[data-casg]').forEach(el=>el.onclick=()=>assignForm(list.find(x=>x.tokenNo===el.dataset.casg)));}
+function jobBox(c){return `<div class="jobbox"><div class="tok">${esc(c.tokenNo)}${c.priority==='Urgent'?' · <span style="color:var(--hold)">Urgent</span>':''}</div><div class="m" style="font-weight:700;font-size:17px">${esc(c.machine)}${c.unit?' · '+esc(c.unit):''}</div><div class="meta">${esc(c.issueType)} · Raised ${esc(hm(c.raisedAt))}</div><div class="meta">Raised by: <b>${esc(c.reportedBy||'—')}</b> · Assigned to: <b>${esc(c.assignedTo||'—')}</b></div><div class="desc">${esc(c.description)}</div>${c.maintenanceRemarks?`<div class="reason"><b>Last note:</b> ${esc(c.maintenanceRemarks)}</div>`:''}</div>`;}
+const localDT=dt=>{const z=n=>String(n).padStart(2,'0');return dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate())+'T'+z(dt.getHours())+':'+z(dt.getMinutes());};
+function assignForm(c){const d=S.data,me=String(d.me.email).toLowerCase(),sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';
+ const cur=String(c.assigneeEmail||'').toLowerCase(),staff=(d.staff||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+ const due=new Date(Date.now()+(c.priority==='Urgent'?4:24)*3600e3);
+ sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>${c.assignedTo?'Reassign':'Assign'} job</b><small>${esc(c.tokenNo)}</small></div></header><main><form id="af" class="card">${jobBox(c)}
+ <label>Assign to</label><div class="people">${staff.map(s=>{const id=String(s.email).toLowerCase();return `<label class="${id===cur?'on':''}"><input type="radio" name="emp" value="${esc(id)}" ${id===cur?'checked':''}>${esc(s.name)}</label>`;}).join('')||'<span class="muted">No maintenance employees found.</span>'}</div>
+ <label>Finish by (deadline)</label><input name="deadline" type="datetime-local" required value="${esc(localDT(due))}">
+ <div id="aErr" class="err" hidden></div><button type="submit" class="big asg">Assign</button></form></main>`;
+ const f=$('#af'),close=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};$('#closeSheet').onclick=close;
+ f.querySelectorAll('input[name=emp]').forEach(x=>x.onchange=()=>f.querySelectorAll('.people label').forEach(l=>l.classList.toggle('on',l.querySelector('input').checked)));
+ f.onsubmit=e=>{e.preventDefault();const err=$('#aErr'),pick=f.querySelector('input[name=emp]:checked');err.hidden=true;
+  if(!pick){err.textContent='Choose an employee';err.hidden=false;return;}const dl=new Date(f.deadline.value);if(!isFinite(dl.getTime())){err.textContent='Set a valid deadline';err.hidden=false;return;}
+  const id=pick.value,name=(staff.find(s=>String(s.email).toLowerCase()===id)||{}).name||id;close();
+  queueSave(c.tokenNo+' → '+name,'assignComplaint',{tokenNo:c.tokenNo,updatedAt:c.updatedAt,assignedTo:id,deadline:dl.toISOString()},()=>{const x=(S.data.complaints||[]).find(y=>y.tokenNo===c.tokenNo);if(x)Object.assign(x,{assignedTo:name,assigneeEmail:id,mine:id===me,status:x.status==='Open'?'Assigned':x.status});});};}
+function renderOpen(){const d=S.data,L=d.openEntries||[],hc=(d.complaints||[]).filter(c=>isHoldC(c)&&(d.supervisor||c.mine)).length,n=L.length+hc;$('#holdCnt').textContent=n?'('+n+')':'';
+ $('#openBox').innerHTML=(L.length?`<div class="sec">Work on hold / pending (${L.length})</div>`+L.map(r=>`<div class="card entry ${esc(r.status)}"><div class="top"><div><div class="m">${esc(r.machine)}</div><div class="meta">${esc(r.issueType)} · ${esc(r.date)} · ${esc(r.startTime)}–${esc(r.endTime)}</div></div><span class="badge ${esc(r.status)}">${esc(r.status)}</span></div><div class="desc">${esc(r.description)}</div>${r.reason?`<div class="reason"><b>Reason:</b> ${esc(r.reason)}</div>`:''}<div class="meta">Team: ${esc((r.employees||[]).join(', '))}</div><div class="btnrow"><button type="button" class="upd" data-resume="${esc(r.id)}">Update work</button></div></div>`).join(''):'')+(n?'':'<div class="card empty">Nothing on hold or pending. 👍</div>');
+ document.querySelectorAll('[data-resume]').forEach(b=>b.onclick=()=>openForm(L.find(x=>x.id===b.dataset.resume),true));}
+function renderReport(){const d=S.data,me=String(d.me.email).toLowerCase(),all=d.entries||[],by={};
+ all.forEach(r=>(r.employeeIds||[]).forEach((id,i)=>{const k=String(id).toLowerCase();(by[k]=by[k]||{name:(r.employees||[])[i]||id,list:[]}).list.push(r);}));
+ (d.staff||[]).forEach(s=>{const k=String(s.email).toLowerCase();if(!by[k])by[k]={name:s.name,list:[]};else by[k].name=s.name;});
+ let keys=Object.keys(by);if(!d.supervisor)keys=keys.filter(k=>k===me);
+ keys.sort((a,b)=>(by[b].list.length-by[a].list.length)||String(by[a].name).localeCompare(String(by[b].name)));
+ const tot=all.reduce((s,r)=>s+Number(r.minutes||0)*(r.employees||[]).length,0),done=all.filter(r=>r.status==='Completed').length;
+ const cnt=(l,st)=>l.filter(r=>r.status===st).length;
+ $('#reportView').innerHTML=`${d.supervisor?`<div class="stats"><div><b>${all.length}</b><small>Jobs</small></div><div><b>${fmt(tot)}</b><small>Man-hours</small></div><div><b>${done}</b><small>Completed</small></div></div>`:''}
+ <div class="sec">Employee report · ${esc(S.day)} <span class="muted" style="font-weight:400">· tap a name for details</span></div>
+ <div class="tiles">${keys.map(k=>{const e=by[k],t=e.list.reduce((s,r)=>s+Number(r.minutes||0),0),c=cnt(e.list,'Completed'),h=cnt(e.list,'Hold'),pn=cnt(e.list,'Pending');return `<div class="tile ${e.list.length?'':'zero'}" data-emp="${esc(k)}"><b>${esc(e.name)}</b><div class="big2">${fmt(t)}</div><div class="muted">${e.list.length} job${e.list.length===1?'':'s'}</div>${e.list.length?`<div class="mini">${c?`<span>${c} done</span>`:''}${h?`<span class="h">${h} hold</span>`:''}${pn?`<span class="p">${pn} pending</span>`:''}</div>`:'<div class="muted">No work logged</div>'}</div>`;}).join('')||'<div class="card empty">No employees.</div>'}</div>
+ ${d.supervisor?'<button type="button" class="big" id="waShare" style="margin-top:14px;background:#1f8f4d">Share report on WhatsApp</button>':''}`;
+ document.querySelectorAll('[data-emp]').forEach(el=>el.onclick=()=>empDetail(by[el.dataset.emp]));
+ if($('#waShare'))$('#waShare').onclick=shareReport;}
+const canEd=r=>S.data.supervisor||String(r.enteredById).toLowerCase()===String(S.data.me.email).toLowerCase();
+function empDetail(e){const sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';const t=e.list.reduce((s,r)=>s+Number(r.minutes||0),0);
+ const list=e.list.slice().sort((a,b)=>(a.shift===b.shift?0:a.shift==='Day'?-1:1)||String(a.startTime).localeCompare(String(b.startTime)));
+ sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>${esc(e.name)}</b><small>${esc(S.day)} · ${list.length} job${list.length===1?'':'s'} · ${fmt(t)}</small></div></header><main>${list.map(r=>`<div class="card entry ${esc(r.status)}"><div class="top"><div><div class="m">${esc(r.machine)}</div><div class="meta">${esc(r.issueType)} · ${esc(r.shift)} shift · ${esc(r.startTime)}–${esc(r.endTime)} (${fmt(r.minutes)})</div></div><span class="badge ${esc(r.status)}">${esc(r.status)}</span></div><div class="desc">${esc(r.description)}</div>${r.reason?`<div class="reason"><b>Reason:</b> ${esc(r.reason)}</div>`:''}<div class="meta">${(r.employees||[]).length>1?'Team: '+esc((r.employees||[]).join(', '))+'<br>':''}Entered by ${esc(r.enteredBy)}</div>${canEd(r)?`<div class="acts"><button class="secondary" data-redit="${esc(r.id)}">Edit</button><button class="danger" data-rdel="${esc(r.id)}">Delete</button></div>`:''}</div>`).join('')||'<div class="card empty">No work logged on this date.</div>'}</main>`;
+ const closeD=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};
+ sh.querySelectorAll('[data-redit]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.redit);closeD();openForm(r);});
+ sh.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.rdel);if(!r||!confirm('Delete this work entry?\n'+r.machine+' · '+r.startTime+'–'+r.endTime))return;closeD();S.data.entries=(S.data.entries||[]).filter(x=>x.id!==r.id);S.data.openEntries=(S.data.openEntries||[]).filter(x=>x.id!==r.id);render();queueSave('delete '+r.machine,'deleteWorkLog',{id:r.id},()=>{});});
+ $('#closeSheet').onclick=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};}
+async function shareReport(){const b=$('#waShare');b.disabled=true;b.textContent='Preparing…';try{const r=await api('workLogReport',{date:S.day});location.href='https://wa.me/?text='+encodeURIComponent(r.text);}catch(e){toast(e.message);}finally{b.disabled=false;b.textContent='Share report on WhatsApp';}}
+
 function updateForm(c){const d=S.data,me=String(d.me.email).toLowerCase(),sup=d.supervisor,sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';
  const asg=String(c.assigneeEmail||'').toLowerCase(),pre=new Set([asg]);if(!sup)pre.add(me);
  const staff=(d.staff||[]).slice().sort((a,b)=>(pre.has(String(b.email).toLowerCase())-pre.has(String(a.email).toLowerCase()))||String(a.name).localeCompare(String(b.name)));
  const runDay=c.runningSince?isoDay(c.runningSince):'',day=runDay||todayIST(),start=c.runningSince?isoHM(c.runningSince):'';
  sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>Update work</b><small>${esc(c.tokenNo)}</small></div></header><main><form id="uf" class="card">
- <div class="jobbox"><div class="tok">${esc(c.tokenNo)}${c.priority==='Urgent'?' · <span style="color:var(--hold)">Urgent</span>':''}</div><div class="m" style="font-weight:700;font-size:17px">${esc(c.machine)}${c.unit?' · '+esc(c.unit):''}</div><div class="meta">${esc(c.issueType)} · Raised ${esc(hm(c.raisedAt))}</div><div class="meta">Raised by: <b>${esc(c.reportedBy||'—')}</b> · Assigned to: <b>${esc(c.assignedTo||'—')}</b></div><div class="desc">${esc(c.description)}</div>${c.maintenanceRemarks?`<div class="reason"><b>Last note:</b> ${esc(c.maintenanceRemarks)}</div>`:''}</div>
+ ${jobBox(c)}
  <label>Date</label><input name="date" type="date" required max="${todayIST()}" value="${esc(day)}">
  <div class="row"><div><label>Start time</label><input name="startTime" type="time" required value="${esc(start)}"></div><div><label>End time</label><input name="endTime" type="time" required value="${esc(nowHM())}"></div></div>
  <div class="chips"><span class="muted">Quick start:</span>${[15,30,60,120].map(m=>`<button type="button" class="chip" data-back="${m}">${m<60?m+' min':m/60+' hr'} ago</button>`).join('')}</div>
@@ -158,24 +207,24 @@ function updateForm(c){const d=S.data,me=String(d.me.email).toLowerCase(),sup=d.
   const ids=[...f.querySelectorAll('input[name=emp]:checked')].map(x=>x.value);if(!ids.length){err.textContent='Tick who did the work';err.hidden=false;return;}
   const st=f.status.value,data={tokenNo:c.tokenNo,status:st,date:f.date.value,startTime:f.startTime.value,endTime:f.endTime.value,workDone:f.workDone.value,reason:st==='Completed'?'':f.reason.value,helperIds:ids};
   close();queueSave(c.tokenNo+' ('+st+')','finishComplaintWork',data,res=>{if(!S.data)return;const en=res.entry;if(en&&en.date===S.day)(S.data.entries=S.data.entries||[]).push(en);const L=S.data.complaints||[];const k=L.findIndex(x=>x.tokenNo===c.tokenNo);if(k>=0){if(res.complaintStatus==='Completed')L.splice(k,1);else Object.assign(L[k],{status:res.complaintStatus||L[k].status,maintenanceRemarks:res.remarks||L[k].maintenanceRemarks,workRunning:false,runningSince:''});}});};}
-function openForm(r=null){const d=S.data;if(!d)return;const sup=d.supervisor,me=String(d.me.email).toLowerCase();
+function openForm(r=null,resume=false){const d=S.data;if(!d)return;const sup=d.supervisor,me=String(d.me.email).toLowerCase();
  const sel=new Set((r?.employeeIds||[me]).map(x=>String(x).toLowerCase()));
  const machines=(d.machines||[]).filter(m=>m!=='Other');if(r?.machine&&!machines.includes(r.machine))machines.unshift(r.machine);
  const opt=(list,v)=>list.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
  const staff=(d.staff||[]).slice().sort((a,b)=>(String(a.email).toLowerCase()===me?-1:String(b.email).toLowerCase()===me?1:String(a.name).localeCompare(String(b.name))));
  const sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';
- sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>${r?'Edit work':'Add work'}</b><small>Maintenance Work Log</small></div></header><main><form id="wf" class="card">
- <div class="row"><div><label style="margin-top:0">Date</label><input name="date" type="date" required max="${todayIST()}" value="${esc(r?.date||S.day)}"></div><div><label style="margin-top:0">Shift</label><select name="shift">${opt(['Day','Night'],r?.shift||nowShift())}</select></div></div>
+ sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>${resume?'Update pending work':r?'Edit work':'Add work'}</b><small>Maintenance Work Log</small></div></header><main><form id="wf" class="card">${resume?`<div class="reason"><b>${esc(r.status)} since ${esc(r.date)}:</b> ${esc(r.reason||'')}</div>`:''}
+ <div class="row"><div><label style="margin-top:0">Date</label><input name="date" type="date" required max="${todayIST()}" value="${esc(resume?todayIST():(r?.date||S.day))}"></div><div><label style="margin-top:0">Shift</label><select name="shift">${opt(['Day','Night'],resume?nowShift():(r?.shift||nowShift()))}</select></div></div>
  <label>Who worked on it? <span class="muted">(tick everyone)</span></label><div class="people">${staff.map(s=>{const id=String(s.email).toLowerCase(),self=id===me,on=sel.has(id)||(!sup&&self);return `<label class="${on?'on':''}"><input type="checkbox" name="emp" value="${esc(id)}" ${on?'checked':''} ${!sup&&self?'data-lock="1"':''}>${esc(s.name)}${self?' (me)':''}</label>`;}).join('')||'<span class="muted">No maintenance employees found.</span>'}</div>
  <label>Machine name</label><div class="row"><select name="machine" id="mSel" required><option value="">Select machine</option>${opt(machines,r?.machine||'')}</select><button type="button" class="secondary fit" id="mNew">+ New</button></div>
  <div class="inline-add" id="mAdd" hidden><input id="mName" placeholder="New machine name" maxlength="150"><button type="button" id="mSave">Add</button></div>
  <label>Issue type</label><div class="row"><select name="issueType" id="tSel" required><option value="">Select type</option>${opt(d.categories||[],r?.issueType||'')}</select><button type="button" class="secondary fit" id="tNew">+ New</button></div>
  <div class="inline-add" id="tAdd" hidden><input id="tName" placeholder="New category name" maxlength="60"><button type="button" id="tSave">Add</button></div>
  <label>Work description</label><textarea name="description" required maxlength="3000" placeholder="What work was done?">${esc(r?.description||'')}</textarea>
- <div class="row"><div><label>Start time</label><input name="startTime" type="time" required value="${esc(r?.startTime||'')}"><button type="button" class="secondary" data-now="startTime" style="width:100%;margin-top:6px;padding:7px">Now</button></div><div><label>End time</label><input name="endTime" type="time" required value="${esc(r?.endTime||'')}"><button type="button" class="secondary" data-now="endTime" style="width:100%;margin-top:6px;padding:7px">Now</button></div></div>
+ <div class="row"><div><label>Start time</label><input name="startTime" type="time" required value="${esc(resume?'':(r?.startTime||''))}"><button type="button" class="secondary" data-now="startTime" style="width:100%;margin-top:6px;padding:7px">Now</button></div><div><label>End time</label><input name="endTime" type="time" required value="${esc(resume?'':(r?.endTime||''))}"><button type="button" class="secondary" data-now="endTime" style="width:100%;margin-top:6px;padding:7px">Now</button></div></div>
  <div class="dur" id="dur"></div>
- <label>Status</label><div class="seg" id="stSeg">${['Completed','Hold','Pending'].map(s=>`<button type="button" data-st="${s}">${s}</button>`).join('')}</div><input type="hidden" name="status" value="${esc(r?.status||'Completed')}">
- <div id="rBox"><label>Reason</label><textarea name="reason" maxlength="1000" placeholder="Why is it on hold / pending?">${esc(r?.reason||'')}</textarea></div>
+ <label>Status</label><div class="seg" id="stSeg">${['Completed','Hold','Pending'].map(s=>`<button type="button" data-st="${s}">${s}</button>`).join('')}</div><input type="hidden" name="status" value="${esc(resume?'Completed':(r?.status||'Completed'))}">
+ <div id="rBox"><label>Reason</label><textarea name="reason" maxlength="1000" placeholder="Why is it on hold / pending?">${esc(resume?'':(r?.reason||''))}</textarea></div>
  <div id="fErr" class="err" hidden></div>
  <button type="submit" style="width:100%;margin-top:16px;padding:14px;font-size:16px">${r?'Save changes':'Save work'}</button></form></main>`;
  const f=$('#wf'),close=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};
@@ -192,12 +241,13 @@ function openForm(r=null){const d=S.data;if(!d)return;const sup=d.supervisor,me=
  sync();
  f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('button[type=submit]'),err=$('#fErr');err.hidden=true;
   const ids=[...f.querySelectorAll('input[name=emp]:checked')].map(c=>c.value);if(!ids.length){err.textContent='Tick at least one employee';err.hidden=false;return;}
-  const st=f.status.value,data={id:r?.id,date:f.date.value,shift:f.shift.value,employeeIds:ids,machine:f.machine.value,issueType:f.issueType.value,description:f.description.value,startTime:f.startTime.value,endTime:f.endTime.value,status:st,reason:st==='Completed'?'':f.reason.value};
-  close();queueSave(data.machine+' '+data.startTime+'–'+data.endTime,'saveWorkLog',data,res=>{const en=res.entry;if(!en||!S.data)return;const L=S.data.entries=(S.data.entries||[]).filter(x=>x.id!==en.id);if(en.date===S.day)L.push(en);});};}
+  const st=f.status.value,data={id:resume?undefined:r?.id,resolves:resume?r.id:undefined,date:f.date.value,shift:f.shift.value,employeeIds:ids,machine:f.machine.value,issueType:f.issueType.value,description:f.description.value,startTime:f.startTime.value,endTime:f.endTime.value,status:st,reason:st==='Completed'?'':f.reason.value};
+  close();queueSave(data.machine+' '+data.startTime+'–'+data.endTime,'saveWorkLog',data,res=>{const en=res.entry;if(!en||!S.data)return;const L=S.data.entries=(S.data.entries||[]).filter(x=>x.id!==en.id);if(en.date===S.day)L.push(en);const O=S.data.openEntries=(S.data.openEntries||[]).filter(x=>x.id!==en.id&&x.id!==data.resolves);if(['Hold','Pending'].includes(en.status)&&!en.complaintToken)O.push(en);});};}
 
 $('#day').value=S.day;$('#day').max=todayIST();
 $('#day').onchange=e=>{S.day=e.target.value||todayIST();if(S.data){S.data.entries=[];render();}load();};
 $('#refresh').onclick=load;$('#addBtn').onclick=()=>openForm();
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));$('#addBtn').hidden=S.tab!=='work';if(S.data)render();});
 document.querySelectorAll('#scopeSeg button').forEach(b=>b.onclick=()=>{S.scope=b.dataset.scope;syncSeg();render();});
 $('#pinMode').onclick=()=>{$('#pinMode').classList.add('on');$('#emailMode').classList.remove('on');$('#pinForm').hidden=false;$('#emailPanel').hidden=true;};
 $('#emailMode').onclick=()=>{$('#emailMode').classList.add('on');$('#pinMode').classList.remove('on');$('#pinForm').hidden=true;$('#emailPanel').hidden=false;};
