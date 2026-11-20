@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#102d4c"><meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://script.google.com" crossorigin><link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<title>Starish | Maintenance Work Log</title><link rel="manifest" href="./worklog.webmanifest"><link rel="icon" href="./icon-starish-192.png"><link rel="apple-touch-icon" href="./icon-starish-192.png">
+<style>
+:root{--navy:#102d4c;--navy2:#1d4673;--bg:#eef3f7;--card:#fff;--line:#d5dfe8;--muted:#5d7183;--ink:#14212e;--ok:#17834a;--okbg:#e3f5ea;--hold:#a12a1f;--holdbg:#fdecea;--pend:#8a5300;--pendbg:#fff4e0;--accent:#f39c12}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:90px}
+header{background:var(--navy);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+header img{width:40px;height:40px;border-radius:8px;background:#fff}header .t{flex:1;min-width:0}header b{display:block;font-size:16px}header small{opacity:.8;font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;padding:6px 10px;border-radius:8px;font-size:13px}
+main{max-width:760px;margin:0 auto;padding:14px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+h1{font-size:22px;margin:4px 0 6px}h2{font-size:17px;margin:0 0 10px}
+label{display:block;font-weight:600;font-size:13px;color:#33475b;margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid #b9c8d6;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:84px;resize:vertical}input:focus,select:focus,textarea:focus{outline:2px solid #7fb2e5;border-color:#7fb2e5}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 16px;background:var(--navy2);color:#fff;font-weight:600}
+button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:var(--holdbg);color:var(--hold)}button:disabled{opacity:.55}
+.row{display:flex;gap:8px;align-items:stretch}.row>*{flex:1}.row .fit{flex:0 0 auto}
+.seg{display:flex;background:#e4ecf3;border-radius:10px;padding:3px}.seg button{flex:1;background:transparent;color:var(--navy);padding:9px}.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.muted{color:var(--muted);font-size:13px}.err{background:var(--holdbg);color:var(--hold);padding:10px 12px;border-radius:10px;margin:10px 0}
+.people{display:flex;flex-wrap:wrap;gap:8px}.people label{display:flex;align-items:center;gap:7px;margin:0;font-weight:500;border:1px solid #c9d6e1;border-radius:999px;padding:7px 12px;background:#fff;font-size:14px}
+.people input{width:auto;margin:0}.people label.on{background:#e6f0fa;border-color:#7fb2e5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.stats div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stats b{display:block;font-size:20px}.stats small{color:var(--muted);font-size:12px}
+.entry{border-left:4px solid var(--ok)}.entry.Hold{border-left-color:var(--hold)}.entry.Pending{border-left-color:var(--accent)}
+.entry .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.entry .m{font-weight:700;font-size:16px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--okbg);color:var(--ok);white-space:nowrap}.badge.Hold{background:var(--holdbg);color:var(--hold)}.badge.Pending{background:var(--pendbg);color:var(--pend)}
+.meta{color:var(--muted);font-size:13px;margin:4px 0}.desc{margin:6px 0;white-space:pre-wrap}.reason{background:#fff8ec;border-radius:8px;padding:6px 10px;font-size:14px;margin:6px 0}
+.acts{display:flex;gap:8px;margin-top:8px}.acts button{padding:8px 14px;font-size:14px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));padding:15px 28px;border-radius:999px;font-size:17px;background:var(--accent);color:#1d1300;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:6}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:10;overflow:auto;padding-bottom:30px}.sheet header{position:sticky}
+.toast{position:fixed;left:16px;right:16px;bottom:90px;max-width:520px;margin:0 auto;background:#14212e;color:#fff;padding:12px 16px;border-radius:12px;z-index:20;text-align:center}
+.dur{font-weight:700;color:var(--navy2);margin-top:8px}.inline-add{display:flex;gap:8px;margin-top:8px}.inline-add input{flex:1}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.foot{text-align:center;font-size:13px;color:var(--muted);margin-top:14px}.foot a{color:var(--navy2)}
+[hidden]{display:none!important}
+</style></head>
+<body>
+<header><img src="./logo-starish-2026.jpg" alt="Starish"><div class="t"><b>Maintenance Work Log</b><small id="who">Starish Autopac Pvt. Ltd.</small></div><button id="logout" hidden>Sign out</button></header>
+<main>
+ <section id="login" class="card" hidden>
+  <h1>Sign in</h1><p class="muted">Use the same login as the Report Portal.</p>
+  <div class="seg"><button type="button" id="pinMode" class="on">Mobile + PIN</button><button type="button" id="emailMode">Email OTP</button></div>
+  <form id="pinForm"><label>Mobile number<input id="phone" type="tel" autocomplete="tel" required placeholder="10-digit mobile number"></label><label>PIN<input id="pin" type="password" inputmode="numeric" pattern="[0-9]{6,12}" autocomplete="current-password" required placeholder="6–12 digit PIN"></label><button style="width:100%;margin-top:14px">Sign in</button></form>
+  <div id="emailPanel" hidden><form id="otpReq"><label>Email address<input id="email" type="email" autocomplete="email" required placeholder="your@email.com"></label><button style="width:100%;margin-top:14px">Send login code</button></form>
+  <form id="otpVerify" hidden><label>6-digit email code<input id="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label><button style="width:100%;margin-top:14px">Sign in</button><p class="muted">Check the Spam folder too. The code expires in 10 minutes.</p></form></div>
+ </section>
+ <section id="app" hidden>
+  <div class="card"><div class="row"><div><label style="margin-top:0">Date</label><input type="date" id="day"></div><div class="fit" style="display:flex;align-items:flex-end"><button class="secondary" id="refresh">Refresh</button></div></div>
+   <div class="seg" id="scopeSeg" style="margin-top:12px" hidden><button type="button" data-scope="mine" class="on">My work</button><button type="button" data-scope="all">All team</button></div></div>
+  <div id="stats" class="stats"></div>
+  <div id="list"></div>
+  <p class="foot">Employee-wise reports are in the <a href="./" target="_blank" rel="noopener">Report Portal</a> → Maintenance Work Log.</p>
+ </section>
+ <div id="boot" class="card empty">Loading…</div>
+</main>
+<button class="fab" id="addBtn" hidden>+ Add work</button>
+<div class="sheet" id="sheet" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<script src="./config.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayIST=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date());
+const nowHM=()=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+const nowShift=()=>{const h=Number(nowHM().slice(0,2));return h>=8&&h<20?'Day':'Night';};
+const fmt=m=>{m=Math.max(0,Math.round(Number(m)||0));return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m';};
+const mins=(a,b)=>{if(!/^\d{2}:\d{2}$/.test(a||'')||!/^\d{2}:\d{2}$/.test(b||''))return 0;const x=a.split(':').map(Number),y=b.split(':').map(Number);let d=(y[0]*60+y[1])-(x[0]*60+x[1]);if(d<=0)d+=1440;return d;};
+let token='';try{token=localStorage.getItem('starish-session')||sessionStorage.getItem('starish-session')||'';}catch{}
+function saveToken(v){token=v;try{localStorage.setItem('starish-session',v);}catch{try{sessionStorage.setItem('starish-session',v);}catch{}}}
+function clearToken(){token='';try{localStorage.removeItem('starish-session');}catch{}try{sessionStorage.removeItem('starish-session');}catch{}}
+let toastT;function toast(s){const t=$('#toast');t.textContent=s;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,4500);}
+function api(action,data={}){const url=window.PORTAL_CONFIG?.apiUrl;
+ if(!/^https:\/\/script\.google\.com\/macros\/s\/[a-zA-Z0-9_-]+\/exec$/.test(url||''))return Promise.reject(Error('Portal server URL is not set.'));
+ if(!navigator.onLine)return Promise.reject(Error('Internet is required to read or save data.'));
+ const nonce=Array.from(crypto.getRandomValues(new Uint8Array(24)),v=>v.toString(16).padStart(2,'0')).join(''),requestId=(crypto.randomUUID?crypto.randomUUID():nonce);
+ return new Promise((resolve,reject)=>{const frame=document.createElement('iframe'),form=document.createElement('form'),input=document.createElement('input');frame.name='api_'+nonce;frame.hidden=true;form.hidden=true;form.method='POST';form.action=url;form.target=frame.name;input.type='hidden';input.name='payload';input.value=JSON.stringify({action,data,token,nonce,requestId,origin:location.origin});form.append(input);
+  const timeout=setTimeout(()=>finish(Error('The server is taking too long. Check your internet and try again.')),90000);
+  function receive(e){let host;try{const u=new URL(e.origin);if(u.protocol!=='https:')return;host=u.hostname;}catch{return;}
+   if(!(host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com')))return;
+   if(e.data?.channel!=='starish-api'||e.data.nonce!==nonce)return;
+   if(e.data.result?.ok)finish(null,e.data.result);else finish(Error(e.data.result?.error||'Request failed'));}
+  function finish(err,res){clearTimeout(timeout);window.removeEventListener('message',receive);form.remove();frame.remove();err?reject(err):resolve(res);}
+  window.addEventListener('message',receive);document.body.append(frame,form);form.submit();});}
+
+const S={day:todayIST(),data:null,scope:'mine'};
+function showLogin(){$('#boot').hidden=true;$('#app').hidden=true;$('#addBtn').hidden=true;$('#logout').hidden=true;$('#login').hidden=false;$('#who').textContent='Starish Autopac Pvt. Ltd.';}
+async function load(){if(!token)return showLogin();$('#refresh').disabled=true;
+ try{S.data=await api('workLogData',{from:S.day,to:S.day});$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;$('#addBtn').hidden=false;$('#logout').hidden=false;
+  $('#who').textContent=S.data.me.name+(S.data.supervisor?' · Supervisor':'');$('#scopeSeg').hidden=!S.data.supervisor;if(S.data.supervisor&&!S._scopeSet){S.scope='all';S._scopeSet=true;syncSeg();}render();}
+ catch(e){if(/Login expired|Account inactive|login|sign in|session/i.test(e.message)){clearToken();showLogin();toast(e.message);}else{$('#boot').hidden=true;$('#app').hidden=false;$('#list').innerHTML='<div class="err">'+esc(e.message)+'</div>';}}
+ finally{$('#refresh').disabled=false;}}
+function syncSeg(){document.querySelectorAll('#scopeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.scope===S.scope));}
+function render(){const d=S.data,me=String(d.me.email).toLowerCase();
+ const all=d.entries||[],rows=S.scope==='mine'?all.filter(r=>(r.employeeIds||[]).includes(me)):all;
+ const myMin=all.filter(r=>(r.employeeIds||[]).includes(me)).reduce((s,r)=>s+Number(r.minutes||0),0);
+ const open=rows.filter(r=>r.status!=='Completed').length;
+ $('#stats').innerHTML=`<div><b>${rows.length}</b><small>Jobs</small></div><div><b>${S.scope==='mine'?fmt(myMin):fmt(rows.reduce((s,r)=>s+Number(r.minutes||0)*(r.employees||[]).length,0))}</b><small>${S.scope==='mine'?'My time':'Man-hours'}</small></div><div><b>${open}</b><small>Hold / Pending</small></div>`;
+ const can=r=>d.supervisor||String(r.enteredById).toLowerCase()===me;
+ const sorted=rows.slice().sort((a,b)=>(a.shift===b.shift?0:a.shift==='Day'?-1:1)||String(a.startTime).localeCompare(String(b.startTime)));
+ $('#list').innerHTML=sorted.length?sorted.map(r=>`<div class="card entry ${esc(r.status)}"><div class="top"><div><div class="m">${esc(r.machine)}</div><div class="meta">${esc(r.issueType)} · ${esc(r.shift)} shift · ${esc(r.startTime)}–${esc(r.endTime)} (${fmt(r.minutes)})</div></div><span class="badge ${esc(r.status)}">${esc(r.status)}</span></div><div class="desc">${esc(r.description)}</div>${r.reason?`<div class="reason"><b>Reason:</b> ${esc(r.reason)}</div>`:''}<div class="meta">Team: ${esc((r.employees||[]).join(', '))}<br>Entered by ${esc(r.enteredBy)}</div>${can(r)?`<div class="acts"><button class="secondary" data-edit="${esc(r.id)}">Edit</button><button class="danger" data-del="${esc(r.id)}">Delete</button></div>`:''}</div>`).join(''):`<div class="card empty">No work entered for ${esc(S.day)}.<br>Tap <b>+ Add work</b> to add your work.</div>`;
+ document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openForm(all.find(x=>x.id===b.dataset.edit)));
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const r=all.find(x=>x.id===b.dataset.del);if(!r||!confirm('Delete this work entry?\n'+r.machine+' · '+r.startTime+'–'+r.endTime))return;b.disabled=true;try{await api('deleteWorkLog',{id:r.id});toast('Entry deleted');await load();}catch(e){toast(e.message);b.disabled=false;}});}
+
+function openForm(r=null){const d=S.data;if(!d)return;const sup=d.supervisor,me=String(d.me.email).toLowerCase();
+ const sel=new Set((r?.employeeIds||[me]).map(x=>String(x).toLowerCase()));
+ const machines=(d.machines||[]).filter(m=>m!=='Other');if(r?.machine&&!machines.includes(r.machine))machines.unshift(r.machine);
+ const opt=(list,v)=>list.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+ const staff=(d.staff||[]).slice().sort((a,b)=>(String(a.email).toLowerCase()===me?-1:String(b.email).toLowerCase()===me?1:String(a.name).localeCompare(String(b.name))));
+ const sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';
+ sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>${r?'Edit work':'Add work'}</b><small>Maintenance Work Log</small></div></header><main><form id="wf" class="card">
+ <div class="row"><div><label style="margin-top:0">Date</label><input name="date" type="date" required max="${todayIST()}" value="${esc(r?.date||S.day)}"></div><div><label style="margin-top:0">Shift</label><select name="shift">${opt(['Day','Night'],r?.shift||nowShift())}</select></div></div>
+ <label>Who worked on it? <span class="muted">(tick everyone)</span></label><div class="people">${staff.map(s=>{const id=String(s.email).toLowerCase(),self=id===me,on=sel.has(id)||(!sup&&self);return `<label class="${on?'on':''}"><input type="checkbox" name="emp" value="${esc(id)}" ${on?'checked':''} ${!sup&&self?'data-lock="1"':''}>${esc(s.name)}${self?' (me)':''}</label>`;}).join('')||'<span class="muted">No maintenance employees found.</span>'}</div>
+ <label>Machine name</label><div class="row"><select name="machine" id="mSel" required><option value="">Select machine</option>${opt(machines,r?.machine||'')}</select><button type="button" class="secondary fit" id="mNew">+ New</button></div>
+ <div class="inline-add" id="mAdd" hidden><input id="mName" placeholder="New machine name" maxlength="150"><button type="button" id="mSave">Add</button></div>
+ <label>Issue type</label><div class="row"><select name="issueType" id="tSel" required><option value="">Select type</option>${opt(d.categories||[],r?.issueType||'')}</select><button type="button" class="secondary fit" id="tNew">+ New</button></div>
+ <div class="inline-add" id="tAdd" hidden><input id="tName" placeholder="New category name" maxlength="60"><button type="button" id="tSave">Add</button></div>
+ <label>Work description</label><textarea name="description" required maxlength="3000" placeholder="What work was done?">${esc(r?.description||'')}</textarea>
+ <div class="row"><div><label>Start time</label><input name="startTime" type="time" required value="${esc(r?.startTime||'')}"><button type="button" class="secondary" data-now="startTime" style="width:100%;margin-top:6px;padding:7px">Now</button></div><div><label>End time</label><input name="endTime" type="time" required value="${esc(r?.endTime||'')}"><button type="button" class="secondary" data-now="endTime" style="width:100%;margin-top:6px;padding:7px">Now</button></div></div>
+ <div class="dur" id="dur"></div>
+ <label>Status</label><div class="seg" id="stSeg">${['Completed','Hold','Pending'].map(s=>`<button type="button" data-st="${s}">${s}</button>`).join('')}</div><input type="hidden" name="status" value="${esc(r?.status||'Completed')}">
+ <div id="rBox"><label>Reason</label><textarea name="reason" maxlength="1000" placeholder="Why is it on hold / pending?">${esc(r?.reason||'')}</textarea></div>
+ <div id="fErr" class="err" hidden></div>
+ <button type="submit" style="width:100%;margin-top:16px;padding:14px;font-size:16px">${r?'Save changes':'Save work'}</button></form></main>`;
+ const f=$('#wf'),close=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};
+ $('#closeSheet').onclick=close;
+ const sync=()=>{const st=f.status.value;document.querySelectorAll('#stSeg button').forEach(b=>b.classList.toggle('on',b.dataset.st===st));$('#rBox').hidden=st==='Completed';f.reason.required=st!=='Completed';const m=mins(f.startTime.value,f.endTime.value);$('#dur').textContent=m?'Work time: '+fmt(m)+(m>720?' — more than 12 hours, please check':''):'';};
+ document.querySelectorAll('#stSeg button').forEach(b=>b.onclick=()=>{f.status.value=b.dataset.st;sync();});
+ f.startTime.oninput=sync;f.endTime.oninput=sync;
+ document.querySelectorAll('[data-now]').forEach(b=>b.onclick=()=>{f[b.dataset.now].value=nowHM();sync();});
+ f.querySelectorAll('input[name=emp]').forEach(c=>c.onchange=()=>{if(c.dataset.lock){c.checked=true;toast('Your own name stays ticked');}c.parentElement.classList.toggle('on',c.checked);});
+ const addInline=(btnNew,box,inp,save,sel,action,listKey,label)=>{$(btnNew).onclick=()=>{$(box).hidden=!$(box).hidden;if(!$(box).hidden)$(inp).focus();};
+  $(save).onclick=async()=>{const name=$(inp).value.trim();if(!name)return toast('Enter '+label.toLowerCase()+' name');$(save).disabled=true;try{const res=await api(action,{name});d[listKey]=res[listKey];const s=$(sel),v=res.added;if(![...s.options].some(o=>o.value===v))s.add(new Option(v,v));s.value=v;$(inp).value='';$(box).hidden=true;toast(label+' added: '+v);}catch(e){toast(e.message);}finally{$(save).disabled=false;}};};
+ addInline('#mNew','#mAdd','#mName','#mSave','#mSel','addWorkMachine','machines','Machine');
+ addInline('#tNew','#tAdd','#tName','#tSave','#tSel','addWorkCategory','categories','Issue type');
+ sync();
+ f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('button[type=submit]'),err=$('#fErr');err.hidden=true;
+  const ids=[...f.querySelectorAll('input[name=emp]:checked')].map(c=>c.value);if(!ids.length){err.textContent='Tick at least one employee';err.hidden=false;return;}
+  const st=f.status.value;btn.disabled=true;btn.textContent='Saving…';
+  try{await api('saveWorkLog',{id:r?.id,date:f.date.value,shift:f.shift.value,employeeIds:ids,machine:f.machine.value,issueType:f.issueType.value,description:f.description.value,startTime:f.startTime.value,endTime:f.endTime.value,status:st,reason:st==='Completed'?'':f.reason.value});
+   close();S.day=f.date.value;$('#day').value=S.day;toast(r?'Work entry updated':'Work saved');await load();}
+  catch(x){err.textContent=x.message;err.hidden=false;btn.disabled=false;btn.textContent=r?'Save changes':'Save work';}};}
+
+$('#day').value=S.day;$('#day').max=todayIST();
+$('#day').onchange=e=>{S.day=e.target.value||todayIST();load();};
+$('#refresh').onclick=load;$('#addBtn').onclick=()=>openForm();
+document.querySelectorAll('#scopeSeg button').forEach(b=>b.onclick=()=>{S.scope=b.dataset.scope;syncSeg();render();});
+$('#pinMode').onclick=()=>{$('#pinMode').classList.add('on');$('#emailMode').classList.remove('on');$('#pinForm').hidden=false;$('#emailPanel').hidden=true;};
+$('#emailMode').onclick=()=>{$('#emailMode').classList.add('on');$('#pinMode').classList.remove('on');$('#pinForm').hidden=true;$('#emailPanel').hidden=false;};
+$('#pinForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginPin',{phone:$('#phone').value,pin:$('#pin').value});saveToken(r.token);$('#pin').value='';await load();}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#otpReq').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginRequest',{email:$('#email').value});$('#otpVerify').hidden=false;toast(r.message||'Code sent');}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#otpVerify').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginVerify',{email:$('#email').value,code:$('#code').value});saveToken(r.token);$('#code').value='';await load();}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#logout').onclick=async()=>{if(!confirm('Sign out?'))return;try{await api('logout');}catch{}clearToken();S.data=null;showLogin();};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+load();
+</script>
+</body></html>
