@@ -37,6 +37,8 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
 .cmp{border-left:4px solid #2f6db3}.cmp.urgent{border-left-color:var(--hold)}.cmp.run{border-left-color:var(--ok);background:#f4fbf6}
 .tok{font-size:12px;font-weight:700;color:#2f6db3}.badge.Urgent{background:var(--holdbg);color:var(--hold)}.badge.Info{background:#e6f0fa;color:#1d4673}
 .big{width:100%;padding:13px;font-size:16px;margin-top:10px}.go{background:var(--ok)}
+.tap{cursor:pointer}.upd{background:#2f6db3}.jobbox{background:#f3f7fb;border-radius:12px;padding:12px;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.chip{background:#e4ecf3;color:var(--navy);padding:6px 10px;font-size:13px;border-radius:999px}
 [hidden]{display:none!important}
 </style></head>
 <body>
@@ -111,28 +113,39 @@ function render(){const d=S.data,me=String(d.me.email).toLowerCase();
  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const r=all.find(x=>x.id===b.dataset.del);if(!r||!confirm('Delete this work entry?\n'+r.machine+' · '+r.startTime+'–'+r.endTime))return;b.disabled=true;try{await api('deleteWorkLog',{id:r.id});toast('Entry deleted');await load();}catch(e){toast(e.message);b.disabled=false;}});}
 
 const hm=iso=>{try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso));}catch{return '';}};
+const isoHM=iso=>{try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso));}catch{return '';}};
+const isoDay=iso=>{try{return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date(iso));}catch{return '';}};
 function renderComplaints(){const d=S.data,list=(d.complaints||[]).slice().sort((a,b)=>(b.mine-a.mine)||((b.priority==='Urgent')-(a.priority==='Urgent'))||String(a.raisedAt).localeCompare(String(b.raisedAt)));
- const mine=list.filter(c=>c.mine),show=d.supervisor?list:mine;
+ const show=d.supervisor?list:list.filter(c=>c.mine);
  if(!show.length){$('#cmpBox').innerHTML='';return;}
- $('#cmpBox').innerHTML=`<div class="sec">${d.supervisor?'Open complaints ('+show.length+')':'My complaints ('+show.length+')'}</div>`+show.map(c=>`<div class="card cmp ${c.priority==='Urgent'?'urgent':''} ${c.workRunning?'run':''}"><div class="top" style="display:flex;justify-content:space-between;gap:8px"><div><div class="tok">${esc(c.tokenNo)}</div><div class="m" style="font-weight:700;font-size:16px">${esc(c.machine)}${c.unit?' · '+esc(c.unit):''}</div><div class="meta">${esc(c.issueType)} · Raised ${esc(hm(c.raisedAt))}</div></div><div style="text-align:right">${c.priority==='Urgent'?'<span class="badge Urgent">Urgent</span><br>':''}<span class="badge Info">${esc(c.workRunning?'Working':c.status)}</span></div></div><div class="desc">${esc(c.description)}</div>${c.maintenanceRemarks?`<div class="reason"><b>Last note:</b> ${esc(c.maintenanceRemarks)}</div>`:''}${!c.mine?`<div class="meta">Assigned to: <b>${esc(c.assignedTo||'Not assigned yet')}</b></div>`:c.workRunning?`<div class="meta">Work started at <b>${esc(hm(c.runningSince))}</b></div><button class="big go" data-cfinish="${esc(c.tokenNo)}">Finish work</button>`:`<button class="big" data-cstart="${esc(c.tokenNo)}">Start work</button>`}</div>`).join('');
- document.querySelectorAll('[data-cstart]').forEach(b=>b.onclick=async()=>{const c=list.find(x=>x.tokenNo===b.dataset.cstart);b.disabled=true;b.textContent='Starting…';try{await api('startComplaintWork',{tokenNo:c.tokenNo,updatedAt:c.updatedAt});toast('Work started. Tap Finish when done.');await load();}catch(e){toast(e.message);b.disabled=false;b.textContent='Start work';}});
- document.querySelectorAll('[data-cfinish]').forEach(b=>b.onclick=()=>finishForm(list.find(x=>x.tokenNo===b.dataset.cfinish)));}
-function finishForm(c){const d=S.data,me=String(d.me.email).toLowerCase(),sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';
- const others=(d.staff||[]).filter(s=>String(s.email).toLowerCase()!==me);
- sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>Finish work</b><small>${esc(c.tokenNo)} · ${esc(c.machine)}</small></div></header><main><form id="ff" class="card">
- <div class="meta">${esc(c.issueType)} · ${esc(c.description)}</div><div class="meta">Started at <b>${esc(hm(c.runningSince))}</b>. End time is taken automatically.</div>
- <label>What work was done?</label><textarea name="workDone" required maxlength="3000" placeholder="Example: Bearing changed, machine checked and running"></textarea>
- <label>Status</label><div class="seg" id="fSeg">${['Completed','Hold','Pending'].map(s=>`<button type="button" data-st="${s}">${s}</button>`).join('')}</div><input type="hidden" name="status" value="Completed">
- <div id="fr"><label>Reason</label><textarea name="reason" maxlength="1000" placeholder="Why is it on hold / pending? (e.g. spare not available)"></textarea></div>
- ${others.length?`<label>Anyone helped? <span class="muted">(optional)</span></label><div class="people">${others.map(s=>`<label><input type="checkbox" name="help" value="${esc(String(s.email).toLowerCase())}">${esc(s.name)}</label>`).join('')}</div>`:''}
- <div id="ffErr" class="err" hidden></div><button type="submit" class="big go">Save</button></form></main>`;
- const f=$('#ff'),close=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};$('#closeSheet').onclick=close;
- const sync=()=>{const st=f.status.value;document.querySelectorAll('#fSeg button').forEach(b=>b.classList.toggle('on',b.dataset.st===st));$('#fr').hidden=st==='Completed';f.reason.required=st!=='Completed';};
- document.querySelectorAll('#fSeg button').forEach(b=>b.onclick=()=>{f.status.value=b.dataset.st;sync();});
- f.querySelectorAll('input[name=help]').forEach(x=>x.onchange=()=>x.parentElement.classList.toggle('on',x.checked));sync();
- f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('button[type=submit]'),err=$('#ffErr');err.hidden=true;btn.disabled=true;btn.textContent='Saving…';const st=f.status.value;
-  try{await api('finishComplaintWork',{tokenNo:c.tokenNo,updatedAt:c.updatedAt,status:st,workDone:f.workDone.value,reason:st==='Completed'?'':f.reason.value,helperIds:[...f.querySelectorAll('input[name=help]:checked')].map(x=>x.value)});
-   close();S.day=todayIST();$('#day').value=S.day;toast(st==='Completed'?'Complaint completed and work saved':'Saved. Complaint is '+(st==='Hold'?'on hold':'pending'));await load();}
+ $('#cmpBox').innerHTML=`<div class="sec">${d.supervisor?'Open complaints ('+show.length+')':'My complaints ('+show.length+')'} <span class="muted" style="font-weight:400">· tap a job to update</span></div>`+show.map(c=>`<div class="card cmp tap ${c.priority==='Urgent'?'urgent':''} ${c.workRunning?'run':''}" data-cupd="${esc(c.tokenNo)}"><div class="top" style="display:flex;justify-content:space-between;gap:8px"><div><div class="tok">${esc(c.tokenNo)}</div><div class="m" style="font-weight:700;font-size:16px">${esc(c.machine)}${c.unit?' · '+esc(c.unit):''}</div><div class="meta">${esc(c.issueType)} · Raised ${esc(hm(c.raisedAt))}</div></div><div style="text-align:right">${c.priority==='Urgent'?'<span class="badge Urgent">Urgent</span><br>':''}<span class="badge Info">${esc(c.workRunning?'Working':c.status)}</span></div></div><div class="desc">${esc(c.description)}</div>${c.maintenanceRemarks?`<div class="reason"><b>Last note:</b> ${esc(c.maintenanceRemarks)}</div>`:''}<div class="meta">Assigned to: <b>${esc(c.assignedTo||'Not assigned yet')}</b></div><button type="button" class="big upd">Update work</button></div>`).join('');
+ document.querySelectorAll('[data-cupd]').forEach(el=>el.onclick=()=>updateForm(list.find(x=>x.tokenNo===el.dataset.cupd)));}
+function updateForm(c){const d=S.data,me=String(d.me.email).toLowerCase(),sup=d.supervisor,sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';
+ const asg=String(c.assigneeEmail||'').toLowerCase(),pre=new Set([asg]);if(!sup)pre.add(me);
+ const staff=(d.staff||[]).slice().sort((a,b)=>(pre.has(String(b.email).toLowerCase())-pre.has(String(a.email).toLowerCase()))||String(a.name).localeCompare(String(b.name)));
+ const runDay=c.runningSince?isoDay(c.runningSince):'',day=runDay||todayIST(),start=c.runningSince?isoHM(c.runningSince):'';
+ sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>Update work</b><small>${esc(c.tokenNo)}</small></div></header><main><form id="uf" class="card">
+ <div class="jobbox"><div class="tok">${esc(c.tokenNo)}${c.priority==='Urgent'?' · <span style="color:var(--hold)">Urgent</span>':''}</div><div class="m" style="font-weight:700;font-size:17px">${esc(c.machine)}${c.unit?' · '+esc(c.unit):''}</div><div class="meta">${esc(c.issueType)} · Raised ${esc(hm(c.raisedAt))} · Assigned to ${esc(c.assignedTo||'—')}</div><div class="desc">${esc(c.description)}</div>${c.maintenanceRemarks?`<div class="reason"><b>Last note:</b> ${esc(c.maintenanceRemarks)}</div>`:''}</div>
+ <label>Date</label><input name="date" type="date" required max="${todayIST()}" value="${esc(day)}">
+ <div class="row"><div><label>Start time</label><input name="startTime" type="time" required value="${esc(start)}"></div><div><label>End time</label><input name="endTime" type="time" required value="${esc(nowHM())}"></div></div>
+ <div class="chips"><span class="muted">Quick start:</span>${[15,30,60,120].map(m=>`<button type="button" class="chip" data-back="${m}">${m<60?m+' min':m/60+' hr'} ago</button>`).join('')}</div>
+ <div class="dur" id="udur"></div>
+ <label>Status</label><div class="seg" id="uSeg">${['Completed','Hold','Pending'].map(s=>`<button type="button" data-st="${s}">${s}</button>`).join('')}</div><input type="hidden" name="status" value="Completed">
+ <label id="wdLabel">Work done</label><textarea name="workDone" maxlength="3000" placeholder="Example: Bearing changed, machine checked and running"></textarea>
+ <div id="ur"><label>Reason</label><textarea name="reason" maxlength="1000" placeholder="Why is it on hold / pending? (e.g. spare not available)"></textarea></div>
+ <label>Who did the work?</label><div class="people">${staff.map(s=>{const id=String(s.email).toLowerCase(),on=pre.has(id),lock=!sup&&id===me;return `<label class="${on?'on':''}"><input type="checkbox" name="emp" value="${esc(id)}" ${on?'checked':''} ${lock?'data-lock="1"':''}>${esc(s.name)}${id===me?' (me)':''}</label>`;}).join('')}</div>
+ <div id="uErr" class="err" hidden></div><button type="submit" class="big go">Save</button></form></main>`;
+ const f=$('#uf'),close=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};$('#closeSheet').onclick=close;
+ const sync=()=>{const st=f.status.value;document.querySelectorAll('#uSeg button').forEach(b=>b.classList.toggle('on',b.dataset.st===st));$('#ur').hidden=st==='Completed';f.reason.required=st!=='Completed';f.workDone.required=st==='Completed';$('#wdLabel').textContent=st==='Completed'?'Work done':'Work done so far (optional)';const m=mins(f.startTime.value,f.endTime.value);$('#udur').textContent=m?'Work time: '+fmt(m)+(m>720?' — more than 12 hours, please check':''):'';};
+ document.querySelectorAll('#uSeg button').forEach(b=>b.onclick=()=>{f.status.value=b.dataset.st;sync();});
+ document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{const e=f.endTime.value||nowHM(),[h,m]=e.split(':').map(Number);let t=h*60+m-Number(b.dataset.back);if(t<0)t+=1440;f.startTime.value=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');sync();});
+ f.startTime.oninput=sync;f.endTime.oninput=sync;
+ f.querySelectorAll('input[name=emp]').forEach(x=>x.onchange=()=>{if(x.dataset.lock){x.checked=true;toast('Your own name stays ticked');}x.parentElement.classList.toggle('on',x.checked);});sync();
+ f.onsubmit=async e=>{e.preventDefault();const btn=f.querySelector('button[type=submit]'),err=$('#uErr');err.hidden=true;
+  const ids=[...f.querySelectorAll('input[name=emp]:checked')].map(x=>x.value);if(!ids.length){err.textContent='Tick who did the work';err.hidden=false;return;}
+  const st=f.status.value;btn.disabled=true;btn.textContent='Saving…';
+  try{await api('finishComplaintWork',{tokenNo:c.tokenNo,status:st,date:f.date.value,startTime:f.startTime.value,endTime:f.endTime.value,workDone:f.workDone.value,reason:st==='Completed'?'':f.reason.value,helperIds:ids});
+   close();S.day=f.date.value;$('#day').value=S.day;toast(st==='Completed'?'Complaint completed and work saved':'Saved. Complaint is '+(st==='Hold'?'on hold':'pending'));await load();}
   catch(x){err.textContent=x.message;err.hidden=false;btn.disabled=false;btn.textContent='Save';}};}
 function openForm(r=null){const d=S.data;if(!d)return;const sup=d.supervisor,me=String(d.me.email).toLowerCase();
  const sel=new Set((r?.employeeIds||[me]).map(x=>String(x).toLowerCase()));
