@@ -291,13 +291,13 @@ function renderParts(){const d=S.data,P=partsOf(),sup=d.supervisor,me=String(d.m
  const waiting=R.filter(r=>r.status==='Requested');$('#partCnt').textContent=sup&&waiting.length?String(waiting.length):'';
  let body='';
  if(seg==='req'){
-  if(sup){body+=`<div class="sec">Waiting for approval (${waiting.length})</div>`+(waiting.map(r=>reqCard(r,`<button type="button" class="go" data-ppass="${esc(r.id)}">Pass</button><button type="button" class="danger" data-prej="${esc(r.id)}">Reject</button>`)).join('')||'<div class="card empty">No parts request waiting. 👍</div>');
-   const done=R.filter(r=>r.status!=='Requested').slice(0,30);if(done.length)body+=`<div class="sec" style="margin-top:14px">Recent decisions</div>`+done.map(r=>reqCard(r,'')).join('');}
-  else{const mine=R.filter(r=>String(r.requestedById).toLowerCase()===me);body+=`<div class="sec">My parts requests (${mine.length})</div>`+(mine.map(r=>reqCard(r,r.status==='Requested'?`<button type="button" class="secondary" data-pcancel="${esc(r.id)}">Cancel request</button>`:'')).join('')||'<div class="card empty">No parts requested yet.<br>Tap <b>+ Request parts</b> to ask for parts.</div>');}
+  if(sup){body+=`<div class="sec">Waiting for approval (${waiting.length})</div>`+(waiting.map(r=>reqCard(r,`<button type="button" class="go" data-ppass="${esc(r.id)}">Pass</button><button type="button" class="danger" data-prej="${esc(r.id)}">Reject</button><button type="button" class="secondary" data-pedit="${esc(r.id)}">Edit</button>`)).join('')||'<div class="card empty">No parts request waiting. 👍</div>');
+   const done=R.filter(r=>r.status!=='Requested').slice(0,30);if(done.length)body+=`<div class="sec" style="margin-top:14px">Recent decisions</div>`+done.map(r=>reqCard(r,r.status!=='Received'?`<button type="button" class="secondary" data-pedit="${esc(r.id)}">Edit</button>`:'')).join('');}
+  else{const mine=R.filter(r=>String(r.requestedById).toLowerCase()===me);body+=`<div class="sec">My parts requests (${mine.length})</div>`+(mine.map(r=>reqCard(r,r.status==='Requested'?`<button type="button" class="secondary" data-pedit="${esc(r.id)}">Edit</button><button type="button" class="danger" data-pcancel="${esc(r.id)}">Cancel request</button>`:'')).join('')||'<div class="card empty">No parts requested yet.<br>Tap <b>+ Request parts</b> to ask for parts.</div>');}
  }else if(seg==='rep'){
   const buy=R.filter(r=>r.status==='Sent for Purchase'),avail=R.filter(r=>(r.status==='Rejected'&&stockOf(r)>0)||r.status==='Received'),rej=R.filter(r=>r.status==='Rejected'&&stockOf(r)<=0),wait=R.filter(r=>r.status==='Requested');
   body+=`<div class="stats"><div><b>${wait.length}</b><small>Waiting</small></div><div><b style="color:#b45309">${buy.length}</b><small>Send for purchase</small></div><div><b style="color:var(--ok)">${avail.length}</b><small>Available</small></div></div>`;
-  body+=`<div class="sec">🛒 Send for purchase (${buy.length})</div>`+(buy.map(r=>reqCard(r,sup?`<button type="button" class="go" data-precv="${esc(r.id)}">Mark received</button>`:'')).join('')||'<div class="card empty">Nothing to purchase.</div>');
+  body+=`<div class="sec">🛒 Send for purchase (${buy.length})</div>`+(buy.map(r=>reqCard(r,sup?`<button type="button" class="go" data-precv="${esc(r.id)}">Mark received</button><button type="button" class="secondary" data-pedit="${esc(r.id)}">Edit</button>`:'')).join('')||'<div class="card empty">Nothing to purchase.</div>');
   if(sup&&buy.length)body+='<button type="button" class="big" id="pShare" style="background:#1f8f4d;margin:0 0 14px">Share purchase list on WhatsApp</button>';
   body+=`<div class="sec" style="margin-top:10px">✅ Available in stock (${avail.length})</div>`+(avail.map(r=>reqCard(r,'')).join('')||'<div class="card empty">None.</div>');
   if(rej.length)body+=`<div class="sec" style="margin-top:10px">Rejected (${rej.length})</div>`+rej.map(r=>reqCard(r,'')).join('');
@@ -310,6 +310,7 @@ function renderParts(){const d=S.data,P=partsOf(),sup=d.supervisor,me=String(d.m
  const f=id=>R.find(x=>x.id===id);
  document.querySelectorAll('[data-ppass]').forEach(b=>b.onclick=()=>decideForm(f(b.dataset.ppass),'Pass'));
  document.querySelectorAll('[data-prej]').forEach(b=>b.onclick=()=>decideForm(f(b.dataset.prej),'Reject'));
+ document.querySelectorAll('[data-pedit]').forEach(b=>b.onclick=()=>editPartForm(f(b.dataset.pedit)));
  document.querySelectorAll('[data-precv]').forEach(b=>b.onclick=()=>receiveForm(f(b.dataset.precv)));
  document.querySelectorAll('[data-pstk]').forEach(b=>b.onclick=()=>stockForm(P.items.find(x=>x.id===b.dataset.pstk)));
  document.querySelectorAll('[data-pcancel]').forEach(b=>b.onclick=()=>{const r=f(b.dataset.pcancel);if(!r||!confirm('Cancel this request?\n'+r.part+' × '+num(r.qty)))return;P.requests=P.requests.filter(x=>x.id!==r.id);render();queueSave('cancel '+r.part,'deletePartRequest',{id:r.id},()=>{});});
@@ -339,6 +340,27 @@ function partForm(){const d=S.data,P=partsOf(),machines=(d.machines||[]).filter(
   if(!lines.length||lines.some(l=>!l.part||!(Number(l.qty)>0))){err.textContent='Choose part and enter quantity in every row';err.hidden=false;return;}
   const data={machine:f.machine.value,lines,note:f.note.value};closeSheet();S.pseg='req';
   queueSave('parts request · '+data.machine,'savePartRequest',data,res=>{const P2=partsOf();P2.requests=(res.requests||[]).concat(P2.requests);});};}
+function editPartForm(r){if(!r)return;const d=S.data,P=partsOf(),sup=d.supervisor,machines=(d.machines||[]).filter(m=>m!=='Other');if(r.machine&&!machines.includes(r.machine))machines.unshift(r.machine);
+ const opt=(list,v)=>list.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('');
+ openSheet('Edit parts request',r.part+' × '+num(r.qty),`<form id="ef" class="card">
+ <label style="margin-top:0">Machine name</label><div class="row"><select name="machine" id="emSel" required><option value="">Select machine</option>${opt(machines,r.machine)}</select><button type="button" class="secondary fit" id="emNew">+ New</button></div>
+ <div class="inline-add" id="emAdd" hidden><input id="emName" placeholder="New machine name" maxlength="150"><button type="button" id="emSave">Add</button></div>
+ <label>Part name</label><div class="row"><select name="part" id="epSel" required><option value="">Select part</option>${opt(P.items.map(x=>x.name),r.part)}</select><button type="button" class="secondary fit" id="epNew">+ New item</button></div>
+ <div class="inline-add" id="epAdd" hidden><input id="epName" placeholder="New part / item name" maxlength="150"><button type="button" id="epSave">Add</button></div>
+ <label>Quantity</label><input name="qty" type="number" inputmode="decimal" min="0.01" step="any" required value="${esc(num(r.qty))}">
+ <label>Note <span class="muted">(optional)</span></label><textarea name="note" maxlength="500">${esc(r.note||'')}</textarea>
+ <div id="eErr" class="err" hidden></div><button type="submit" class="big preqbtn">Save changes</button>
+ ${sup||r.status==='Requested'?'<button type="button" class="big danger" id="eDel">Delete request</button>':''}</form>`);
+ const f=$('#ef');
+ const inl=(nb,box,inp,sv,sel,label,after)=>{$(nb).onclick=()=>{$(box).hidden=!$(box).hidden;if(!$(box).hidden)$(inp).focus();};$(sv).onclick=()=>{const name=$(inp).value.trim().replace(/\s+/g,' ');if(name.length<2)return toast('Enter '+label+' name');const s=$(sel);let o=[...s.options].find(x=>x.value.toLowerCase()===name.toLowerCase());if(!o){o=new Option(name,name);s.add(o);after(name);}s.value=o.value;$(inp).value='';$(box).hidden=true;toast(label+' added: '+o.value);};};
+ inl('#emNew','#emAdd','#emName','#emSave','#emSel','Machine',name=>{(d.machines=d.machines||[]).push(name);api('addWorkMachine',{name}).then(res=>{if(res&&res.machines)d.machines=res.machines;}).catch(()=>{});});
+ inl('#epNew','#epAdd','#epName','#epSave','#epSel','Item',name=>{P.items.push({id:'new-'+Date.now(),name,stock:0,isNew:true});P.items.sort((a,b)=>String(a.name).localeCompare(String(b.name)));});
+ if($('#eDel'))$('#eDel').onclick=()=>{if(!confirm('Delete this request?\n'+r.part+' × '+num(r.qty)))return;closeSheet();P.requests=P.requests.filter(x=>x.id!==r.id);render();queueSave('delete '+r.part,'deletePartRequest',{id:r.id},()=>{});};
+ f.onsubmit=e=>{e.preventDefault();const err=$('#eErr');err.hidden=true;
+  if(!f.machine.value||!f.part.value||!(Number(f.qty.value)>0)){err.textContent='Choose machine, part and enter quantity';err.hidden=false;err.scrollIntoView({block:'center'});return;}
+  const data={id:r.id,machine:f.machine.value,part:f.part.value,qty:Number(f.qty.value),note:f.note.value};closeSheet();
+  const it=P.items.find(x=>x.name===data.part);Object.assign(r,{machine:data.machine,part:data.part,partId:it?it.id:r.partId,qty:data.qty,note:data.note});render();
+  queueSave('edit · '+data.part,'updatePartRequest',data,res=>{const P2=partsOf();if(res.items)P2.items=res.items;const k=P2.requests.findIndex(x=>x.id===r.id);if(k>=0&&res.request)P2.requests[k]=res.request;});};}
 function decideForm(r,dec){if(!r)return;const st=stockOf(r);
  const sh=openSheet(dec==='Pass'?'Pass request':'Reject request',r.part+' × '+num(r.qty),`<form id="df" class="card">${reqCard(r,'')}
  ${dec==='Reject'?`<label>Reason</label><div class="chips">${['Already in stock','Not required','Duplicate request'].map(x=>`<button type="button" class="chip" data-rs="${esc(x)}">${esc(x)}</button>`).join('')}</div><textarea name="reason" required maxlength="500" style="margin-top:8px" placeholder="Why is it rejected?"></textarea>
