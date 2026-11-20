@@ -41,7 +41,14 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.chip{background:#e4ecf3;color:var(--navy);padding:6px 10px;font-size:13px;border-radius:999px}
 .pend{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;background:#e6f0fa;color:#1d4673}.pend.bad{background:var(--holdbg);color:var(--hold)}.pend button{padding:6px 10px;font-size:13px}
 #sync{font-size:11px;opacity:.85}
-.tabs{display:flex;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:60px;z-index:4}.tabs button{flex:1;background:transparent;color:var(--muted);border-radius:0;padding:12px;border-bottom:3px solid transparent}.tabs button.on{color:var(--navy);border-bottom-color:var(--accent)}
+.tabs{display:flex;gap:8px;padding:10px 12px;background:var(--bg);position:sticky;top:60px;z-index:4;box-shadow:0 2px 6px rgba(16,45,76,.08)}
+.tabs button{flex:1;border-radius:12px;padding:10px 4px;font-size:14px;font-weight:700;line-height:1.2;border:2px solid transparent;white-space:nowrap}
+.tabs .ico{display:block;font-size:18px;margin-bottom:2px}
+.tabs [data-tab=work]{background:#e3eefb;color:#1d4673}.tabs [data-tab=work].on{background:#1d4673;color:#fff}
+.tabs [data-tab=hold]{background:#fdeedc;color:#b45309}.tabs [data-tab=hold].on{background:#e67e22;color:#fff}
+.tabs [data-tab=report]{background:#e3f5ea;color:#17834a}.tabs [data-tab=report].on{background:#17834a;color:#fff}
+.tabs .on{box-shadow:0 3px 8px rgba(0,0,0,.18)}
+#holdCnt:not(:empty){display:inline-block;min-width:20px;padding:0 6px;margin-left:3px;border-radius:999px;background:#c0392b;color:#fff;font-size:12px;line-height:18px}
 .btnrow{display:flex;gap:8px;margin-top:10px}.btnrow button{flex:1;padding:12px;font-size:15px}.asg{background:#7a4dbd}.badge.Open{background:#fff4e0;color:#8a5300}
 .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}.tile b{display:block;font-size:15px}.tile .big2{font-size:22px;font-weight:800;color:var(--navy);margin:4px 0}.tile.zero{opacity:.55}.mini{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.mini span{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--okbg);color:var(--ok)}.mini .h{background:var(--holdbg);color:var(--hold)}.mini .p{background:var(--pendbg);color:var(--pend)}
 [hidden]{display:none!important}
@@ -49,7 +56,7 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
 <body>
 <header><img src="../logo-starish-2026.jpg" alt="Starish"><div class="t"><b>Maintenance Work Log</b><small id="who">Starish Autopac Pvt. Ltd.</small><small id="sync" hidden>Updating…</small></div><button id="install" hidden>Install</button><button id="logout" hidden>Sign out</button></header>
 <div id="iosTip" class="card" style="margin:12px 16px 0" hidden><b>Install this app:</b> tap the Share button in Safari, then <b>Add to Home Screen</b>. <button type="button" class="secondary" id="iosClose" style="padding:4px 10px;margin-left:6px">OK</button></div>
-<nav class="tabs" id="tabs" hidden><button type="button" data-tab="work" class="on">Work</button><button type="button" data-tab="hold">Hold / Pending <span id="holdCnt"></span></button><button type="button" data-tab="report">Report</button></nav>
+<nav class="tabs" id="tabs" hidden><button type="button" data-tab="work" class="on"><span class="ico">🔧</span>Work</button><button type="button" data-tab="hold"><span class="ico">⏸️</span>Hold/Pending<span id="holdCnt"></span></button><button type="button" data-tab="report"><span class="ico">📊</span>Report</button></nav>
 <main>
  <section id="login" class="card" hidden>
   <h1>Sign in</h1><p class="muted">Sign in with the mobile number and PIN given by the Maintenance Head.</p>
@@ -156,7 +163,7 @@ function assignForm(c){const d=S.data,me=String(d.me.email).toLowerCase(),sh=$('
   if(!pick){err.textContent='Choose an employee';err.hidden=false;return;}const dl=new Date(f.deadline.value);if(!isFinite(dl.getTime())){err.textContent='Set a valid deadline';err.hidden=false;return;}
   const id=pick.value,name=(staff.find(s=>String(s.email).toLowerCase()===id)||{}).name||id;close();
   queueSave(c.tokenNo+' → '+name,'assignComplaint',{tokenNo:c.tokenNo,updatedAt:c.updatedAt,assignedTo:id,deadline:dl.toISOString()},()=>{const x=(S.data.complaints||[]).find(y=>y.tokenNo===c.tokenNo);if(x)Object.assign(x,{assignedTo:name,assigneeEmail:id,mine:id===me,status:x.status==='Open'?'Assigned':x.status});});};}
-function renderOpen(){const d=S.data,L=d.openEntries||[],hc=(d.complaints||[]).filter(c=>isHoldC(c)&&(d.supervisor||c.mine)).length,n=L.length+hc;$('#holdCnt').textContent=n?'('+n+')':'';
+function renderOpen(){const d=S.data,L=d.openEntries||[],hc=(d.complaints||[]).filter(c=>isHoldC(c)&&(d.supervisor||c.mine)).length,n=L.length+hc;$('#holdCnt').textContent=n?String(n):'';
  $('#openBox').innerHTML=(L.length?`<div class="sec">Work on hold / pending (${L.length})</div>`+L.map(r=>`<div class="card entry ${esc(r.status)}"><div class="top"><div><div class="m">${esc(r.machine)}</div><div class="meta">${esc(r.issueType)} · ${esc(r.date)} · ${esc(r.startTime)}–${esc(r.endTime)}</div></div><span class="badge ${esc(r.status)}">${esc(r.status)}</span></div><div class="desc">${esc(r.description)}</div>${r.reason?`<div class="reason"><b>Reason:</b> ${esc(r.reason)}</div>`:''}<div class="meta">Team: ${esc((r.employees||[]).join(', '))}</div><div class="btnrow"><button type="button" class="upd" data-resume="${esc(r.id)}">Update work</button></div></div>`).join(''):'')+(n?'':'<div class="card empty">Nothing on hold or pending. 👍</div>');
  document.querySelectorAll('[data-resume]').forEach(b=>b.onclick=()=>openForm(L.find(x=>x.id===b.dataset.resume),true));}
 function renderReport(){const d=S.data,me=String(d.me.email).toLowerCase(),all=d.entries||[],by={};
