@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#17834a"><meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://script.google.com" crossorigin><link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<title>Daily Report</title><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Daily Report"><link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon-daily-192.png"><link rel="apple-touch-icon" href="./icon-daily-192.png">
+<style>
+:root{--navy:#102d4c;--navy2:#1d4673;--bg:#eef3f7;--card:#fff;--line:#d5dfe8;--muted:#5d7183;--ink:#14212e;--ok:#17834a;--okbg:#e3f5ea;--hold:#a12a1f;--holdbg:#fdecea;--pend:#8a5300;--pendbg:#fff4e0;--accent:#f39c12}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:90px}
+header{background:var(--navy);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+header img{width:40px;height:40px;border-radius:8px;background:#fff}header .t{flex:1;min-width:0}header b{display:block;font-size:16px}header small{opacity:.8;font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;padding:6px 10px;border-radius:8px;font-size:13px}
+main{max-width:760px;margin:0 auto;padding:14px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+h1{font-size:22px;margin:4px 0 6px}h2{font-size:17px;margin:0 0 10px}
+label{display:block;font-weight:600;font-size:13px;color:#33475b;margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid #b9c8d6;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:84px;resize:vertical}input:focus,select:focus,textarea:focus{outline:2px solid #7fb2e5;border-color:#7fb2e5}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 16px;background:var(--navy2);color:#fff;font-weight:600}
+button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:var(--holdbg);color:var(--hold)}button:disabled{opacity:.55}
+.row{display:flex;gap:8px;align-items:stretch}.row>*{flex:1}.row .fit{flex:0 0 auto}
+.seg{display:flex;background:#e4ecf3;border-radius:10px;padding:3px}.seg button{flex:1;background:transparent;color:var(--navy);padding:9px}.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.muted{color:var(--muted);font-size:13px}.err{background:var(--holdbg);color:var(--hold);padding:10px 12px;border-radius:10px;margin:10px 0}
+.people{display:flex;flex-wrap:wrap;gap:8px}.people label{display:flex;align-items:center;gap:7px;margin:0;font-weight:500;border:1px solid #c9d6e1;border-radius:999px;padding:7px 12px;background:#fff;font-size:14px}
+.people input{width:auto;margin:0}.people label.on{background:#e6f0fa;border-color:#7fb2e5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.stats div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stats b{display:block;font-size:20px}.stats small{color:var(--muted);font-size:12px}
+.entry{border-left:4px solid var(--ok)}.entry.Hold{border-left-color:var(--hold)}.entry.Pending{border-left-color:var(--accent)}
+.entry .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.entry .m{font-weight:700;font-size:16px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--okbg);color:var(--ok);white-space:nowrap}.badge.Hold{background:var(--holdbg);color:var(--hold)}.badge.Pending{background:var(--pendbg);color:var(--pend)}
+.meta{color:var(--muted);font-size:13px;margin:4px 0}.desc{margin:6px 0;white-space:pre-wrap}.reason{background:#fff8ec;border-radius:8px;padding:6px 10px;font-size:14px;margin:6px 0}
+.acts{display:flex;gap:8px;margin-top:8px}.acts button{padding:8px 14px;font-size:14px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));padding:15px 28px;border-radius:999px;font-size:17px;background:var(--accent);color:#1d1300;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:6}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:10;overflow:auto;padding-bottom:30px}.sheet header{position:sticky}
+.toast{position:fixed;left:16px;right:16px;bottom:90px;max-width:520px;margin:0 auto;background:#14212e;color:#fff;padding:12px 16px;border-radius:12px;z-index:20;text-align:center}
+.dur{font-weight:700;color:var(--navy2);margin-top:8px}.inline-add{display:flex;gap:8px;margin-top:8px}.inline-add input{flex:1}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.foot{text-align:center;font-size:13px;color:var(--muted);margin-top:14px}.foot a{color:var(--navy2)}
+.sec{font-size:15px;font-weight:700;color:var(--navy);margin:6px 2px 8px}
+.cmp{border-left:4px solid #2f6db3}.cmp.urgent{border-left-color:var(--hold)}.cmp.run{border-left-color:var(--ok);background:#f4fbf6}
+.tok{font-size:12px;font-weight:700;color:#2f6db3}.badge.Urgent{background:var(--holdbg);color:var(--hold)}.badge.Info{background:#e6f0fa;color:#1d4673}
+.big{width:100%;padding:13px;font-size:16px;margin-top:10px}.go{background:var(--ok)}
+.tap{cursor:pointer}.upd{background:#2f6db3}.jobbox{background:#f3f7fb;border-radius:12px;padding:12px;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.chip{background:#e4ecf3;color:var(--navy);padding:6px 10px;font-size:13px;border-radius:999px}
+.pend{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;background:#e6f0fa;color:#1d4673}.pend.bad{background:var(--holdbg);color:var(--hold)}.pend button{padding:6px 10px;font-size:13px}
+#sync{font-size:11px;opacity:.85}
+.tabs{display:flex;gap:8px;padding:10px 12px;background:var(--bg);position:sticky;top:60px;z-index:4;box-shadow:0 2px 6px rgba(16,45,76,.08)}
+.tabs button{flex:1;border-radius:12px;padding:10px 4px;font-size:14px;font-weight:700;line-height:1.2;border:2px solid transparent;white-space:nowrap}
+.tabs .ico{display:block;font-size:18px;margin-bottom:2px}
+.tabs{gap:6px;padding:10px 8px}.tabs button{font-size:13px;padding:9px 2px}
+.mini .o{background:#efe7fb;color:#6a3fb5}.tile.carry{opacity:1}
+.tabs .on{box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.btnrow{display:flex;gap:8px;margin-top:10px}.btnrow button{flex:1;padding:12px;font-size:15px}.asg{background:#7a4dbd}.badge.Open{background:#fff4e0;color:#8a5300}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}.tile b{display:block;font-size:15px}.tile .big2{font-size:22px;font-weight:800;color:var(--navy);margin:4px 0}.tile.zero{opacity:.55}.mini{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.mini span{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--okbg);color:var(--ok)}.mini .h{background:var(--holdbg);color:var(--hold)}.mini .p{background:var(--pendbg);color:var(--pend)}
+.tabs{overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tabs button{min-width:62px;font-size:12px}
+.preqbtn{background:#0e7c86}.preq{border-left:4px solid #2f6db3}.preq.buy{border-left-color:#e67e22}.preq.avail{border-left-color:var(--ok)}.preq.rej{border-left-color:#8a99a8}.preq.wait{border-left-color:#0e7c86}
+.qty{font-size:22px;font-weight:800;color:var(--navy);line-height:1.1}.qty.zero{color:#a0aebb}
+.badge.pb.wait{background:#dcf3f4;color:#0e6f78}.badge.pb.buy{background:#fdeedc;color:#b45309}.badge.pb.avail{background:var(--okbg);color:var(--ok)}.badge.pb.rej{background:#eceff2;color:#5d7183}
+.prow{display:flex;gap:8px;margin-bottom:8px}.prow select{flex:1 1 60%}.prow input{flex:0 0 84px;width:84px}.prow .fit{flex:0 0 auto;padding:8px 12px}
+.stk{display:flex;justify-content:space-between;gap:10px;align-items:center}
+[hidden]{display:none!important}
+
+.tabs [data-tab=today]{background:#e3f5ea;color:#17834a}.tabs [data-tab=today].on{background:#17834a;color:#fff}
+.tabs [data-tab=list]{background:#e3eefb;color:#1d4673}.tabs [data-tab=list].on{background:#1d4673;color:#fff}
+.tabs [data-tab=report]{background:#efe7fb;color:#6a3fb5}.tabs [data-tab=report].on{background:#6a3fb5;color:#fff}
+.tabs button{font-size:14px}
+#openCnt:not(:empty){display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:#c0392b;color:#fff;font-size:12px;line-height:18px}.tabs .on #openCnt{background:#fff;color:#c0392b}
+.task{border-left:5px solid #c0392b}.task.done{border-left-color:var(--ok);background:#f6fcf8}.task.pnd{border-left-color:#e67e22}
+.task .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.tt{font-weight:700;font-size:16px;word-break:break-word}.task.done .tt{color:#4c6b58}
+.badge.done{background:var(--okbg);color:var(--ok)}.badge.pnd{background:#fdeedc;color:#b45309}.badge.open{background:#fdecea;color:#a12a1f}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#e4ecf3;color:#1d4673}.tag.daily{background:#e3eefb;color:#1d4673}.tag.extra{background:#e3f5ea;color:#17834a}.tag.assigned{background:#efe7fb;color:#6a3fb5}
+.pendb{background:#e67e22}.btnrow .more{flex:0 0 52px}.reason.ok{background:#eef9f1}
+.bar{height:10px;background:#e4ecf3;border-radius:999px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#17834a,#2ecc71);border-radius:999px}.bar.sm{height:6px;margin:4px 0}
+.pctb{font-size:20px;font-weight:800;color:var(--ok)}.info{background:#e6f0fa;border-color:#c9dcf0;color:#1d4673;font-size:14px}
+.stats{grid-template-columns:repeat(4,1fr)}.stats b{font-size:18px}.chip.on{background:#6a3fb5;color:#fff}.mini .z{background:#eceff2;color:#5d7183}
+.fab{background:#17834a;color:#fff}
+</style></head>
+<body>
+<header><img src="../logo-starish-2026.jpg" alt="Starish"><div class="t"><b>Daily Report</b><small id="who">Starish Autopac Pvt. Ltd.</small><small id="sync" hidden>Updating…</small></div><button id="install" hidden>Install</button><button id="logout" hidden>Sign out</button></header>
+<div id="iosTip" class="card" style="margin:12px 16px 0" hidden><b>Install this app:</b> tap the Share button in Safari, then <b>Add to Home Screen</b>. <button type="button" class="secondary" id="iosClose" style="padding:4px 10px;margin-left:6px">OK</button></div>
+<nav class="tabs" id="tabs" hidden><button type="button" data-tab="today" class="on"><span class="ico">✅</span>My tasks<span id="openCnt"></span></button><button type="button" data-tab="list"><span class="ico">🔁</span>Daily list</button><button type="button" data-tab="report" id="repTab" hidden><span class="ico">📊</span>Report</button></nav>
+<main>
+ <section id="login" class="card" hidden>
+  <h1>Sign in</h1><p class="muted">Sign in with the same mobile number and PIN you use for the Report Portal.</p>
+  <div class="seg"><button type="button" id="pinMode" class="on">Mobile + PIN</button><button type="button" id="emailMode">Email OTP</button></div>
+  <form id="pinForm"><label>Mobile number<input id="phone" type="tel" autocomplete="tel" required placeholder="10-digit mobile number"></label><label>PIN<input id="pin" type="password" inputmode="numeric" pattern="[0-9]{6,12}" autocomplete="current-password" required placeholder="6–12 digit PIN"></label><button style="width:100%;margin-top:14px">Sign in</button></form>
+  <div id="emailPanel" hidden><form id="otpReq"><label>Email address<input id="email" type="email" autocomplete="email" required placeholder="your@email.com"></label><button style="width:100%;margin-top:14px">Send login code</button></form>
+  <form id="otpVerify" hidden><label>6-digit email code<input id="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label><button style="width:100%;margin-top:14px">Sign in</button><p class="muted">Check the Spam folder too. The code expires in 10 minutes.</p></form></div>
+ </section>
+ <section id="app" hidden>
+  <div id="pendBox"></div>
+  <div class="card" id="dayCard"><div class="row"><div><label style="margin-top:0">Date</label><input type="date" id="day"></div><div class="fit" style="display:flex;align-items:flex-end"><button class="secondary" id="refresh">Refresh</button></div></div></div>
+  <div id="todayView"></div>
+  <div id="listView" hidden></div>
+  <div id="reportView" hidden></div>
+ </section>
+ <div id="boot" class="card empty">Loading…</div>
+</main>
+<button class="fab" id="addBtn" hidden>+ Add task</button>
+<div class="sheet" id="sheet" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<script src="../config.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayIST=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date());
+const nowHM=()=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+const fmt=m=>{m=Math.max(0,Math.round(Number(m)||0));return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m';};
+const mins=(a,b)=>{if(!/^\d{2}:\d{2}$/.test(a||'')||!/^\d{2}:\d{2}$/.test(b||''))return 0;const x=a.split(':').map(Number),y=b.split(':').map(Number);let d=(y[0]*60+y[1])-(x[0]*60+x[1]);if(d<=0)d+=1440;return d;};
+let token='';try{token=localStorage.getItem('starish-session')||sessionStorage.getItem('starish-session')||'';}catch{}
+function saveToken(v){token=v;try{localStorage.setItem('starish-session',v);}catch{try{sessionStorage.setItem('starish-session',v);}catch{}}}
+function clearToken(){token='';try{localStorage.removeItem('starish-session');}catch{}try{sessionStorage.removeItem('starish-session');}catch{}}
+let toastT;function toast(s){const t=$('#toast');t.textContent=s;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,4500);}
+function api(action,data={}){const url=window.PORTAL_CONFIG?.apiUrl;
+ if(!/^https:\/\/script\.google\.com\/macros\/s\/[a-zA-Z0-9_-]+\/exec$/.test(url||''))return Promise.reject(Error('Portal server URL is not set.'));
+ if(!navigator.onLine)return Promise.reject(Error('Internet is required to read or save data.'));
+ const nonce=Array.from(crypto.getRandomValues(new Uint8Array(24)),v=>v.toString(16).padStart(2,'0')).join(''),requestId=(crypto.randomUUID?crypto.randomUUID():nonce);
+ return new Promise((resolve,reject)=>{const frame=document.createElement('iframe'),form=document.createElement('form'),input=document.createElement('input');frame.name='api_'+nonce;frame.hidden=true;form.hidden=true;form.method='POST';form.action=url;form.target=frame.name;input.type='hidden';input.name='payload';input.value=JSON.stringify({action,data,token,nonce,requestId,origin:location.origin});form.append(input);
+  const timeout=setTimeout(()=>finish(Error('The server is taking too long. Check your internet and try again.')),90000);
+  function receive(e){let host;try{const u=new URL(e.origin);if(u.protocol!=='https:')return;host=u.hostname;}catch{return;}
+   if(!(host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com')))return;
+   if(e.data?.channel!=='starish-api'||e.data.nonce!==nonce)return;
+   if(e.data.result?.ok)finish(null,e.data.result);else finish(Error(e.data.result?.error||'Request failed'));}
+  function finish(err,res){clearTimeout(timeout);window.removeEventListener('message',receive);form.remove();frame.remove();err?reject(err):resolve(res);}
+  window.addEventListener('message',receive);document.body.append(frame,form);form.submit();});}
+
+const S={day:todayIST(),data:null,tab:'today',dept:''};
+const isToday=()=>S.data&&S.day===S.data.today;
+function showLogin(){$('#tabs').hidden=true;$('#boot').hidden=true;$('#app').hidden=true;$('#addBtn').hidden=true;$('#logout').hidden=true;$('#login').hidden=false;$('#who').textContent='Starish Autopac Pvt. Ltd.';}
+function saveCache(){try{localStorage.setItem('dr-cache',JSON.stringify({day:S.day,data:S.data}));}catch{}}
+function showApp(){$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;$('#tabs').hidden=false;$('#logout').hidden=false;
+ const d=S.data;$('#who').textContent=d.me.name+(d.me.department?' · '+d.me.department:'')+(d.head?' · Head':'');$('#repTab').hidden=!d.head;if(!d.head&&S.tab==='report')S.tab='today';syncTabs();render();}
+let loadSeq=0;
+async function load(){if(!token)return showLogin();const seq=++loadSeq,day=S.day;$('#refresh').disabled=true;$('#sync').hidden=!S.data;
+ try{const data=await api('dailyData',{date:day});if(seq!==loadSeq)return;S.data=data;saveCache();showApp();}
+ catch(e){if(seq!==loadSeq)return;if(/Login expired|Account inactive|login|sign in|session/i.test(e.message)){clearToken();try{localStorage.removeItem('dr-cache');}catch{}S.data=null;showLogin();toast(e.message);}else if(S.data){toast('Could not refresh: '+e.message);}else{$('#boot').hidden=true;$('#app').hidden=false;$('#todayView').innerHTML='<div class="err">'+esc(e.message)+'</div>';}}
+ finally{if(seq===loadSeq){$('#refresh').disabled=false;$('#sync').hidden=true;}}}
+const pending=[];
+function renderPending(){$('#pendBox').innerHTML=pending.map((p,i)=>p.error?`<div class="pend bad"><span>Not saved: ${esc(p.label)}<br><small>${esc(p.error)}</small></span><span style="display:flex;gap:6px"><button type="button" data-retry="${i}">Retry</button><button type="button" class="secondary" data-drop="${i}">Dismiss</button></span></div>`:`<div class="pend"><span>Saving: ${esc(p.label)}…</span></div>`).join('');
+ document.querySelectorAll('[data-retry]').forEach(b=>b.onclick=()=>sendOp(pending[Number(b.dataset.retry)]));
+ document.querySelectorAll('[data-drop]').forEach(b=>b.onclick=()=>{const op=pending.splice(Number(b.dataset.drop),1)[0];try{op&&op.undo&&op.undo();}catch{}renderPending();});}
+function sendOp(op){op.error='';renderPending();api(op.action,op.data).then(res=>{const i=pending.indexOf(op);if(i>=0)pending.splice(i,1);try{op.apply(res);}catch{}saveCache();render();renderPending();toast('Saved: '+op.label);if(!pending.length)setTimeout(load,800);}).catch(e=>{op.error=e.message;renderPending();});}
+function queueSave(label,action,data,apply,undo){const op={label,action,data,apply,undo,error:''};pending.push(op);saveCache();sendOp(op);}
+addEventListener('beforeunload',e=>{if(pending.some(p=>!p.error)){e.preventDefault();e.returnValue='';}});
+function syncTabs(){document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.tab===S.tab));$('#addBtn').hidden=S.tab==='report'||!S.data;$('#addBtn').textContent=S.tab==='list'?'+ Add to daily list':'+ Add task';$('#dayCard').hidden=S.tab==='list';}
+const ST=t=>['Submitted','Closed'].includes(t.status)?'done':t.pendingReason?'pnd':'open';
+const STL={done:'Done',pnd:'Pending',open:'Not done yet'};
+const kind=t=>t.routineId?'Daily':t.own?'Extra':'Assigned';
+function closeSheet(){const sh=$('#sheet');sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';}
+function openSheet(title,sub,body){const sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>${esc(title)}</b><small>${esc(sub||'')}</small></div></header><main>${body}</main>`;$('#closeSheet').onclick=closeSheet;return sh;}
+function render(){renderToday();renderList();if(S.data.head)renderReport();['today','list','report'].forEach(t=>$('#'+t+'View').hidden=S.tab!==t);}
+function taskCard(t,mine){const st=ST(t),edit=mine&&isToday()&&t.status!=='Closed';
+ return `<div class="card task ${st}"><div class="top"><div style="min-width:0"><div class="tt">${esc(t.title)}</div><div class="meta"><span class="tag ${kind(t).toLowerCase()}">${kind(t)}</span>${t.description&&t.description!=='Daily routine'?' · '+esc(t.description):''}</div></div><span class="badge ${st}">${STL[st]}</span></div>
+ ${t.pendingReason&&st==='pnd'?`<div class="reason"><b>Reason:</b> ${esc(t.pendingReason)}</div>`:''}${st==='done'&&t.workUpdate&&!/^Marked (done|complete)/.test(t.workUpdate)?`<div class="reason ok"><b>Note:</b> ${esc(t.workUpdate)}</div>`:''}${t.removalRequest?'<div class="meta">Delete request sent to management</div>':''}
+ ${edit?`<div class="btnrow">${st==='done'?`<button type="button" class="secondary" data-undo="${esc(t.id)}">Undo done</button>`:`<button type="button" class="go" data-done="${esc(t.id)}">✓ Done</button><button type="button" class="pendb" data-pend="${esc(t.id)}">Pending</button>`}<button type="button" class="secondary more" data-more="${esc(t.id)}">⋯</button></div>`:''}</div>`;}
+function renderToday(){const d=S.data,L=(d.tasks||[]).slice().sort((a,b)=>(ST(a)==='done')-(ST(b)==='done')||kind(a).localeCompare(kind(b))||String(a.title).localeCompare(String(b.title)));
+ const done=L.filter(t=>ST(t)==='done').length,pend=L.filter(t=>ST(t)==='pnd').length,pct=L.length?Math.round(done*100/L.length):0;$('#openCnt').textContent=isToday()&&L.length-done?String(L.length-done):'';
+ $('#todayView').innerHTML=`<div class="prog card"><div class="row" style="align-items:center"><div><b style="font-size:22px">${done} / ${L.length}</b> <span class="muted">done${pend?' · '+pend+' pending':''}</span></div><div class="fit pctb">${pct}%</div></div><div class="bar"><i style="width:${pct}%"></i></div>${isToday()?'':'<div class="muted" style="margin-top:6px">Past / future day: view only.</div>'}</div>`+
+  (L.length?L.map(t=>taskCard(t,true)).join(''):`<div class="card empty">No tasks for ${esc(S.day)}.<br>Tap <b>+ Add task</b> to add your work, or build your <b>Daily list</b>.</div>`)+'<div style="height:70px"></div>';
+ const f=id=>L.find(x=>x.id===id);
+ document.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>markForm(f(b.dataset.done),'Done'));
+ document.querySelectorAll('[data-pend]').forEach(b=>b.onclick=()=>markForm(f(b.dataset.pend),'Pending'));
+ document.querySelectorAll('[data-undo]').forEach(b=>b.onclick=()=>{const t=f(b.dataset.undo);mark(t,'Open','');});
+ document.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>moreSheet(f(b.dataset.more)));}
+function mark(t,status,text){const old={status:t.status,pendingReason:t.pendingReason,workUpdate:t.workUpdate};
+ if(status==='Done'){t.status='Submitted';t.pendingReason='';t.workUpdate=text;}else if(status==='Pending'){t.status='Pending';t.pendingReason=text;}else{t.status='Pending';t.pendingReason='';}
+ render();queueSave(t.title+' → '+(status==='Open'?'not done':status),'drMark',{id:t.id,status,text},res=>{if(res.task)Object.assign(t,res.task);},()=>{Object.assign(t,old);render();});}
+function markForm(t,status){if(!t)return;if(status==='Done'){openSheet('Mark done',t.title,`<form id="mf" class="card"><div class="tt" style="font-size:17px">${esc(t.title)}</div><label>Note <span class="muted">(optional)</span></label><textarea name="text" maxlength="1000" placeholder="What was done? (optional)"></textarea><button type="submit" class="big go">✓ Done</button><button type="button" class="big secondary" id="quick">Done without note</button></form>`);
+  const f=$('#mf');$('#quick').onclick=()=>{closeSheet();mark(t,'Done','');};f.onsubmit=e=>{e.preventDefault();closeSheet();mark(t,'Done',f.text.value.trim());};return;}
+ openSheet('Mark pending',t.title,`<form id="mf" class="card"><div class="tt" style="font-size:17px">${esc(t.title)}</div><label>Why is it pending?</label><div class="chips">${['Material not available','Machine breakdown','Waiting for approval','No time today','Shifted to tomorrow'].map(x=>`<button type="button" class="chip" data-r="${esc(x)}">${esc(x)}</button>`).join('')}</div><textarea name="text" required maxlength="1000" style="margin-top:8px" placeholder="Reason">${esc(t.pendingReason||'')}</textarea><div id="mErr" class="err" hidden></div><button type="submit" class="big pendb">Save as pending</button></form>`);
+ const f=$('#mf');document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{f.text.value=b.dataset.r;});f.onsubmit=e=>{e.preventDefault();const v=f.text.value.trim();if(!v){$('#mErr').textContent='Enter reason';$('#mErr').hidden=false;return;}closeSheet();mark(t,'Pending',v);};}
+function moreSheet(t){if(!t)return;const r=t.routineId?(S.data.routines||[]).find(x=>x.id===t.routineId):null;
+ openSheet('Task options',t.title,`<div class="card"><div class="tt" style="font-size:17px">${esc(t.title)}</div><div class="meta"><span class="tag ${kind(t).toLowerCase()}">${kind(t)}</span></div>
+ <button type="button" class="big" id="oEdit">✏️ Edit task</button>
+ <button type="button" class="big danger" id="oDel">🗑 Delete ${t.routineId?'for today only':kind(t)==='Assigned'?'(needs approval)':'task'}</button>
+ ${r?`<button type="button" class="big danger" id="oDelR">🗑 Remove from daily list (every day)</button>`:''}</div>`);
+ $('#oEdit').onclick=()=>{closeSheet();r?routineForm(r,t):taskForm(t);};
+ $('#oDel').onclick=()=>{if(!confirm('Delete this task'+(t.routineId?' for today':'')+'?\n'+t.title))return;closeSheet();
+  if(kind(t)==='Assigned'){queueSave('delete request · '+t.title,'drDeleteTask',{id:t.id},res=>{t.removalRequest='Requested';});return;}
+  const L=S.data.tasks;S.data.tasks=L.filter(x=>x.id!==t.id);render();queueSave('delete · '+t.title,'drDeleteTask',{id:t.id},()=>{},()=>{S.data.tasks=L;render();});};
+ if($('#oDelR'))$('#oDelR').onclick=()=>{closeSheet();delRoutine(r);};}
+function taskForm(t){const edit=!!t;openSheet(edit?'Edit task':'Add task',edit?t.title:S.day,`<form id="tf" class="card">
+ <label style="margin-top:0">Task</label><input name="title" required maxlength="200" placeholder="What work?" value="${esc(edit?t.title:'')}">
+ ${edit?'':`<label>Add to</label><div class="seg" id="whenSeg"><button type="button" data-w="today" class="on">Only ${S.day===todayIST()?'today':esc(S.day)}</button><button type="button" data-w="daily">Daily list (every day)</button></div>`}
+ <label>Note <span class="muted">(optional)</span></label><textarea name="description" maxlength="1000">${esc(edit&&t.description!=='Daily routine'?t.description:'')}</textarea>
+ <div id="tErr" class="err" hidden></div><button type="submit" class="big go">${edit?'Save changes':'Add task'}</button></form>`);
+ const f=$('#tf');let when='today';document.querySelectorAll('#whenSeg button').forEach(b=>b.onclick=()=>{when=b.dataset.w;document.querySelectorAll('#whenSeg button').forEach(x=>x.classList.toggle('on',x===b));});setTimeout(()=>f.title.focus(),50);
+ f.onsubmit=e=>{e.preventDefault();const title=f.title.value.trim().replace(/\s+/g,' ');if(title.length<2){$('#tErr').textContent='Enter task name';$('#tErr').hidden=false;return;}const desc=f.description.value.trim();closeSheet();
+  if(edit){const old={title:t.title,description:t.description};Object.assign(t,{title,description:desc});render();queueSave('edit · '+title,'drSaveTask',{id:t.id,title,description:desc},res=>{if(res.task)Object.assign(t,res.task);},()=>{Object.assign(t,old);render();});return;}
+  if(when==='daily'){addRoutine(title);return;}
+  const tmp={id:'tmp-'+Date.now(),title,description:desc,status:'Pending',own:true,tmp:true};S.data.tasks.push(tmp);render();
+  queueSave('add · '+title,'drSaveTask',{date:S.day,title,description:desc},res=>{const L=S.data.tasks;const k=L.indexOf(tmp);if(k>=0&&res.task)L[k]=res.task;},()=>{S.data.tasks=S.data.tasks.filter(x=>x!==tmp);render();});};}
+function addRoutine(title){const d=S.data;if((d.routines||[]).some(r=>r.title.toLowerCase()===title.toLowerCase())){toast('Already in your daily list');return;}
+ const tmpR={id:'tmp-'+Date.now(),title,shared:false,tmp:true};d.routines.push(tmpR);let tmpT=null;if(isToday()&&!d.tasks.some(t=>t.title.toLowerCase()===title.toLowerCase())){tmpT={id:'tmpt-'+Date.now(),title,status:'Pending',routineId:tmpR.id,tmp:true};d.tasks.push(tmpT);}render();
+ queueSave('daily list · '+title,'drSaveRoutine',{title},res=>{Object.assign(tmpR,res.routine,{tmp:false});if(tmpT)tmpT.routineId=res.routine.id;},()=>{d.routines=d.routines.filter(x=>x!==tmpR);if(tmpT)d.tasks=d.tasks.filter(x=>x!==tmpT);render();});}
+function routineForm(r,t){openSheet(r?'Edit daily task':'Add to daily list',r?'Changes today and every day':'Comes every day',`<form id="rf" class="card"><label style="margin-top:0">Task</label><input name="title" required maxlength="200" value="${esc(r?r.title:'')}" placeholder="e.g. Check boiler pressure">
+ ${r&&r.shared?'<p class="muted">This task was given by management. Your change applies only to your own list.</p>':''}<div id="rErr" class="err" hidden></div><button type="submit" class="big go">${r?'Save changes':'Add to daily list'}</button></form>`);
+ const f=$('#rf');setTimeout(()=>f.title.focus(),50);f.onsubmit=e=>{e.preventDefault();const title=f.title.value.trim().replace(/\s+/g,' ');if(title.length<2){$('#rErr').textContent='Enter task name';$('#rErr').hidden=false;return;}closeSheet();
+  if(!r){addRoutine(title);return;}const d=S.data,old=r.title,tt=t||d.tasks.find(x=>x.routineId===r.id);r.title=title;if(tt&&ST(tt)!=='done')tt.title=title;render();
+  queueSave('edit daily · '+title,'drSaveRoutine',{id:r.id,title},res=>{const oldId=r.id;Object.assign(r,res.routine);if(tt&&tt.routineId===oldId)tt.routineId=r.id;},()=>{r.title=old;if(tt)tt.title=old;render();});};}
+function delRoutine(r){if(!r||!confirm('Remove from your daily list?\n'+r.title+'\n\nIt will not come from tomorrow. Today’s open task is also removed.'))return;const d=S.data,R=d.routines,T=d.tasks;
+ d.routines=R.filter(x=>x!==r);d.tasks=T.filter(x=>!(x.routineId===r.id&&ST(x)!=='done'));render();queueSave('remove daily · '+r.title,'drDeleteRoutine',{id:r.id},()=>{},()=>{d.routines=R;d.tasks=T;render();});}
+function renderList(){const R=(S.data.routines||[]).slice().sort((a,b)=>String(a.title).localeCompare(String(b.title)));
+ $('#listView').innerHTML=`<div class="card info">These tasks come <b>every day</b> in My tasks. Add, edit or remove them here.</div><div class="sec">My daily list (${R.length})</div>`+(R.map(r=>`<div class="card rt"><div class="tt">${esc(r.title)}</div>${r.shared?'<div class="meta">Given by management</div>':''}<div class="btnrow"><button type="button" class="secondary" data-redit="${esc(r.id)}">✏️ Edit</button><button type="button" class="danger" data-rdel="${esc(r.id)}">🗑 Remove</button></div></div>`).join('')||'<div class="card empty">Your daily list is empty.<br>Tap <b>+ Add to daily list</b> to add work you do every day.</div>')+'<div style="height:70px"></div>';
+ document.querySelectorAll('[data-redit]').forEach(b=>b.onclick=()=>routineForm(R.find(x=>x.id===b.dataset.redit)));
+ document.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>delRoutine(R.find(x=>x.id===b.dataset.rdel)));}
+function renderReport(){const d=S.data,team=(d.team||[]).filter(p=>!S.dept||p.department===S.dept),T=d.teamTasks||[],by={};T.forEach(t=>{const k=String(t.assignee).toLowerCase();(by[k]=by[k]||[]).push(t);});
+ const rows=team.map(p=>{const L=by[String(p.email).toLowerCase()]||[],dn=L.filter(t=>ST(t)==='done').length,pn=L.filter(t=>ST(t)==='pnd').length;return {p,L,dn,pn,op:L.length-dn-pn};}).sort((a,b)=>(b.L.length?1:0)-(a.L.length?1:0)||(a.dn/(a.L.length||1))-(b.dn/(b.L.length||1))||String(a.p.name).localeCompare(String(b.p.name)));
+ const all=rows.reduce((s,r)=>s+r.L.length,0),dn=rows.reduce((s,r)=>s+r.dn,0),pn=rows.reduce((s,r)=>s+r.pn,0);
+ $('#reportView').innerHTML=`${(d.departments||[]).length>1?`<div class="chips" style="margin:0 0 10px"><button type="button" class="chip ${S.dept?'':'on'}" data-dept="">All</button>${d.departments.map(x=>`<button type="button" class="chip ${S.dept===x?'on':''}" data-dept="${esc(x)}">${esc(x)}</button>`).join('')}</div>`:''}
+ <div class="stats"><div><b>${all}</b><small>Tasks</small></div><div><b style="color:var(--ok)">${dn}</b><small>Done</small></div><div><b style="color:#b45309">${pn}</b><small>Pending</small></div><div><b style="color:var(--hold)">${all-dn-pn}</b><small>Not done</small></div></div>
+ <div class="sec">Employee report · ${esc(S.day)} <span class="muted" style="font-weight:400">· tap a name</span></div>
+ <div class="tiles">${rows.map(r=>{const pct=r.L.length?Math.round(r.dn*100/r.L.length):0;return `<div class="tile ${r.L.length?'':'zero'}" data-emp="${esc(r.p.email)}"><b>${esc(r.p.name)}</b><div class="muted">${esc(r.p.department)}</div><div class="big2">${r.L.length?pct+'%':'—'}</div><div class="bar sm"><i style="width:${pct}%"></i></div><div class="mini">${r.dn?`<span>${r.dn} done</span>`:''}${r.pn?`<span class="p">${r.pn} pending</span>`:''}${r.op?`<span class="h">${r.op} not done</span>`:''}${r.L.length?'':'<span class="z">No tasks</span>'}</div></div>`;}).join('')||'<div class="card empty">No employees.</div>'}</div>
+ <button type="button" class="big" id="waShare" style="margin-top:14px;background:#1f8f4d">Share report on WhatsApp</button><div style="height:20px"></div>`;
+ document.querySelectorAll('[data-dept]').forEach(b=>b.onclick=()=>{S.dept=b.dataset.dept;renderReport();});
+ document.querySelectorAll('[data-emp]').forEach(el=>el.onclick=()=>{const r=rows.find(x=>x.p.email===el.dataset.emp);empSheet(r);});
+ $('#waShare').onclick=()=>{const txt='*Daily Report* · '+S.day+(S.dept?' · '+S.dept:'')+'\nTasks: '+all+' | Done: '+dn+' | Pending: '+pn+' | Not done: '+(all-dn-pn)+'\n\n'+rows.filter(r=>r.L.length).map(r=>'*'+r.p.name+'* — '+r.dn+'/'+r.L.length+' done'+(r.pn?', '+r.pn+' pending':'')+(r.op?', '+r.op+' not done':'')+r.L.filter(t=>ST(t)!=='done').map(t=>'\n   • '+t.title+(t.pendingReason?' ('+t.pendingReason+')':'')).join('')).join('\n')+(rows.some(r=>!r.L.length)?'\n\nNo tasks: '+rows.filter(r=>!r.L.length).map(r=>r.p.name).join(', '):'');location.href='https://wa.me/?text='+encodeURIComponent(txt);};}
+function empSheet(r){if(!r)return;const L=r.L.slice().sort((a,b)=>['open','pnd','done'].indexOf(ST(a))-['open','pnd','done'].indexOf(ST(b)));openSheet(r.p.name,S.day+' · '+r.dn+'/'+r.L.length+' done',L.map(t=>taskCard(t,false)).join('')||'<div class="card empty">No tasks on this date.</div>');}
+$('#day').value=S.day;
+$('#day').onchange=e=>{S.day=e.target.value||todayIST();load();};
+$('#refresh').onclick=load;
+$('#addBtn').onclick=()=>{if(S.tab==='list')routineForm(null);else if(S.day<todayIST())toast('Past days are view only');else taskForm(null);};
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;syncTabs();if(S.data)render();});
+$('#pinMode').onclick=()=>{$('#pinMode').classList.add('on');$('#emailMode').classList.remove('on');$('#pinForm').hidden=false;$('#emailPanel').hidden=true;};
+$('#emailMode').onclick=()=>{$('#emailMode').classList.add('on');$('#pinMode').classList.remove('on');$('#pinForm').hidden=true;$('#emailPanel').hidden=false;};
+$('#pinForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginPin',{phone:$('#phone').value,pin:$('#pin').value});saveToken(r.token);$('#pin').value='';await load();}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#otpReq').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginRequest',{email:$('#email').value});$('#otpVerify').hidden=false;toast(r.message||'Code sent');}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#otpVerify').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginVerify',{email:$('#email').value,code:$('#code').value});saveToken(r.token);$('#code').value='';await load();}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#logout').onclick=async()=>{if(!confirm('Sign out?'))return;try{await api('logout');}catch{}clearToken();S.data=null;showLogin();};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+let installEvt=null;const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(!standalone)$('#install').hidden=false;});
+addEventListener('appinstalled',()=>{$('#install').hidden=true;toast('App installed. Open it from your home screen.');});
+$('#install').onclick=async()=>{if(installEvt){installEvt.prompt();await installEvt.userChoice.catch(()=>{});installEvt=null;$('#install').hidden=true;}};
+if(!standalone&&/iphone|ipad|ipod/i.test(navigator.userAgent)){let seen='';try{seen=localStorage.getItem('dr-ios-tip')||'';}catch{}if(!seen)$('#iosTip').hidden=false;}
+$('#iosClose').onclick=()=>{$('#iosTip').hidden=true;try{localStorage.setItem('dr-ios-tip','1');}catch{}};
+
+try{const c=JSON.parse(localStorage.getItem('dr-cache')||'null');if(token&&c&&c.day===S.day&&c.data&&c.data.me){S.data=c.data;showApp();}}catch{}
+load();
+</script>
+</body></html>
