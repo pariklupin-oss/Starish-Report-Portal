@@ -64,10 +64,11 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
 .badge.pb.wait{background:#dcf3f4;color:#0e6f78}.badge.pb.buy{background:#fdeedc;color:#b45309}.badge.pb.avail{background:var(--okbg);color:var(--ok)}.badge.pb.rej{background:#eceff2;color:#5d7183}
 .prow{display:flex;gap:8px;margin-bottom:8px}.prow select{flex:1 1 60%}.prow input{flex:0 0 84px;width:84px}.prow .fit{flex:0 0 auto;padding:8px 12px}
 .stk{display:flex;justify-content:space-between;gap:10px;align-items:center}.prow input[name=part]{flex:1 1 auto;width:auto;min-width:0}.pwrap{margin-bottom:8px}.pwrap .prow{margin-bottom:2px}.phint{font-size:12px;min-height:0;padding-left:4px}.phint.ok{color:var(--ok);font-weight:600}
+.back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.55);border-radius:8px;padding:7px 9px;font-size:13px;font-weight:700;white-space:nowrap}header b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:380px){header img{display:none}}
 [hidden]{display:none!important}
 </style></head>
 <body>
-<header><img src="../logo-starish-2026.jpg" alt="Starish"><div class="t"><b>Maintenance Work Log</b><small id="who">Starish Autopac Pvt. Ltd.</small><small id="sync" hidden>Updating…</small></div><button id="install" hidden>Install</button><button id="logout" hidden>Sign out</button></header>
+<header><a class="back" href="../" title="Back to Report Portal">‹ Portal</a><img src="../logo-starish-2026.jpg" alt="Starish"><div class="t"><b>Maintenance Work Log</b><small id="who">Starish Autopac Pvt. Ltd.</small><small id="sync" hidden>Updating…</small></div><button id="install" hidden>Install</button><button id="logout" hidden>Sign out</button></header>
 <div id="iosTip" class="card" style="margin:12px 16px 0" hidden><b>Install this app:</b> tap the Share button in Safari, then <b>Add to Home Screen</b>. <button type="button" class="secondary" id="iosClose" style="padding:4px 10px;margin-left:6px">OK</button></div>
 <nav class="tabs" id="tabs" hidden><button type="button" data-tab="work" class="on"><span class="ico">🔧</span>Work</button><button type="button" data-tab="hold"><span class="ico">⏸️</span>Hold<span id="holdCnt"></span></button><button type="button" data-tab="done"><span class="ico">✅</span>Done<span id="doneCnt"></span></button><button type="button" data-tab="report"><span class="ico">📊</span>Report</button><button type="button" data-tab="parts"><span class="ico">📦</span>Parts<span id="partCnt"></span></button></nav>
 <main>
