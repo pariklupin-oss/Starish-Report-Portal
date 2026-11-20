@@ -134,12 +134,15 @@ async function load(){if(!token)return showLogin();const seq=++loadSeq,day=S.day
  try{const data=await api('dailyData',{date:day});if(seq!==loadSeq)return;S.data=data;saveCache();showApp();}
  catch(e){if(seq!==loadSeq)return;if(/Login expired|Account inactive|login|sign in|session/i.test(e.message)){clearToken();try{localStorage.removeItem('dr-cache');}catch{}S.data=null;showLogin();toast(e.message);}else if(S.data){toast('Could not refresh: '+e.message);}else{$('#boot').hidden=true;$('#app').hidden=false;$('#todayView').innerHTML='<div class="err">'+esc(e.message)+'</div>';}}
  finally{if(seq===loadSeq){$('#refresh').disabled=false;$('#sync').hidden=true;}}}
-const pending=[];
-function renderPending(){$('#pendBox').innerHTML=pending.map((p,i)=>p.error?`<div class="pend bad"><span>Not saved: ${esc(p.label)}<br><small>${esc(p.error)}</small></span><span style="display:flex;gap:6px"><button type="button" data-retry="${i}">Retry</button><button type="button" class="secondary" data-drop="${i}">Dismiss</button></span></div>`:`<div class="pend"><span>Saving: ${esc(p.label)}…</span></div>`).join('');
- document.querySelectorAll('[data-retry]').forEach(b=>b.onclick=()=>sendOp(pending[Number(b.dataset.retry)]));
+const pending=[];let busyOp=null;
+function renderPending(){const w=pending.filter(p=>!p.error).length;$('#pendBox').innerHTML=pending.filter(p=>p.error).map(p=>`<div class="pend bad"><span>Not saved: ${esc(p.label)}<br><small>${esc(p.error)}</small></span><span style="display:flex;gap:6px"><button type="button" data-retry="${pending.indexOf(p)}">Retry</button><button type="button" class="secondary" data-drop="${pending.indexOf(p)}">Dismiss</button></span></div>`).join('')+(w?`<div class="pend"><span>Saving${w>1?' '+w+' items':''}: ${esc((busyOp||pending.find(p=>!p.error)).label)}…</span></div>`:'');
+ document.querySelectorAll('[data-retry]').forEach(b=>b.onclick=()=>{const op=pending[Number(b.dataset.retry)];if(op){op.error='';op.tries=0;pump();renderPending();}});
  document.querySelectorAll('[data-drop]').forEach(b=>b.onclick=()=>{const op=pending.splice(Number(b.dataset.drop),1)[0];try{op&&op.undo&&op.undo();}catch{}renderPending();});}
-function sendOp(op){op.error='';renderPending();api(op.action,op.data).then(res=>{const i=pending.indexOf(op);if(i>=0)pending.splice(i,1);try{op.apply(res);}catch{}saveCache();render();renderPending();toast('Saved: '+op.label);if(!pending.length)setTimeout(load,800);}).catch(e=>{op.error=e.message;renderPending();});}
-function queueSave(label,action,data,apply,undo){const op={label,action,data,apply,undo,error:''};pending.push(op);saveCache();sendOp(op);}
+function pump(){if(busyOp)return;const op=pending.find(p=>!p.error);if(!op){return;}busyOp=op;renderPending();
+ api(op.action,op.data).then(res=>{busyOp=null;const i=pending.indexOf(op);if(i>=0)pending.splice(i,1);try{op.apply(res);}catch{}saveCache();render();renderPending();if(pending.some(p=>!p.error))pump();else{toast('Saved');setTimeout(()=>{if(!pending.length)load();},800);}})
+ .catch(e=>{busyOp=null;op.tries=(op.tries||0)+1;if(/busy|too long|Record changed/i.test(e.message)&&op.tries<4){setTimeout(pump,1500*op.tries);}else{op.error=e.message;pump();}renderPending();});}
+function sendOp(op){op.error='';pump();}
+function queueSave(label,action,data,apply,undo){const op={label,action,data,apply,undo,error:'',tries:0};pending.push(op);saveCache();renderPending();pump();}
 addEventListener('beforeunload',e=>{if(pending.some(p=>!p.error)){e.preventDefault();e.returnValue='';}});
 function syncTabs(){document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.tab===S.tab));$('#addBtn').hidden=S.tab==='report'||!S.data;$('#addBtn').textContent=S.tab==='list'?'+ Add to daily list':'+ Add task';$('#dayCard').hidden=S.tab==='list';}
 const ST=t=>['Submitted','Closed'].includes(t.status)?'done':t.pendingReason?'pnd':'open';
