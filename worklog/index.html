@@ -63,7 +63,7 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
 .qty{font-size:22px;font-weight:800;color:var(--navy);line-height:1.1}.qty.zero{color:#a0aebb}
 .badge.pb.wait{background:#dcf3f4;color:#0e6f78}.badge.pb.buy{background:#fdeedc;color:#b45309}.badge.pb.avail{background:var(--okbg);color:var(--ok)}.badge.pb.rej{background:#eceff2;color:#5d7183}
 .prow{display:flex;gap:8px;margin-bottom:8px}.prow select{flex:1 1 60%}.prow input{flex:0 0 84px;width:84px}.prow .fit{flex:0 0 auto;padding:8px 12px}
-.stk{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.stk{display:flex;justify-content:space-between;gap:10px;align-items:center}.prow input[name=part]{flex:1 1 auto;width:auto;min-width:0}.pwrap{margin-bottom:8px}.pwrap .prow{margin-bottom:2px}.phint{font-size:12px;min-height:0;padding-left:4px}.phint.ok{color:var(--ok);font-weight:600}
 [hidden]{display:none!important}
 </style></head>
 <body>
@@ -276,6 +276,9 @@ function openForm(r=null,resume=false){const d=S.data;if(!d)return;const sup=d.s
 
 const PST={Requested:'Waiting',Rejected:'Rejected','Sent for Purchase':'Send for purchase',Received:'Received'};
 const num=v=>{const n=Number(v||0);return Number.isInteger(n)?String(n):n.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');};
+const partInfo=name=>partsOf().items.find(x=>String(x.name).toLowerCase()===String(name||'').trim().toLowerCase());
+const stockTxt=it=>it?num(it.stock)+(it.uom?' '+it.uom:'')+(it.location||it.rack?' · '+[it.location,it.rack].filter(Boolean).join(' / '):''):'';
+const partDL=()=>'<datalist id="partList">'+partsOf().items.map(it=>`<option value="${esc(it.name)}">${esc((it.code?it.code+' · ':'')+'Stock '+num(it.stock)+(it.uom?' '+it.uom:''))}</option>`).join('')+'</datalist>';
 function partsOf(){const d=S.data;d.parts=d.parts||{items:[],requests:[]};d.parts.items=d.parts.items||[];d.parts.requests=d.parts.requests||[];return d.parts;}
 const stockOf=r=>{const it=partsOf().items.find(x=>x.id===r.partId||String(x.name).toLowerCase()===String(r.part).toLowerCase());return it?Number(it.stock||0):0;};
 function closeSheet(){const sh=$('#sheet');sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';}
@@ -285,7 +288,7 @@ function reqCard(r,acts){const st=r.status,cls=st==='Requested'?'wait':st==='Rej
  return `<div class="card preq ${cls}"><div class="top" style="display:flex;justify-content:space-between;gap:8px"><div><div class="m" style="font-weight:700;font-size:16px">${esc(r.part)}</div><div class="meta">Machine: <b>${esc(r.machine)}</b></div></div><div style="text-align:right"><div class="qty">${esc(num(r.qty))}</div><span class="badge pb ${cls}">${esc(lbl)}</span></div></div>
  <div class="meta">Requested by <b>${esc(r.requestedBy)}</b> · ${esc(hm(r.createdAt))}</div>${r.note?`<div class="desc">${esc(r.note)}</div>`:''}
  ${r.decidedBy?`<div class="reason"><b>${r.decision==='Pass'?'Passed':'Rejected'} by ${esc(r.decidedBy)}</b>${r.reason?': '+esc(r.reason):''}</div>`:''}
- ${st==='Rejected'||st==='Received'?`<div class="meta">Stock now: <b>${esc(num(stockOf(r)))}</b>${st==='Received'?' · Received '+esc(num(r.receivedQty))+' on '+esc(hm(r.receivedAt)):''}</div>`:''}
+ <div class="meta">Store stock: <b>${esc(stockTxt(partInfo(r.part))||num(stockOf(r)))}</b>${st==='Received'?' · Received '+esc(num(r.receivedQty))+' on '+esc(hm(r.receivedAt)):''}</div>
  ${acts?`<div class="btnrow">${acts}</div>`:''}</div>`;}
 function renderParts(){const d=S.data,P=partsOf(),sup=d.supervisor,me=String(d.me.email).toLowerCase(),seg=S.pseg||'req',R=P.requests;
  const waiting=R.filter(r=>r.status==='Requested');$('#partCnt').textContent=sup&&waiting.length?String(waiting.length):'';
@@ -302,10 +305,16 @@ function renderParts(){const d=S.data,P=partsOf(),sup=d.supervisor,me=String(d.m
   body+=`<div class="sec" style="margin-top:10px">✅ Available in stock (${avail.length})</div>`+(avail.map(r=>reqCard(r,'')).join('')||'<div class="card empty">None.</div>');
   if(rej.length)body+=`<div class="sec" style="margin-top:10px">Rejected (${rej.length})</div>`+rej.map(r=>reqCard(r,'')).join('');
  }else{
-  const L=P.items;body+=`<div class="sec">Parts stock (${L.length})</div>`+(L.map(it=>{const s=Number(it.stock||0);return `<div class="card stk"><div><div class="m" style="font-weight:700">${esc(it.name)}</div><div class="meta">${s>0?'Available':'Not available'}${it.stockUpdatedBy?' · updated by '+esc(it.stockUpdatedBy)+' '+esc(hm(it.stockUpdatedAt)):''}</div></div><div style="text-align:right"><div class="qty ${s>0?'':'zero'}">${esc(num(s))}</div>${sup?`<button type="button" class="secondary" data-pstk="${esc(it.id)}" style="padding:6px 10px;font-size:13px;margin-top:4px">Edit stock</button>`:''}</div></div>`;}).join('')||'<div class="card empty">No parts in the list yet. Parts get added when someone requests them.</div>');
+  const sy=P.sync;body+=`${sup?'<button type="button" class="big secondary" id="pSync" style="margin-top:0">🔄 Update from store sheet</button>':''}<div class="muted" style="margin:8px 2px">${sy&&sy.at?'Stock from store sheet ('+esc(sy.tab||'')+') · updated '+esc(hm(sy.at)):'Stock updates every hour from the store sheet.'}</div>
+  <input id="stkQ" placeholder="Search part name / code / machine / rack" value="${esc(S.stkQ||'')}" autocomplete="off"><div class="seg" id="stkF" style="margin:8px 0">${[['all','All'],['in','In stock'],['out','Out of stock']].map(([k,l])=>`<button type="button" data-sf="${k}" class="${(S.stkF||'all')===k?'on':''}">${l}</button>`).join('')}</div><div id="stkList"></div>`;
  }
  $('#partsView').innerHTML=`<button type="button" class="big preqbtn" id="pNew">+ Request parts</button><div class="seg" id="pSeg" style="margin:12px 0">${[['req',sup?'Approve':'My requests'],['rep','Report'],['stk','Stock']].map(([k,l])=>`<button type="button" data-pseg="${k}" class="${seg===k?'on':''}">${l}</button>`).join('')}</div>`+body;
  $('#pNew').onclick=()=>partForm();
+ if(seg==='stk'){const draw=()=>{const ws=String(S.stkQ||'').toLowerCase().split(/\s+/).filter(Boolean),fl=S.stkF||'all';const L=P.items.filter(it=>{if(!(fl==='all'||(fl==='in')===(Number(it.stock)>0)))return false;const t=[it.name,it.code,it.machine,it.category,it.rack,it.location].join(' ').toLowerCase();return ws.every(w=>t.includes(w));});
+  $('#stkList').innerHTML=`<div class="sec">Parts stock (${L.length}${L.length!==P.items.length?' of '+P.items.length:''})</div>`+(L.slice(0,150).map(it=>{const s=Number(it.stock||0);return `<div class="card stk"><div style="min-width:0"><div class="m" style="font-weight:700">${esc(it.name)}</div><div class="meta">${it.code?esc(it.code)+' · ':''}${esc([it.category,it.machine].filter(Boolean).join(' · '))}${it.location||it.rack?'<br>Place: '+esc([it.location,it.rack].filter(Boolean).join(' / ')):''}</div></div><div style="text-align:right"><div class="qty ${s>0?'':'zero'}">${esc(num(s))}</div><div class="muted">${esc(it.uom||'')}</div>${sup?`<button type="button" class="secondary" data-pstk="${esc(it.id)}" style="padding:6px 10px;font-size:13px;margin-top:4px">Edit</button>`:''}</div></div>`;}).join('')||'<div class="card empty">No matching part.</div>')+(L.length>150?'<div class="muted" style="text-align:center">Showing first 150. Type in search to find more.</div>':'');
+  document.querySelectorAll('[data-pstk]').forEach(b=>b.onclick=()=>stockForm(P.items.find(x=>x.id===b.dataset.pstk)));};
+  draw();$('#stkQ').oninput=e=>{S.stkQ=e.target.value;draw();};document.querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{S.stkF=b.dataset.sf;document.querySelectorAll('[data-sf]').forEach(x=>x.classList.toggle('on',x===b));draw();});
+  if($('#pSync'))$('#pSync').onclick=async()=>{const b=$('#pSync');b.disabled=true;b.textContent='Updating from store sheet…';try{const r=await api('syncStoreStock');toast('Stock updated: '+r.items+' items');load();}catch(e){toast(e.message);b.disabled=false;b.textContent='🔄 Update from store sheet';}};}
  document.querySelectorAll('[data-pseg]').forEach(b=>b.onclick=()=>{S.pseg=b.dataset.pseg;renderParts();});
  const f=id=>R.find(x=>x.id===id);
  document.querySelectorAll('[data-ppass]').forEach(b=>b.onclick=()=>decideForm(f(b.dataset.ppass),'Pass'));
@@ -316,28 +325,28 @@ function renderParts(){const d=S.data,P=partsOf(),sup=d.supervisor,me=String(d.m
  document.querySelectorAll('[data-pcancel]').forEach(b=>b.onclick=()=>{const r=f(b.dataset.pcancel);if(!r||!confirm('Cancel this request?\n'+r.part+' × '+num(r.qty)))return;P.requests=P.requests.filter(x=>x.id!==r.id);render();queueSave('cancel '+r.part,'deletePartRequest',{id:r.id},()=>{});});
  if($('#pShare'))$('#pShare').onclick=()=>{const buy=R.filter(r=>r.status==='Sent for Purchase');const t='*Parts to purchase* · '+todayIST()+'\n\n'+buy.map((r,i)=>(i+1)+'. '+r.part+' — Qty '+num(r.qty)+'\n   Machine: '+r.machine+' · by '+r.requestedBy).join('\n')+'\n\nTotal items: '+buy.length;location.href='https://wa.me/?text='+encodeURIComponent(t);};}
 function partForm(){const d=S.data,P=partsOf(),machines=(d.machines||[]).filter(m=>m!=='Other');
- const popt=v=>'<option value="">Select part</option>'+P.items.map(it=>`<option ${it.name===v?'selected':''}>${esc(it.name)}</option>`).join('');
- const rowH=()=>`<div class="prow"><select name="part" required>${popt('')}</select><input name="qty" type="number" inputmode="decimal" min="0.01" step="any" required placeholder="Qty"><button type="button" class="danger fit" data-prm>✕</button></div>`;
+ const rowH=()=>`<div class="pwrap"><div class="prow"><input name="part" list="partList" required placeholder="Type part name / code" autocomplete="off" maxlength="150"><input name="qty" type="number" inputmode="decimal" min="0.01" step="any" required placeholder="Qty"><button type="button" class="danger fit" data-prm>✕</button></div><div class="phint muted"></div></div>`;
  const sh=openSheet('Request parts','Machine / Part / Qty',`<form id="pf" class="card">
  <label style="margin-top:0">Machine name</label><div class="row"><select name="machine" id="pmSel" required><option value="">Select machine</option>${machines.map(m=>`<option>${esc(m)}</option>`).join('')}</select><button type="button" class="secondary fit" id="pmNew">+ New</button></div>
  <div class="inline-add" id="pmAdd" hidden><input id="pmName" placeholder="New machine name" maxlength="150"><button type="button" id="pmSave">Add</button></div>
- <label>Parts and quantity</label><div id="prows">${rowH()}</div>
+ <label>Parts and quantity <span class="muted">(type to search ${P.items.length} store items)</span></label>${partDL()}<div id="prows">${rowH()}</div>
  <div class="row" style="margin-top:8px"><button type="button" class="secondary" id="pAddRow">+ Add another part</button><button type="button" class="secondary" id="piNew">+ New item</button></div>
  <div class="inline-add" id="piAdd" hidden><input id="piName" placeholder="New part / item name" maxlength="150"><button type="button" id="piSave">Add</button></div>
  <label>Note <span class="muted">(optional)</span></label><textarea name="note" maxlength="500" placeholder="Size, model, why it is needed…"></textarea>
  <div id="pErr" class="err" hidden></div><button type="submit" class="big preqbtn">Send request</button></form>`);
  const f=$('#pf'),rows=$('#prows');let lastSel=null;
- const wire=()=>{rows.querySelectorAll('select[name=part]').forEach(s=>s.onfocus=()=>lastSel=s);rows.querySelectorAll('[data-prm]').forEach(b=>b.onclick=()=>{if(rows.children.length>1)b.parentElement.remove();else{b.parentElement.querySelector('select').value='';b.parentElement.querySelector('input').value='';}});};wire();
- $('#pAddRow').onclick=()=>{rows.insertAdjacentHTML('beforeend',rowH());wire();rows.lastElementChild.querySelector('select').focus();};
+ const hint=inp=>{const it=partInfo(inp.value),h=inp.closest('.pwrap').querySelector('.phint');h.textContent=!inp.value.trim()?'':it?'In store: '+stockTxt(it)+(Number(it.stock)>0?'':' (not available)'):'New item – will be added to the list';h.className='phint muted'+(it&&Number(it.stock)>0?' ok':'');};
+ const wire=()=>{rows.querySelectorAll('input[name=part]').forEach(s=>{s.onfocus=()=>lastSel=s;s.oninput=()=>hint(s);s.onchange=()=>hint(s);});rows.querySelectorAll('[data-prm]').forEach(b=>b.onclick=()=>{const w=b.closest('.pwrap');if(rows.children.length>1)w.remove();else{w.querySelectorAll('input').forEach(i=>i.value='');hint(w.querySelector('input[name=part]'));}});};wire();
+ $('#pAddRow').onclick=()=>{rows.insertAdjacentHTML('beforeend',rowH());wire();rows.lastElementChild.querySelector('input[name=part]').focus();};
  $('#pmNew').onclick=()=>{$('#pmAdd').hidden=!$('#pmAdd').hidden;if(!$('#pmAdd').hidden)$('#pmName').focus();};
  $('#piNew').onclick=()=>{$('#piAdd').hidden=!$('#piAdd').hidden;if(!$('#piAdd').hidden)$('#piName').focus();};
  $('#pmSave').onclick=()=>{const name=$('#pmName').value.trim().replace(/\s+/g,' ');if(name.length<2)return toast('Enter machine name');const s=$('#pmSel');let o=[...s.options].find(x=>x.value.toLowerCase()===name.toLowerCase());if(!o){o=new Option(name,name);s.add(o);(d.machines=d.machines||[]).push(name);api('addWorkMachine',{name}).then(res=>{if(res&&res.machines)d.machines=res.machines;}).catch(()=>{});}s.value=o.value;$('#pmName').value='';$('#pmAdd').hidden=true;toast('Machine added: '+o.value);};
  $('#piSave').onclick=()=>{const name=$('#piName').value.trim().replace(/\s+/g,' ');if(name.length<2)return toast('Enter part name');let it=P.items.find(x=>String(x.name).toLowerCase()===name.toLowerCase());if(!it){it={id:'new-'+Date.now(),name,stock:0,isNew:true};P.items.push(it);P.items.sort((a,b)=>String(a.name).localeCompare(String(b.name)));}const v=it.name;
-  rows.querySelectorAll('select[name=part]').forEach(s=>{const cur=s.value;s.innerHTML=popt(cur);});const empty=[...rows.querySelectorAll('select[name=part]')].find(s=>!s.value);const t=(lastSel&&!lastSel.value?lastSel:empty)||null;let target=t;if(!target){rows.insertAdjacentHTML('beforeend',rowH());wire();target=rows.lastElementChild.querySelector('select');}target.value=v;$('#piName').value='';$('#piAdd').hidden=true;target.parentElement.querySelector('input').focus();toast('Item added: '+v);};
+  const dl=$('#partList');if(dl&&![...dl.options].some(o=>o.value===v))dl.append(new Option('New item',v));const empty=[...rows.querySelectorAll('input[name=part]')].find(s=>!s.value);const t=(lastSel&&!lastSel.value?lastSel:empty)||null;let target=t;if(!target){rows.insertAdjacentHTML('beforeend',rowH());wire();target=rows.lastElementChild.querySelector('input[name=part]');}target.value=v;hint(target);$('#piName').value='';$('#piAdd').hidden=true;target.closest('.pwrap').querySelector('input[name=qty]').focus();toast('Item added: '+v);};
  f.onsubmit=e=>{e.preventDefault();const err=$('#pErr');err.hidden=true;
-  const lines=[...rows.children].map(r=>({part:r.querySelector('select').value,qty:r.querySelector('input').value})).filter(l=>l.part||l.qty);
+  const lines=[...rows.children].map(r=>({part:(partInfo(r.querySelector('input[name=part]').value)||{}).name||r.querySelector('input[name=part]').value.trim().replace(/\s+/g,' '),qty:r.querySelector('input[name=qty]').value})).filter(l=>l.part||l.qty);
   if(!f.machine.value){err.textContent='Select machine';err.hidden=false;return;}
-  if(!lines.length||lines.some(l=>!l.part||!(Number(l.qty)>0))){err.textContent='Choose part and enter quantity in every row';err.hidden=false;return;}
+  if(!lines.length||lines.some(l=>l.part.length<2||!(Number(l.qty)>0))){err.textContent='Enter part name and quantity in every row';err.hidden=false;err.scrollIntoView({block:'center'});return;}
   const data={machine:f.machine.value,lines,note:f.note.value};closeSheet();S.pseg='req';
   queueSave('parts request · '+data.machine,'savePartRequest',data,res=>{const P2=partsOf();P2.requests=(res.requests||[]).concat(P2.requests);});};}
 function editPartForm(r){if(!r)return;const d=S.data,P=partsOf(),sup=d.supervisor,machines=(d.machines||[]).filter(m=>m!=='Other');if(r.machine&&!machines.includes(r.machine))machines.unshift(r.machine);
@@ -345,20 +354,20 @@ function editPartForm(r){if(!r)return;const d=S.data,P=partsOf(),sup=d.superviso
  openSheet('Edit parts request',r.part+' × '+num(r.qty),`<form id="ef" class="card">
  <label style="margin-top:0">Machine name</label><div class="row"><select name="machine" id="emSel" required><option value="">Select machine</option>${opt(machines,r.machine)}</select><button type="button" class="secondary fit" id="emNew">+ New</button></div>
  <div class="inline-add" id="emAdd" hidden><input id="emName" placeholder="New machine name" maxlength="150"><button type="button" id="emSave">Add</button></div>
- <label>Part name</label><div class="row"><select name="part" id="epSel" required><option value="">Select part</option>${opt(P.items.map(x=>x.name),r.part)}</select><button type="button" class="secondary fit" id="epNew">+ New item</button></div>
+ <label>Part name</label>${partDL()}<div class="row"><input name="part" id="epSel" list="partList" required autocomplete="off" maxlength="150" value="${esc(r.part)}"><button type="button" class="secondary fit" id="epNew">+ New item</button></div>
  <div class="inline-add" id="epAdd" hidden><input id="epName" placeholder="New part / item name" maxlength="150"><button type="button" id="epSave">Add</button></div>
  <label>Quantity</label><input name="qty" type="number" inputmode="decimal" min="0.01" step="any" required value="${esc(num(r.qty))}">
  <label>Note <span class="muted">(optional)</span></label><textarea name="note" maxlength="500">${esc(r.note||'')}</textarea>
  <div id="eErr" class="err" hidden></div><button type="submit" class="big preqbtn">Save changes</button>
  ${sup||r.status==='Requested'?'<button type="button" class="big danger" id="eDel">Delete request</button>':''}</form>`);
  const f=$('#ef');
- const inl=(nb,box,inp,sv,sel,label,after)=>{$(nb).onclick=()=>{$(box).hidden=!$(box).hidden;if(!$(box).hidden)$(inp).focus();};$(sv).onclick=()=>{const name=$(inp).value.trim().replace(/\s+/g,' ');if(name.length<2)return toast('Enter '+label+' name');const s=$(sel);let o=[...s.options].find(x=>x.value.toLowerCase()===name.toLowerCase());if(!o){o=new Option(name,name);s.add(o);after(name);}s.value=o.value;$(inp).value='';$(box).hidden=true;toast(label+' added: '+o.value);};};
+ const inl=(nb,box,inp,sv,sel,label,after)=>{$(nb).onclick=()=>{$(box).hidden=!$(box).hidden;if(!$(box).hidden)$(inp).focus();};$(sv).onclick=()=>{const name=$(inp).value.trim().replace(/\s+/g,' ');if(name.length<2)return toast('Enter '+label+' name');const s=$(sel);let v;if(s.tagName==='SELECT'){let o=[...s.options].find(x=>x.value.toLowerCase()===name.toLowerCase());if(!o){o=new Option(name,name);s.add(o);after(name);}v=o.value;}else{const it=partInfo(name);if(!it)after(name);v=it?it.name:name;}s.value=v;$(inp).value='';$(box).hidden=true;toast(label+' added: '+v);};};
  inl('#emNew','#emAdd','#emName','#emSave','#emSel','Machine',name=>{(d.machines=d.machines||[]).push(name);api('addWorkMachine',{name}).then(res=>{if(res&&res.machines)d.machines=res.machines;}).catch(()=>{});});
  inl('#epNew','#epAdd','#epName','#epSave','#epSel','Item',name=>{P.items.push({id:'new-'+Date.now(),name,stock:0,isNew:true});P.items.sort((a,b)=>String(a.name).localeCompare(String(b.name)));});
  if($('#eDel'))$('#eDel').onclick=()=>{if(!confirm('Delete this request?\n'+r.part+' × '+num(r.qty)))return;closeSheet();P.requests=P.requests.filter(x=>x.id!==r.id);render();queueSave('delete '+r.part,'deletePartRequest',{id:r.id},()=>{});};
  f.onsubmit=e=>{e.preventDefault();const err=$('#eErr');err.hidden=true;
   if(!f.machine.value||!f.part.value||!(Number(f.qty.value)>0)){err.textContent='Choose machine, part and enter quantity';err.hidden=false;err.scrollIntoView({block:'center'});return;}
-  const data={id:r.id,machine:f.machine.value,part:f.part.value,qty:Number(f.qty.value),note:f.note.value};closeSheet();
+  const data={id:r.id,machine:f.machine.value,part:(partInfo(f.part.value)||{}).name||f.part.value.trim().replace(/\s+/g,' '),qty:Number(f.qty.value),note:f.note.value};closeSheet();
   const it=P.items.find(x=>x.name===data.part);Object.assign(r,{machine:data.machine,part:data.part,partId:it?it.id:r.partId,qty:data.qty,note:data.note});render();
   queueSave('edit · '+data.part,'updatePartRequest',data,res=>{const P2=partsOf();if(res.items)P2.items=res.items;const k=P2.requests.findIndex(x=>x.id===r.id);if(k>=0&&res.request)P2.requests[k]=res.request;});};}
 function decideForm(r,dec){if(!r)return;const st=stockOf(r);
