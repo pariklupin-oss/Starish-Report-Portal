@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#3b1f6e"><meta name="referrer" content="no-referrer">
+<link rel="preconnect" href="https://script.google.com" crossorigin><link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<title>Quality</title><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Quality"><script>/* 21-11-2026: inside the Portal app window, do not link this app's manifest (it made Edge/Chrome show "App update available" again and again) */(function(){var p=/[?&]in=portal\b/.test(location.search);try{if(p)sessionStorage.setItem("inPortal","1");p=p||sessionStorage.getItem("inPortal")==="1";}catch(e){}if(p&&history.replaceState)try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}if(!p){var l=document.createElement("link");l.rel="manifest";l.href="./manifest.webmanifest";document.head.appendChild(l);}})();</script><link rel="icon" href="./icon-quality-192.png"><link rel="apple-touch-icon" href="./icon-quality-192.png">
+<style>
+:root{--navy:#102d4c;--navy2:#1d4673;--bg:#eef3f7;--card:#fff;--line:#d5dfe8;--muted:#5d7183;--ink:#14212e;--ok:#17834a;--okbg:#e3f5ea;--hold:#a12a1f;--holdbg:#fdecea;--pend:#8a5300;--pendbg:#fff4e0;--accent:#f39c12}
+*{box-sizing:border-box}html,body{margin:0}body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:90px}
+header{background:var(--navy);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+header img{width:40px;height:40px;border-radius:8px;background:#fff}header .t{flex:1;min-width:0}header b{display:block;font-size:16px}header small{opacity:.8;font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header button{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;padding:6px 10px;border-radius:8px;font-size:13px}
+main{max-width:760px;margin:0 auto;padding:14px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+h1{font-size:22px;margin:4px 0 6px}h2{font-size:17px;margin:0 0 10px}
+label{display:block;font-weight:600;font-size:13px;color:#33475b;margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid #b9c8d6;border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:84px;resize:vertical}input:focus,select:focus,textarea:focus{outline:2px solid #7fb2e5;border-color:#7fb2e5}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:11px 16px;background:var(--navy2);color:#fff;font-weight:600}
+button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:var(--holdbg);color:var(--hold)}button:disabled{opacity:.55}
+.row{display:flex;gap:8px;align-items:stretch}.row>*{flex:1}.row .fit{flex:0 0 auto}
+.seg{display:flex;background:#e4ecf3;border-radius:10px;padding:3px}.seg button{flex:1;background:transparent;color:var(--navy);padding:9px}.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.muted{color:var(--muted);font-size:13px}.err{background:var(--holdbg);color:var(--hold);padding:10px 12px;border-radius:10px;margin:10px 0}
+.people{display:flex;flex-wrap:wrap;gap:8px}.people label{display:flex;align-items:center;gap:7px;margin:0;font-weight:500;border:1px solid #c9d6e1;border-radius:999px;padding:7px 12px;background:#fff;font-size:14px}
+.people input{width:auto;margin:0}.people label.on{background:#e6f0fa;border-color:#7fb2e5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.stats div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stats b{display:block;font-size:20px}.stats small{color:var(--muted);font-size:12px}
+.entry{border-left:4px solid var(--ok)}.entry.Hold{border-left-color:var(--hold)}.entry.Pending{border-left-color:var(--accent)}
+.entry .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.entry .m{font-weight:700;font-size:16px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--okbg);color:var(--ok);white-space:nowrap}.badge.Hold{background:var(--holdbg);color:var(--hold)}.badge.Pending{background:var(--pendbg);color:var(--pend)}
+.meta{color:var(--muted);font-size:13px;margin:4px 0}.desc{margin:6px 0;white-space:pre-wrap}.reason{background:#fff8ec;border-radius:8px;padding:6px 10px;font-size:14px;margin:6px 0}
+.acts{display:flex;gap:8px;margin-top:8px}.acts button{padding:8px 14px;font-size:14px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));padding:15px 28px;border-radius:999px;font-size:17px;background:var(--accent);color:#1d1300;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:6}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:10;overflow:auto;padding-bottom:30px}.sheet header{position:sticky}
+.toast{position:fixed;left:16px;right:16px;bottom:90px;max-width:520px;margin:0 auto;background:#14212e;color:#fff;padding:12px 16px;border-radius:12px;z-index:20;text-align:center}
+.dur{font-weight:700;color:var(--navy2);margin-top:8px}.inline-add{display:flex;gap:8px;margin-top:8px}.inline-add input{flex:1}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.foot{text-align:center;font-size:13px;color:var(--muted);margin-top:14px}.foot a{color:var(--navy2)}
+.sec{font-size:15px;font-weight:700;color:var(--navy);margin:6px 2px 8px}
+.cmp{border-left:4px solid #2f6db3}.cmp.urgent{border-left-color:var(--hold)}.cmp.run{border-left-color:var(--ok);background:#f4fbf6}
+.tok{font-size:12px;font-weight:700;color:#2f6db3}.badge.Urgent{background:var(--holdbg);color:var(--hold)}.badge.Info{background:#e6f0fa;color:#1d4673}
+.big{width:100%;padding:13px;font-size:16px;margin-top:10px}.go{background:var(--ok)}
+.tap{cursor:pointer}.upd{background:#2f6db3}.jobbox{background:#f3f7fb;border-radius:12px;padding:12px;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.chip{background:#e4ecf3;color:var(--navy);padding:6px 10px;font-size:13px;border-radius:999px}
+.pend{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;background:#e6f0fa;color:#1d4673}.pend.bad{background:var(--holdbg);color:var(--hold)}.pend button{padding:6px 10px;font-size:13px}
+#sync{font-size:11px;opacity:.85}
+.tabs{display:flex;gap:8px;padding:10px 12px;background:var(--bg);position:sticky;top:60px;z-index:4;box-shadow:0 2px 6px rgba(16,45,76,.08)}
+.tabs button{flex:1;border-radius:12px;padding:10px 4px;font-size:14px;font-weight:700;line-height:1.2;border:2px solid transparent;white-space:nowrap}
+.tabs .ico{display:block;font-size:18px;margin-bottom:2px}
+.tabs{gap:6px;padding:10px 8px}.tabs button{font-size:13px;padding:9px 2px}
+.mini .o{background:#efe7fb;color:#6a3fb5}.tile.carry{opacity:1}
+.tabs .on{box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.btnrow{display:flex;gap:8px;margin-top:10px}.btnrow button{flex:1;padding:12px;font-size:15px}.asg{background:#7a4dbd}.badge.Open{background:#fff4e0;color:#8a5300}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.tile{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}.tile b{display:block;font-size:15px}.tile .big2{font-size:22px;font-weight:800;color:var(--navy);margin:4px 0}.tile.zero{opacity:.55}.mini{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.mini span{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--okbg);color:var(--ok)}.mini .h{background:var(--holdbg);color:var(--hold)}.mini .p{background:var(--pendbg);color:var(--pend)}
+.tabs{overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tabs button{min-width:62px;font-size:12px}
+.preqbtn{background:#0e7c86}.preq{border-left:4px solid #2f6db3}.preq.buy{border-left-color:#e67e22}.preq.avail{border-left-color:var(--ok)}.preq.rej{border-left-color:#8a99a8}.preq.wait{border-left-color:#0e7c86}
+.qty{font-size:22px;font-weight:800;color:var(--navy);line-height:1.1}.qty.zero{color:#a0aebb}
+.badge.pb.wait{background:#dcf3f4;color:#0e6f78}.badge.pb.buy{background:#fdeedc;color:#b45309}.badge.pb.avail{background:var(--okbg);color:var(--ok)}.badge.pb.rej{background:#eceff2;color:#5d7183}
+.prow{display:flex;gap:8px;margin-bottom:8px}.prow select{flex:1 1 60%}.prow input{flex:0 0 84px;width:84px}.prow .fit{flex:0 0 auto;padding:8px 12px}
+.stk{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.55);border-radius:8px;padding:7px 9px;font-size:13px;font-weight:700;white-space:nowrap}header b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:380px){header img{display:none}}
+[hidden]{display:none!important}
+
+.tabs [data-tab=today]{background:#e3f5ea;color:#17834a}.tabs [data-tab=today].on{background:#17834a;color:#fff}
+.tabs [data-tab=list]{background:#e3eefb;color:#1d4673}.tabs [data-tab=list].on{background:#1d4673;color:#fff}
+.tabs [data-tab=report]{background:#efe7fb;color:#6a3fb5}.tabs [data-tab=report].on{background:#6a3fb5;color:#fff}
+.tabs button{font-size:14px}
+#openCnt:not(:empty){display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:999px;background:#c0392b;color:#fff;font-size:12px;line-height:18px}.tabs .on #openCnt{background:#fff;color:#c0392b}
+.task{border-left:5px solid #c0392b}.task.done{border-left-color:var(--ok);background:#f6fcf8}.task.pnd{border-left-color:#e67e22}
+.task .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.tt{font-weight:700;font-size:16px;word-break:break-word}.task.done .tt{color:#4c6b58}
+.badge.done{background:var(--okbg);color:var(--ok)}.badge.pnd{background:#fdeedc;color:#b45309}.badge.open{background:#fdecea;color:#a12a1f}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#e4ecf3;color:#1d4673}.tag.daily{background:#e3eefb;color:#1d4673}.tag.extra{background:#e3f5ea;color:#17834a}.tag.assigned{background:#efe7fb;color:#6a3fb5}
+.pendb{background:#e67e22}.btnrow .more{flex:0 0 52px}.reason.ok{background:#eef9f1}
+.bar{height:10px;background:#e4ecf3;border-radius:999px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#17834a,#2ecc71);border-radius:999px}.bar.sm{height:6px;margin:4px 0}
+.pctb{font-size:20px;font-weight:800;color:var(--ok)}.info{background:#e6f0fa;border-color:#c9dcf0;color:#1d4673;font-size:14px}
+.stats{grid-template-columns:repeat(4,1fr)}.stats b{font-size:18px}.chip.on{background:#6a3fb5;color:#fff}.mini .z{background:#eceff2;color:#5d7183}
+.fab{background:#17834a;color:#fff}
+
+:root{--q:#6a3fb5;--qbg:#efe7fb}
+header{background:#3b1f6e}.fab{background:var(--q);color:#fff}
+.qcard{border-left:5px solid var(--q)}.qcard.res{border-left-color:var(--ok)}.qcard.fwd{border-left-color:#2f6db3}.qcard.pen{border-left-color:#e67e22}
+.qtop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.tokn{font-size:12px;font-weight:800;color:var(--q)}
+.qh{font-weight:800;font-size:16px;margin:6px 0 2px;word-break:break-word}.qc{color:#33475b;font-size:14px}
+.badge.pen{background:#fdeedc;color:#b45309}.badge.res{background:var(--okbg);color:var(--ok)}.badge.fwd{background:#e6f0fa;color:#1d4673}.badge.oth{background:#eceff2;color:#5d7183}
+.kv{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:13px}.kv span small{display:block;color:var(--muted);font-size:11px}
+.note{background:#f4f0fb;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:14px;white-space:pre-wrap}
+.jobs{max-height:46vh;overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:8px}
+.jobs button{display:block;width:100%;text-align:left;background:#fff;color:var(--ink);border-bottom:1px solid #edf1f5;border-radius:0;padding:10px 12px;font-weight:500}
+.jobs button b{color:var(--q)}.jobs button small{display:block;color:var(--muted)}.jobs button.on{background:var(--qbg)}
+.sel{background:var(--qbg);border-radius:12px;padding:12px;margin-top:10px}.sel b{color:var(--q)}
+.filt{display:flex;gap:8px;margin-bottom:10px}.filt select{flex:0 0 130px}
+.stats{grid-template-columns:repeat(4,1fr)}
+.qcard .btnrow{flex-wrap:wrap}.qcard .btnrow button{flex:1 1 40%}
+.save{background:var(--q);width:100%;padding:14px;font-size:16px;margin-top:14px}
+</style></head>
+<body>
+<header><a class="back" href="../" title="Back to Report Portal">‹ Portal</a><img src="../logo-starish-2026.jpg" alt="Starish"><div class="t"><b>Quality</b><small id="who">Starish Autopac Pvt. Ltd.</small><small id="sync" hidden>Updating…</small></div><button id="install" hidden>Install</button><button id="logout" hidden>Sign out</button></header>
+<div id="iosTip" class="card" style="margin:12px 16px 0" hidden><b>Install this app:</b> tap the Share button in Safari, then <b>Add to Home Screen</b>. <button type="button" class="secondary" id="iosClose" style="padding:4px 10px;margin-left:6px">OK</button></div>
+<main>
+ <section id="login" class="card" hidden>
+  <h1>Sign in</h1><p class="muted">Sign in with the same mobile number and PIN you use for the Report Portal.</p>
+  <div class="seg"><button type="button" id="pinMode" class="on">Mobile + PIN</button><button type="button" id="emailMode">Email OTP</button></div>
+  <form id="pinForm"><label>Mobile number<input id="phone" type="tel" autocomplete="tel" required placeholder="10-digit mobile number"></label><label>PIN<input id="pin" type="password" inputmode="numeric" pattern="[0-9]{6,12}" autocomplete="current-password" required placeholder="6–12 digit PIN"></label><button style="width:100%;margin-top:14px">Sign in</button></form>
+  <div id="emailPanel" hidden><form id="otpReq"><label>Email address<input id="email" type="email" autocomplete="email" required placeholder="your@email.com"></label><button style="width:100%;margin-top:14px">Send login code</button></form>
+  <form id="otpVerify" hidden><label>6-digit email code<input id="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required></label><button style="width:100%;margin-top:14px">Sign in</button><p class="muted">Check the Spam folder too. The code expires in 10 minutes.</p></form></div>
+ </section>
+ <section id="app" hidden>
+  <div id="kpis"></div>
+  <div class="filt"><input id="q" type="search" placeholder="Search Job Card, customer, item, details" autocomplete="off"><select id="days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select></div>
+  <div class="seg" id="seg" style="margin-bottom:10px"><button type="button" data-f="open" class="on">Open</button><button type="button" data-f="all">All</button></div>
+  <div id="list"></div>
+ </section>
+ <div id="boot" class="card empty">Loading…</div>
+</main>
+<button class="fab" id="addBtn" hidden>+ Register Quality</button>
+<div class="sheet" id="sheet" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<script src="../config.js"></script>
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const todayIST=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata'}).format(new Date());
+const nowHM=()=>new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+const fmt=m=>{m=Math.max(0,Math.round(Number(m)||0));return Math.floor(m/60)+'h '+String(m%60).padStart(2,'0')+'m';};
+const mins=(a,b)=>{if(!/^\d{2}:\d{2}$/.test(a||'')||!/^\d{2}:\d{2}$/.test(b||''))return 0;const x=a.split(':').map(Number),y=b.split(':').map(Number);let d=(y[0]*60+y[1])-(x[0]*60+x[1]);if(d<=0)d+=1440;return d;};
+let token='';try{token=localStorage.getItem('starish-session')||sessionStorage.getItem('starish-session')||'';}catch{}
+function saveToken(v){token=v;try{localStorage.setItem('starish-session',v);}catch{try{sessionStorage.setItem('starish-session',v);}catch{}}}
+function clearToken(){token='';try{localStorage.removeItem('starish-session');}catch{}try{sessionStorage.removeItem('starish-session');}catch{}}
+let toastT;function toast(s){const t=$('#toast');t.textContent=s;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,4500);}
+function api(action,data={}){const url=window.PORTAL_CONFIG?.apiUrl;
+ if(!/^https:\/\/script\.google\.com\/macros\/s\/[a-zA-Z0-9_-]+\/exec$/.test(url||''))return Promise.reject(Error('Portal server URL is not set.'));
+ if(!navigator.onLine)return Promise.reject(Error('Internet is required to read or save data.'));
+ const nonce=Array.from(crypto.getRandomValues(new Uint8Array(24)),v=>v.toString(16).padStart(2,'0')).join(''),requestId=(crypto.randomUUID?crypto.randomUUID():nonce);
+ return new Promise((resolve,reject)=>{const frame=document.createElement('iframe'),form=document.createElement('form'),input=document.createElement('input');frame.name='api_'+nonce;frame.hidden=true;form.hidden=true;form.method='POST';form.action=url;form.target=frame.name;input.type='hidden';input.name='payload';input.value=JSON.stringify({action,data,token,nonce,requestId,origin:location.origin});form.append(input);
+  const timeout=setTimeout(()=>finish(Error('The server is taking too long. Check your internet and try again.')),90000);
+  function receive(e){let host;try{const u=new URL(e.origin);if(u.protocol!=='https:')return;host=u.hostname;}catch{return;}
+   if(!(host==='script.google.com'||host==='script.googleusercontent.com'||host.endsWith('.googleusercontent.com')))return;
+   if(e.data?.channel!=='starish-api'||e.data.nonce!==nonce)return;
+   if(e.data.result?.ok)finish(null,e.data.result);else finish(Error(e.data.result?.error||'Request failed'));}
+  function finish(err,res){clearTimeout(timeout);window.removeEventListener('message',receive);form.remove();frame.remove();err?reject(err):resolve(res);}
+  window.addEventListener('message',receive);document.body.append(frame,form);form.submit();});}
+
+
+const S={data:null,f:'open',q:'',days:30};
+const OPEN=['Pending Manager Review','In Progress'];
+const cls=s=>s==='Resolved'?'res':s==='Forwarded to Maintenance'?'fwd':OPEN.includes(s)?'pen':'oth';
+const when=t=>{try{return new Date(t).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}catch{return '';}};
+function showLogin(){$('#boot').hidden=true;$('#app').hidden=true;$('#addBtn').hidden=true;$('#logout').hidden=true;$('#login').hidden=false;$('#who').textContent='Starish Autopac Pvt. Ltd.';}
+function saveCache(){try{localStorage.setItem('q-cache',JSON.stringify({days:S.days,data:S.data}));}catch{}}
+function showApp(){$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;$('#logout').hidden=false;$('#addBtn').hidden=false;const m=S.data.me;$('#who').textContent=m.name+(S.data.manager?' · Quality Manager':m.department?' · '+m.department:'');render();}
+let loadSeq=0;
+async function load(){if(!token)return showLogin();const seq=++loadSeq;$('#sync').hidden=!S.data;
+ try{const data=await api('qualityData',{days:S.days});if(seq!==loadSeq)return;S.data=data;saveCache();showApp();}
+ catch(e){if(seq!==loadSeq)return;if(/Login expired|Account inactive|login|sign in|session/i.test(e.message)){clearToken();try{localStorage.removeItem('q-cache');}catch{}S.data=null;showLogin();toast(e.message);}else if(S.data){toast('Could not refresh: '+e.message);}else{$('#boot').hidden=true;$('#app').hidden=false;$('#list').innerHTML='<div class="err">'+esc(e.message)+'</div>';}}
+ finally{if(seq===loadSeq)$('#sync').hidden=true;}}
+/* save with automatic retry when the server is busy */
+async function send(action,data,btn,label){const old=btn?btn.textContent:'';if(btn){btn.disabled=true;btn.textContent='Saving…';}
+ try{for(let i=1;;i++){try{return await api(action,data);}catch(e){if(/busy|too long/i.test(e.message)&&i<4){if(btn)btn.textContent='Server busy, retrying ('+i+')…';await new Promise(r=>setTimeout(r,2000*i));continue;}throw e;}}}
+ finally{if(btn){btn.disabled=false;btn.textContent=old;}}}
+function render(){const d=S.data,me=d.me.email,ql=S.q.trim().toLowerCase();
+ const all=(d.issues||[]).filter(x=>!x.deletedAt);
+ if(d.manager){const inR=all.filter(x=>String(x.createdDate||x.createdAt||'').slice(0,10)>=d.from);$('#kpis').innerHTML=`<div class="stats"><div><b>${inR.length}</b><small>Records</small></div><div><b>${all.filter(x=>OPEN.includes(x.status)).length}</b><small>To review</small></div><div><b>${inR.filter(x=>x.status==='Resolved').length}</b><small>Resolved</small></div><div><b>${inR.filter(x=>x.status==='Forwarded to Maintenance').length}</b><small>To Maint.</small></div></div>`;}else $('#kpis').innerHTML='';
+ const rows=all.filter(x=>(S.f==='all'||OPEN.includes(x.status))&&(!ql||[x.tokenNo,x.jobCardNumber,x.customerName,x.productName,x.description,x.reportedBy,x.status].join(' ').toLowerCase().includes(ql)));
+ $('#list').innerHTML=rows.map(x=>{const own=x.reporterId===me,pen=x.status==='Pending Manager Review';
+  const acts=[];if(pen&&(d.manager||own))acts.push(`<button type="button" class="secondary" data-ed="${esc(x.id)}">Edit</button>`);
+  if(d.manager&&OPEN.includes(x.status)){acts.push(`<button type="button" class="go" data-rs="${esc(x.id)}">Resolve</button>`);acts.push(`<button type="button" class="upd" data-fw="${esc(x.id)}">To Maintenance</button>`);}
+  if(d.manager||(pen&&own))acts.push(`<button type="button" class="danger" data-dl="${esc(x.id)}">Delete</button>`);
+  return `<div class="card qcard ${cls(x.status)}"><div class="qtop"><div><span class="tokn">${esc(x.tokenNo)}</span><div class="meta" style="margin:0">${esc(when(x.createdAt))}</div></div><span class="badge ${cls(x.status)}">${esc(x.status)}</span></div>
+  <div class="qh">JC ${esc(x.jobCardNumber)} · ${esc(x.productName)}</div><div class="qc">${esc(x.customerName)}</div><div class="desc">${esc(x.description)}</div>
+  <div class="kv"><span><small>Reported by</small>${esc(x.reportedBy||'')}</span><span><small>Classification</small>${esc(x.category||'Awaiting review')}</span>${x.maintenanceToken?`<span><small>Maintenance token</small>${esc(x.maintenanceToken)}</span>`:''}</div>
+  ${x.solutionNote?`<div class="note"><b>${x.status==='Resolved'?'Quality solution':'Manager note'}:</b> ${esc(x.solutionNote)}</div>`:''}
+  ${acts.length?`<div class="btnrow">${acts.join('')}</div>`:''}</div>`;}).join('')||`<div class="card empty">${S.f==='open'?'No open Quality entries.':'No Quality entries in this period.'}<br><small>Tap <b>+ Register Quality</b> to add one.</small></div>`;
+ const find=id=>all.find(x=>x.id===id);
+ document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>issueForm(find(b.dataset.ed)));
+ document.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>resolveForm(find(b.dataset.rs)));
+ document.querySelectorAll('[data-fw]').forEach(b=>b.onclick=()=>forwardForm(find(b.dataset.fw)));
+ document.querySelectorAll('[data-dl]').forEach(b=>b.onclick=async()=>{const x=find(b.dataset.dl);if(!x||!confirm('Delete Quality record '+x.tokenNo+'?'))return;try{await send('deleteQualityIssue',{id:x.id,version:x.version},b);toast('Quality entry deleted');load();}catch(e){toast(e.message);}});}
+function closeSheet(){const sh=$('#sheet');sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';}
+function openSheet(title,body){const sh=$('#sheet');sh.hidden=false;document.body.style.overflow='hidden';sh.innerHTML=`<header><button type="button" id="closeSheet">✕</button><div class="t"><b>${esc(title)}</b></div></header><main>${body}</main>`;$('#closeSheet').onclick=closeSheet;return sh;}
+function issueForm(ex){const d=S.data,jobs=[...(d.jobs||[])];let sel=null;
+ if(ex){sel=jobs.find(j=>j.jobCardNumber===ex.jobCardNumber&&j.customerName===ex.customerName&&j.productName===ex.productName)||{jobCardNumber:ex.jobCardNumber,customerName:ex.customerName,productName:ex.productName,date:''};if(!jobs.includes(sel))jobs.unshift(sel);}
+ openSheet(ex?'Edit '+(ex.tokenNo||'Quality entry'):'Register Quality',`<div class="card"><label style="margin-top:0">Job Card (search number, customer or item)</label><input id="js" type="search" autocomplete="off" placeholder="Type Job Card number…"><div class="jobs" id="jl"></div><div id="selBox"></div>
+ <label>Quality Details / Remarks</label><textarea id="desc" maxlength="3000" placeholder="Glue, size, print, material or other defect">${esc(ex?ex.description:'')}</textarea>
+ ${jobs.length?'':`<div class="err">No Job Card found in the last 7 days of Production Planning.${d.jobsError?' ('+esc(d.jobsError)+')':''}</div>`}
+ <button type="button" class="save" id="sv">${ex?'Save correction':'Save Quality entry'}</button><p class="muted">Job Cards from today and the previous 6 days are listed. The entry goes to the Quality Manager for review.</p></div>`);
+ const drawSel=()=>{$('#selBox').innerHTML=sel?`<div class="sel"><b>Job Card ${esc(sel.jobCardNumber)}</b><div>${esc(sel.customerName)}</div><div class="muted">${esc(sel.productName)}${sel.date?' · '+esc(sel.date):''}</div></div>`:'';};
+ const draw=()=>{const q=$('#js').value.trim().toLowerCase(),num=/^\d+$/.test(q);const L=jobs.filter(j=>!q||(num?String(j.jobCardNumber).toLowerCase().startsWith(q):[j.jobCardNumber,j.customerName,j.productName].join(' ').toLowerCase().includes(q))).slice(0,60);
+  $('#jl').innerHTML=L.map(j=>`<button type="button" data-j="${jobs.indexOf(j)}" class="${j===sel?'on':''}"><b>JC ${esc(j.jobCardNumber)}</b> · ${esc(j.customerName)}<small>${esc(j.productName)}${j.date?' · '+esc(j.date):''}</small></button>`).join('')||'<div class="empty">No matching Job Card in the last 7 days.</div>';
+  document.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>{sel=jobs[Number(b.dataset.j)];drawSel();draw();$('#desc').focus();});};
+ $('#js').oninput=draw;draw();drawSel();
+ $('#sv').onclick=async e=>{if(!sel)return toast('Select a Job Card from the list.');const desc=$('#desc').value.trim();if(!desc)return toast('Enter Quality details.');
+  const data={jobCardNumber:sel.jobCardNumber,customerName:sel.customerName,productName:sel.productName,description:desc};
+  try{const r=ex?await send('editQualityIssue',{id:ex.id,version:ex.version,...data},e.target):await send('saveQualityIssue',data,e.target);closeSheet();toast(r.warning||(ex?'Quality entry corrected':'Saved · '+((r.issue&&r.issue.tokenNo)||'sent to Quality Manager')));load();}catch(x){toast(x.message);}};}
+function resolveForm(x){openSheet('Resolve '+x.tokenNo,`<div class="card"><div class="qh" style="margin-top:0">JC ${esc(x.jobCardNumber)} · ${esc(x.productName)}</div><div class="qc">${esc(x.customerName)}</div><div class="desc">${esc(x.description)}</div><label>Solution / Resolution note</label><textarea id="sn" maxlength="3000" placeholder="Cause checked and action taken"></textarea><button type="button" class="save go" id="sv">Save solution and resolve</button></div>`);
+ $('#sv').onclick=async e=>{const n=$('#sn').value.trim();if(!n)return toast('Enter the solution note.');try{await send('resolveQualityIssue',{id:x.id,version:x.version,solutionNote:n},e.target);closeSheet();toast('Quality issue resolved');load();}catch(err){toast(err.message);}};}
+function forwardForm(x){openSheet('Forward '+x.tokenNo+' to Maintenance',`<div class="card"><div class="qh" style="margin-top:0">JC ${esc(x.jobCardNumber)} · ${esc(x.productName)}</div><div class="desc">${esc(x.description)}</div>
+ <label>Machine name</label><input id="fm" maxlength="150"><label>Machine unit / part</label><input id="fu" maxlength="150"><div class="row"><div><label>Issue type</label><select id="ft"><option>Mechanical</option><option>Electrical</option><option>Other</option></select></div><div><label>Priority</label><select id="fp"><option>Normal</option><option>Urgent</option></select></div></div>
+ <label>Quality Manager note</label><textarea id="fn" maxlength="1500" placeholder="Optional note for Maintenance"></textarea><button type="button" class="save upd" id="sv">Create Maintenance complaint</button><p class="muted">This creates an Open complaint in the Maintenance register.</p></div>`);
+ $('#sv').onclick=async e=>{const m=$('#fm').value.trim();if(!m)return toast('Enter machine name.');try{const r=await send('forwardQualityIssue',{id:x.id,version:x.version,machine:m,unit:$('#fu').value.trim(),issueType:$('#ft').value,priority:$('#fp').value,managerNote:$('#fn').value.trim()},e.target);closeSheet();toast('Forwarded as Maintenance '+(r.maintenanceToken||''));load();}catch(err){toast(err.message);}};}
+$('#addBtn').onclick=()=>{if(S.data)issueForm(null);};
+$('#q').oninput=e=>{S.q=e.target.value;if(S.data)render();};
+$('#days').onchange=e=>{S.days=Number(e.target.value)||30;load();};
+document.querySelectorAll('#seg button').forEach(b=>b.onclick=()=>{S.f=b.dataset.f;document.querySelectorAll('#seg button').forEach(x=>x.classList.toggle('on',x===b));if(S.data)render();});
+$('#pinMode').onclick=()=>{$('#pinMode').classList.add('on');$('#emailMode').classList.remove('on');$('#pinForm').hidden=false;$('#emailPanel').hidden=true;};
+$('#emailMode').onclick=()=>{$('#emailMode').classList.add('on');$('#pinMode').classList.remove('on');$('#pinForm').hidden=true;$('#emailPanel').hidden=false;};
+$('#pinForm').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginPin',{phone:$('#phone').value,pin:$('#pin').value});saveToken(r.token);$('#pin').value='';await load();}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#otpReq').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginRequest',{email:$('#email').value});$('#otpVerify').hidden=false;toast(r.message||'Code sent');}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#otpVerify').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;try{const r=await api('loginVerify',{email:$('#email').value,code:$('#code').value});saveToken(r.token);$('#code').value='';await load();}catch(x){toast(x.message);}finally{b.disabled=false;}};
+$('#logout').onclick=async()=>{if(!confirm('Sign out?'))return;try{await api('logout');}catch{}clearToken();S.data=null;showLogin();};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js',{scope:'./'}).catch(()=>{});
+let installEvt=null;const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e;if(!standalone)$('#install').hidden=false;});
+addEventListener('appinstalled',()=>{$('#install').hidden=true;toast('App installed. Open it from your home screen.');});
+$('#install').onclick=async()=>{if(installEvt){installEvt.prompt();await installEvt.userChoice.catch(()=>{});installEvt=null;$('#install').hidden=true;}};
+if(!standalone&&/iphone|ipad|ipod/i.test(navigator.userAgent)){let seen='';try{seen=localStorage.getItem('q-ios-tip')||'';}catch{}if(!seen)$('#iosTip').hidden=false;}
+$('#iosClose').onclick=()=>{$('#iosTip').hidden=true;try{localStorage.setItem('q-ios-tip','1');}catch{}};
+
+
+try{const c=JSON.parse(localStorage.getItem('q-cache')||'null');if(token&&c&&c.data&&c.data.me){S.data=c.data;S.days=c.days||30;$('#days').value=String(S.days);showApp();}}catch{}
+load();
+</script>
+</body></html>
