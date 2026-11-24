@@ -97,7 +97,7 @@ button.secondary{background:#e4ecf3;color:var(--navy)}button.danger{background:v
 <button class="fab" id="addBtn" hidden>+ Add work</button>
 <div class="sheet" id="sheet" hidden></div>
 <div class="toast" id="toast" hidden></div>
-<script src="../config.js"></script>
+<script src="../config.js"></script><script src="../complaint-media.js?v=2"></script>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -150,8 +150,9 @@ function render(){const d=S.data,me=String(d.me.email).toLowerCase();
  renderComplaints('#cmpBox',false);renderComplaints('#holdCmp',true);renderOpen();renderDone();renderReport();renderParts();['work','hold','done','report','parts'].forEach(t=>$('#'+t+'View').hidden=S.tab!==t);$('#dayCard').hidden=S.tab==='parts';$('#scopeSeg').hidden=!d.supervisor||S.tab!=='work';
  const can=r=>!r.readOnly&&(d.supervisor||String(r.enteredById).toLowerCase()===me);
  const sorted=rows.slice().sort((a,b)=>(a.shift===b.shift?0:a.shift==='Day'?-1:1)||String(a.startTime).localeCompare(String(b.startTime)));
- $('#list').innerHTML=sorted.length?sorted.map(r=>`<div class="card entry ${esc(r.status)}"><div class="top"><div><div class="m">${esc(r.machine)}</div><div class="meta">${esc(r.issueType)} · ${esc(r.shift)} shift · ${esc(r.startTime)}–${esc(r.endTime)} (${fmt(r.minutes)})</div></div><span class="badge ${esc(r.status)}">${esc(r.status)}</span></div><div class="desc">${esc(r.description)}</div>${r.reason?`<div class="reason"><b>Reason:</b> ${esc(r.reason)}</div>`:''}<div class="meta">Team: ${esc((r.employees||[]).join(', '))}<br>Entered by ${esc(r.enteredBy)}</div>${can(r)?`<div class="acts"><button class="secondary" data-edit="${esc(r.id)}">Edit</button><button class="danger" data-del="${esc(r.id)}">Delete</button></div>`:''}</div>`).join(''):`<div class="card empty">No work entered for ${esc(S.day)}.<br>Tap <b>+ Add work</b> to add your work.</div>`;
+ $('#list').innerHTML=sorted.length?sorted.map(r=>`<div class="card entry ${esc(r.status)}"><div class="top"><div><div class="m">${esc(r.machine)}</div><div class="meta">${esc(r.issueType)} · ${esc(r.shift)} shift · ${esc(r.startTime)}–${esc(r.endTime)} (${fmt(r.minutes)})</div></div><span class="badge ${esc(r.status)}">${esc(r.status)}</span></div><div class="desc">${esc(r.description)}</div>${r.reason?`<div class="reason"><b>Reason:</b> ${esc(r.reason)}</div>`:''}<div class="meta">Team: ${esc((r.employees||[]).join(', '))}<br>Entered by ${esc(r.enteredBy)}</div>${typeof cmThumbs==='function'?cmThumbs(r.media):''}${can(r)?`<div class="acts"><button class="secondary" data-edit="${esc(r.id)}">Edit</button>${d.mediaOn?`<button class="secondary" data-media="${esc(r.id)}">📷 Photo</button>`:''}<button class="danger" data-del="${esc(r.id)}">Delete</button></div>`:''}</div>`).join(''):`<div class="card empty">No work entered for ${esc(S.day)}.<br>Tap <b>+ Add work</b> to add your work.</div>`;
  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openForm(all.find(x=>x.id===b.dataset.edit)));
+ document.querySelectorAll('[data-media]').forEach(b=>b.onclick=()=>{if(typeof cmAddSheet!=='function')return toast('Please refresh the app');cmAddSheet('Photo / video of this work',{api,kind:'worklog',ref:b.dataset.media,onDone:load});});
  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const r=all.find(x=>x.id===b.dataset.del);if(!r||!confirm('Delete this work entry?\n'+r.machine+' · '+r.startTime+'–'+r.endTime))return;S.data.entries=(S.data.entries||[]).filter(x=>x.id!==r.id);render();queueSave('delete '+r.machine,'deleteWorkLog',{id:r.id},()=>{});});}
 
 const hm=iso=>{try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso));}catch{return '';}};
