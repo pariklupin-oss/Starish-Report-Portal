@@ -2,8 +2,8 @@ import {createWorkspaceLoader,workspaceGroup,workspaceNeedsReload} from './works
 import {METRICS,SHIFT_FIELDS,parseSummarySheet} from './boiler-summary.js';
 import {readTaskWorkbook} from './task-excel.js';
 import {analysisMetrics,monthlyAnalysis,dateAnalysis,metricMethod} from './analysis-model.js';
-import {buildReportTable} from './report-table.js?v=95';
-import {REPORT_NAMES,fieldNames,inputType,MATERIALS,METERS,DEPARTMENTS,derived,summary,glueDays} from './report-model.js?v=95';
+import {buildReportTable} from './report-table.js?v=111';
+import {REPORT_NAMES,fieldNames,inputType,MATERIALS,METERS,DEPARTMENTS,derived,summary,glueDays} from './report-model.js?v=111';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const dateIST=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const types=REPORT_NAMES.filter(t=>!['Employee Task','Boiler Hourly Log','Boiler Water Tests'].includes(t));
@@ -511,8 +511,8 @@ function bindBoilerEntry(){if($('#boilerExcelUpload'))$('#boilerExcelUpload').on
 
 function portalCorrectionForm(r){
  const keys=r.type==='Stage Report'?Object.keys(r.fields||{}):Array.from(new Set([...Object.keys(r.fields||{}),...fieldNames(r.type),'Remarks']));
- modal('Edit '+r.type+' · '+r.date,`<form id="portalCorrection"><p class="notice">This correction updates portal tables, PDFs and analysis. It is retained during sync. The original source Sheet / dedicated entry tab is unchanged.</p><div class="form-grid"><label>Date<input name="date" type="date" value="${esc(r.date)}" required></label><label>Shift<select name="shift">${option(['Day','Night','Daily'],r.shift)}</select></label>${keys.map((k,i)=>`<label>${esc(k)}<input name="field${i}" value="${esc(r.fields?.[k]??'')}"></label>`).join('')}<label class="full">Correction reason<textarea name="reason" required></textarea></label></div><button type="submit">Save correction</button></form>`);
- submit($('#portalCorrection'),async fd=>{const fields={};keys.forEach((k,i)=>fields[k]=fd.get('field'+i));await mutate('correctReport',{id:r.id,version:r.version,date:fd.get('date'),shift:fd.get('shift'),fields,reason:fd.get('reason')});message('Correction saved');});
+ modal('Edit '+r.type+' · '+r.date,`<form id="portalCorrection"><p class="notice">This correction updates portal tables, PDFs and analysis. It is retained during sync. The original source Sheet / dedicated entry tab is unchanged.</p><div class="form-grid"><label>Date<input name="date" type="date" value="${esc(r.date)}" required></label><label>Shift<select name="shift">${option(['Day','Night','Daily'],r.shift)}</select></label>${keys.map((k,i)=>`<label>${esc(k)}<input name="field${i}" value="${esc(r.type==='Water Meter'&&k==='Reading Multiplier'?'10':r.fields?.[k]??'')}" ${r.type==='Water Meter'&&k==='Reading Multiplier'?'readonly':''}></label>`).join('')}<label class="full">Correction reason<textarea name="reason" required></textarea></label></div><button type="submit">Save correction</button></form>`);
+ submit($('#portalCorrection'),async fd=>{const fields={};keys.forEach((k,i)=>fields[k]=fd.get('field'+i));if(r.type==='Water Meter')fields['Reading Multiplier']='10';await mutate('correctReport',{id:r.id,version:r.version,date:fd.get('date'),shift:fd.get('shift'),fields,reason:fd.get('reason')});message('Correction saved');});
 }
 
 
