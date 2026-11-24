@@ -23,7 +23,10 @@ export function derived(r) {
         out['Rate (litres/hour)'] = h && fuel !== null ? fmt(fuel / h) : 'Unavailable';
     }
     if (r.type === 'Water Meter') {
-        const a = n('Opening Reading'), b = n('Closing Reading'), m = n('Reading Multiplier');
+        // All Water Meter registers are entered as six digits: one count is 10 litres.
+        // Apply the same conversion to historical records without changing their raw readings.
+        const a = n('Opening Reading'), b = n('Closing Reading'), m = 10;
+        out['Reading Multiplier'] = String(m);
         out['Consumption (litres)'] = a !== null && b !== null && m !== null ? fmt((b - a) * m) : 'Missing readings or multiplier';
     }
     if (r.type.includes('Production') || r.type.includes('Timesheet')) {
