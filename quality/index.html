@@ -112,7 +112,7 @@ header{background:#3b1f6e}.fab{background:var(--q);color:#fff}
 <button class="fab" id="addBtn" hidden>+ Register Quality</button>
 <div class="sheet" id="sheet" hidden></div>
 <div class="toast" id="toast" hidden></div>
-<script src="../config.js"></script>
+<script src="../config.js"></script><script src="../complaint-media.js?v=2"></script>
 <script>
 'use strict';
 const $=s=>document.querySelector(s);
@@ -162,14 +162,16 @@ function render(){const d=S.data,me=d.me.email,ql=S.q.trim().toLowerCase();
  $('#list').innerHTML=rows.map(x=>{const own=x.reporterId===me,pen=x.status==='Pending Manager Review';
   const acts=[];if(pen&&(d.manager||own))acts.push(`<button type="button" class="secondary" data-ed="${esc(x.id)}">Edit</button>`);
   if(d.manager&&OPEN.includes(x.status)){acts.push(`<button type="button" class="go" data-rs="${esc(x.id)}">Resolve</button>`);acts.push(`<button type="button" class="upd" data-fw="${esc(x.id)}">To Maintenance</button>`);}
+  if(d.mediaOn&&x.status!=='Resolved'&&(d.manager||own))acts.push(`<button type="button" class="secondary" data-md="${esc(x.id)}">📷 Photo</button>`);
   if(d.manager||(pen&&own))acts.push(`<button type="button" class="danger" data-dl="${esc(x.id)}">Delete</button>`);
   return `<div class="card qcard ${cls(x.status)}"><div class="qtop"><div><span class="tokn">${esc(x.tokenNo)}</span><div class="meta" style="margin:0">${esc(when(x.createdAt))}</div></div><span class="badge ${cls(x.status)}">${esc(x.status)}</span></div>
-  <div class="qh">JC ${esc(x.jobCardNumber)} · ${esc(x.productName)}</div><div class="qc">${esc(x.customerName)}</div><div class="desc">${esc(x.description)}</div>
+  <div class="qh">JC ${esc(x.jobCardNumber)} · ${esc(x.productName)}</div><div class="qc">${esc(x.customerName)}</div><div class="desc">${esc(x.description)}</div>${typeof cmThumbs==='function'?cmThumbs(x.media):''}
   <div class="kv"><span><small>Reported by</small>${esc(x.reportedBy||'')}</span><span><small>Classification</small>${esc(x.category||'Awaiting review')}</span>${x.maintenanceToken?`<span><small>Maintenance token</small>${esc(x.maintenanceToken)}</span>`:''}</div>
   ${x.solutionNote?`<div class="note"><b>${x.status==='Resolved'?'Quality solution':'Manager note'}:</b> ${esc(x.solutionNote)}</div>`:''}
   ${acts.length?`<div class="btnrow">${acts.join('')}</div>`:''}</div>`;}).join('')||`<div class="card empty">${S.f==='open'?'No open Quality entries.':'No Quality entries in this period.'}<br><small>Tap <b>+ Register Quality</b> to add one.</small></div>`;
  const find=id=>all.find(x=>x.id===id);
  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>issueForm(find(b.dataset.ed)));
+ document.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>{if(typeof cmAddSheet!=='function')return toast('Please refresh the app');cmAddSheet('Photo / video of the defect',{api,kind:'quality',ref:b.dataset.md,onDone:load});});
  document.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>resolveForm(find(b.dataset.rs)));
  document.querySelectorAll('[data-fw]').forEach(b=>b.onclick=()=>forwardForm(find(b.dataset.fw)));
  document.querySelectorAll('[data-dl]').forEach(b=>b.onclick=async()=>{const x=find(b.dataset.dl);if(!x||!confirm('Delete Quality record '+x.tokenNo+'?'))return;try{await send('deleteQualityIssue',{id:x.id,version:x.version},b);toast('Quality entry deleted');load();}catch(e){toast(e.message);}});}
@@ -188,7 +190,7 @@ function issueForm(ex){const d=S.data,jobs=[...(d.jobs||[])];let sel=null;
  $('#js').oninput=draw;draw();drawSel();
  $('#sv').onclick=async e=>{if(!sel)return toast('Select a Job Card from the list.');const desc=$('#desc').value.trim();if(!desc)return toast('Enter Quality details.');
   const data={jobCardNumber:sel.jobCardNumber,customerName:sel.customerName,productName:sel.productName,description:desc};
-  try{const r=ex?await send('editQualityIssue',{id:ex.id,version:ex.version,...data},e.target):await send('saveQualityIssue',data,e.target);closeSheet();toast(r.warning||(ex?'Quality entry corrected':'Saved · '+((r.issue&&r.issue.tokenNo)||'sent to Quality Manager')));load();}catch(x){toast(x.message);}};}
+  try{const r=ex?await send('editQualityIssue',{id:ex.id,version:ex.version,...data},e.target):await send('saveQualityIssue',data,e.target);closeSheet();toast(r.warning||(ex?'Quality entry corrected':'Saved · '+((r.issue&&r.issue.tokenNo)||'sent to Quality Manager')));load();if(!ex&&r.issue&&r.issue.id&&S.data&&S.data.mediaOn&&typeof cmAddSheet==='function'&&confirm('Add a photo/video of the defect now?'))cmAddSheet('Photo / video of the defect',{api,kind:'quality',ref:r.issue.id,onDone:load});}catch(x){toast(x.message);}};}
 function resolveForm(x){openSheet('Resolve '+x.tokenNo,`<div class="card"><div class="qh" style="margin-top:0">JC ${esc(x.jobCardNumber)} · ${esc(x.productName)}</div><div class="qc">${esc(x.customerName)}</div><div class="desc">${esc(x.description)}</div><label>Solution / Resolution note</label><textarea id="sn" maxlength="3000" placeholder="Cause checked and action taken"></textarea><button type="button" class="save go" id="sv">Save solution and resolve</button></div>`);
  $('#sv').onclick=async e=>{const n=$('#sn').value.trim();if(!n)return toast('Enter the solution note.');try{await send('resolveQualityIssue',{id:x.id,version:x.version,solutionNote:n},e.target);closeSheet();toast('Quality issue resolved');load();}catch(err){toast(err.message);}};}
 function forwardForm(x){openSheet('Forward '+x.tokenNo+' to Maintenance',`<div class="card"><div class="qh" style="margin-top:0">JC ${esc(x.jobCardNumber)} · ${esc(x.productName)}</div><div class="desc">${esc(x.description)}</div>
