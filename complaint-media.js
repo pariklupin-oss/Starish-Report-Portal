@@ -48,7 +48,7 @@ function cmRecordVideo(){return new Promise(async(resolve,reject)=>{
   rec.onstop=()=>{stopAll();dlg.close();if(cancelled)return;resolve({blob:new Blob(parts,{type:cmBaseMime(mime)}),mime:cmBaseMime(mime),kind:'video',duration:sec});};
   rec.start(1000);go.textContent='Stop';tick=setInterval(()=>{sec++;t.textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');if(sec>=CM_MAX_VIDEO_S)finish();},1000);};
 });}
-function cmPickerHtml(){return `<div class="cm-status" style="color:#b45309;font-weight:600">Storage is full, so photo/video upload is disabled. Please submit the complaint here and share the photos/videos on WhatsApp.</div>`;}
+function cmPickerHtml(){return `<div class="cm-btns"><label class="cm-file">📷 Photo<input type="file" accept="image/*" multiple data-cm-photo></label><label class="cm-file">🎞 Choose video<input type="file" accept="video/*" data-cm-video></label><button type="button" data-cm-rec>⏺ Record video</button></div><div class="cm-status" data-cm-status></div>`;}
 /* Wires the three buttons; onItem(item) gets each ready (compressed) photo/video. */
 function cmBindPicker(root,onItem){if(!root.querySelector('[data-cm-photo]'))return;/*27-10-2026 media off*/
  const st=root.querySelector('[data-cm-status]'),status=s=>{if(st)st.textContent=s||'';};
@@ -58,3 +58,19 @@ function cmBindPicker(root,onItem){if(!root.querySelector('[data-cm-photo]'))ret
  root.querySelector('[data-cm-rec]').onclick=()=>run(()=>cmRecordVideo());
  return status;
 }
+
+/* ---- 24-11-2026: photos/videos are stored in Google Drive (Starish Media server), not Supabase ---- */
+function cmB64(blob){return new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]||'');fr.onerror=()=>bad(Error('Could not read the file'));fr.readAsDataURL(blob);});}
+async function cmDrivePost(r,item){const data=await cmB64(item.blob);const res=await fetch(r.uploadUrl,{method:'POST',body:JSON.stringify({action:'upload',ticket:r.ticket,mime:item.mime,data})});
+ let j=null;try{j=await res.json();}catch(e){throw Error('Upload failed. Check internet and try again.');}if(!j||!j.ok)throw Error((j&&j.error)||'Upload failed');return j;}
+function cmEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function cmThumbs(list,delAttr){list=list||[];if(!list.length)return '';return '<div class="cm-grid">'+list.map(m=>`<div class="cm-item"><a href="${cmEsc(m.url)}" target="_blank" rel="noopener"><img src="${cmEsc(m.thumb||m.url)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.opacity=.25">${m.kind==='video'?'<span class="cm-play">▶</span>':''}</a>${delAttr?`<button type="button" ${delAttr}="${cmEsc(m.id)}">✕</button>`:''}</div>`).join('')+'</div>';}
+(function(){const st=document.createElement('style');st.textContent='.cm-item a{position:relative;display:block}.cm-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);color:#fff;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px}#cmAdd{border:0;border-radius:14px;padding:16px;width:calc(100% - 24px);max-width:520px}#cmAdd .cm-close{float:right;width:auto;margin:0;padding:6px 12px;background:#fff;color:#102d4c;border:1px solid #c9d3da;border-radius:10px}';document.head.append(st);})();
+/* Small sheet to add photos/videos to an entry (Work Log / Quality). api = the app's api(action,data) */
+function cmAddSheet(title,o){let dlg=document.getElementById('cmAdd');if(!dlg){dlg=document.createElement('dialog');dlg.id='cmAdd';document.body.append(dlg);}
+ dlg.innerHTML=`<button type="button" class="cm-close">Close</button><h3 style="margin:4px 0 10px">${cmEsc(title)}</h3><div class="cm-box">${cmPickerHtml()}<div data-cm-done class="cm-status"></div></div><p class="cm-status">Photos are made smaller on the phone. Video up to 1 minute. Keep this screen open until it says Uploaded.</p>`;
+ let added=0;const close=()=>{dlg.close();if(added&&o.onDone)o.onDone();};dlg.querySelector('.cm-close').onclick=close;dlg.oncancel=e=>{e.preventDefault();close();};
+ cmBindPicker(dlg,async(item,status)=>{status('Uploading '+item.kind+'… ('+(item.blob.size/1048576).toFixed(1)+' MB)');
+  const r=await o.api('mediaUpload',{kind:o.kind,ref:o.ref,mime:item.mime,size:item.blob.size,duration:item.duration||0});const j=await cmDrivePost(r,item);
+  await o.api('mediaDone',{id:r.id,fileId:j.id,sig:j.sig,size:j.size});added++;status('Uploaded ✓ ('+added+')');});
+ dlg.showModal();}

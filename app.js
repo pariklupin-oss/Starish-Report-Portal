@@ -171,11 +171,13 @@ function cmRecordVideo(){return new Promise(async(resolve,reject)=>{
 async function cmUpload(tokenNo,item,stage,status){
  status&&status('Uploading '+item.kind+'… ('+(item.blob.size/1048576).toFixed(1)+' MB)');
  const r=await api('complaintMediaUpload',{tokenNo,mime:item.mime,size:item.blob.size,stage,duration:item.duration||0},true);
- const res=await fetch(r.uploadUrl,{method:'PUT',headers:{'Content-Type':item.mime,'x-upsert':'false'},body:item.blob});
- if(!res.ok)throw Error('Upload failed ('+res.status+'). Please try again.');
- await api('complaintMediaDone',{id:r.id},true);
+ const fin={id:r.id};
+ if(r.mode==='drive'){const data=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]||'');fr.onerror=()=>bad(Error('Could not read the file'));fr.readAsDataURL(item.blob);});
+  const res=await fetch(r.uploadUrl,{method:'POST',body:JSON.stringify({action:'upload',ticket:r.ticket,mime:item.mime,data})});let j=null;try{j=await res.json();}catch(e){}if(!j||!j.ok)throw Error((j&&j.error)||'Upload failed. Please try again.');fin.fileId=j.id;fin.sig=j.sig;fin.size=j.size;}
+ else{const res=await fetch(r.uploadUrl,{method:'PUT',headers:{'Content-Type':item.mime,'x-upsert':'false'},body:item.blob});if(!res.ok)throw Error('Upload failed ('+res.status+'). Please try again.');}
+ await api('complaintMediaDone',fin,true);
 }
-function cmPickerHtml(){return `<div class="cm-status" style="color:#b45309;font-weight:600">Storage is full, so photo/video upload is disabled. Please submit the complaint here and share the photos/videos on WhatsApp.</div>`;}
+function cmPickerHtml(){return `<div class="cm-btns"><label class="cm-file">📷 Photo<input type="file" accept="image/*" multiple data-cm-photo></label><label class="cm-file">🎞 Choose video<input type="file" accept="video/*" data-cm-video></label><button type="button" data-cm-rec>⏺ Record video</button></div><div class="cm-status" data-cm-status></div>`;}
 /* Wires the three buttons; onItem(item) gets each ready (compressed) photo/video. */
 function cmBindPicker(root,onItem){if(!root.querySelector('[data-cm-photo]'))return;/*27-10-2026 media off*/
  const st=root.querySelector('[data-cm-status]'),status=s=>{if(st)st.textContent=s||'';};
@@ -190,7 +192,7 @@ function cmMediaSection(c,host){
  if(!host)return;host.innerHTML='<div class="cm-box"><h4>Photos / Videos</h4><div class="cm-status">Loading…</div></div>';
  api('complaintMediaList',{tokenNo:c.tokenNo}).then(r=>{
   const box=host.querySelector('.cm-box'),list=r.media||[];
-  box.innerHTML=`<h4>Photos / Videos (${list.length}/${r.max})</h4>${r.canAdd&&list.length<r.max?cmPickerHtml():''}<div class="cm-grid">${list.map(m=>`<div class="cm-item">${m.kind==='video'?`<video src="${esc(m.url)}" controls preload="metadata" playsinline></video>`:`<a href="${esc(m.url)}" target="_blank" rel="noopener"><img src="${esc(m.url)}" alt="Complaint photo" loading="lazy"></a>`}<small>${esc(m.by)} · ${esc(new Date(m.at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}))}</small>${m.canDelete&&r.canAdd?`<button type="button" class="secondary" data-cm-del="${esc(m.id)}">✕</button>`:''}</div>`).join('')}</div><p class="muted">${esc(r.deleteNote||'')}</p>`;
+  box.innerHTML=`<h4>Photos / Videos (${list.length}/${r.max})</h4>${r.canAdd&&list.length<r.max?cmPickerHtml():''}<div class="cm-grid">${list.map(m=>`<div class="cm-item">${m.thumb?`<a href="${esc(m.url)}" target="_blank" rel="noopener" style="position:relative;display:block"><img src="${esc(m.thumb)}" alt="Complaint ${esc(m.kind)}" loading="lazy" referrerpolicy="no-referrer">${m.kind==='video'?'<span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);color:#fff;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center">▶</span>':''}</a>`:m.kind==='video'?`<video src="${esc(m.url)}" controls preload="metadata" playsinline></video>`:`<a href="${esc(m.url)}" target="_blank" rel="noopener"><img src="${esc(m.url)}" alt="Complaint photo" loading="lazy"></a>`}<small>${esc(m.by)} · ${esc(new Date(m.at).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}))}</small>${m.canDelete&&r.canAdd?`<button type="button" class="secondary" data-cm-del="${esc(m.id)}">✕</button>`:''}</div>`).join('')}</div><p class="muted">${esc(r.deleteNote||'')}</p>`;
   if(r.canAdd&&list.length<r.max)cmBindPicker(box,async(item,status)=>{await cmUpload(c.tokenNo,item,c.status==='Open'?'raise':'work',status);status('Uploaded');cmMediaSection(c,host);});
   box.querySelectorAll('[data-cm-del]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this photo/video?'))return;b.disabled=true;try{await api('complaintMediaDelete',{id:b.dataset.cmDel},true);cmMediaSection(c,host);}catch(e){message(e.message);b.disabled=false;}});
  }).catch(e=>{host.innerHTML='<div class="cm-box"><h4>Photos / Videos</h4><div class="cm-status">'+esc(e.message==='Unknown action'?'Photo/video needs the latest backend (Apps Script).':e.message)+'</div></div>';});
