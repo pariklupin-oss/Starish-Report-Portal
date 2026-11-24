@@ -29,9 +29,21 @@ export function buildReportTable(type,entries,options={}){
  totals={Customer:'TOTAL','No. of Vehicles':allVehicles.size,'Vehicle Numbers':'',Invoices:input.length,Qty:fmt(totalQty,0),'Amount (Rs)':fmt(totalAmount,0)};
  }else{
  const fields=new Set(type==='Diesel Consumption'?['Opening Litres','Received Litres','Issued Litres','Receiver Name','Used For']:fieldNames(type));for(const r of input)for(const k of Object.keys({...r.fields,...derived(r)}))fields.add(k);if(type==='Water Meter')fields.add('Area Consumption (litres)');columns=['Date','Shift',...[...fields].filter(k=>!['Review','Review status','Pending approval'].includes(k)&&(type!=='Diesel Consumption'||!/(Cans|Barrels|Container Type|Container Quantity)$/.test(k)))];
- for(const r of input){const values={Date:r.date,Shift:r.shift,...r.fields,...derived(r)};if(type==='Water Meter'){const meter=String(r.fields['Meter Name']).toUpperCase(),down=meter==='BOARDLINE'?'PRINTING':meter==='GLUE'?'BOARDLINE':null;const raw=numeric(values['Consumption (litres)']);const downstream=down?input.filter(x=>x.date===r.date&&x.shift===r.shift&&String(x.fields['Meter Name']).toUpperCase()===down).map(x=>numeric(derived(x)['Consumption (litres)'])):[0];const subtraction=downstream.length&&downstream.every(v=>v!==null&&v>=0)?downstream.reduce((a,b)=>a+b,0):null;values['Area Consumption (litres)']=raw!==null&&subtraction!==null&&raw>=subtraction?fmt(raw-subtraction):'Unavailable - verify readings';}rows.push({id:r.id,values});}
+ for(const r of input){const values={Date:r.date,Shift:r.shift,...r.fields,...derived(r)};if(type==='Water Meter'){const meter=String(r.fields['Meter Name']).toUpperCase(),down=meter==='BOARDLINE'?'PRINTING':meter==='GLUE'?'BOARDLINE':null;const raw=numeric(values['Consumption (litres)']);const downstream=down?input.filter(x=>x.date===r.date&&x.shift===r.shift&&String(x.fields['Meter Name']).toUpperCase()===down).map(x=>numeric(derived(x)['Consumption (litres)'])):[0];const subtraction=downstream.length&&downstream.every(v=>v!==null&&v>=0)?downstream.reduce((a,b)=>a+b,0):null;values['Area Consumption (litres)']=raw!==null&&subtraction!==null&&raw>=subtraction?fmt(raw-subtraction):(raw===null?'Missing meter readings':subtraction===null?'Missing '+down+' readings':'Verify readings: '+meter+' '+fmt(raw)+' L < '+down+' '+fmt(subtraction)+' L');}rows.push({id:r.id,values});}
  }
  rows.sort((a,b)=>String(a.values.Date).localeCompare(String(b.values.Date))||String(a.values.Machine||'').localeCompare(String(b.values.Machine||''))||String(a.values.Shift).localeCompare(String(b.values.Shift)));
+ if(type==='Water Meter'&&options.waterLayout==='date'){
+ const meters=[['MAIN','MAIN'],['PRINTING','PRINTING'],['BOARDLINE','BOARDLINE'],['GLUE','GLUE'],['CANTEEN','CANTEEN'],['LABOUR','LABOUR'],['BOILER','BOILER']];
+ const dates=[...new Set(rows.map(r=>r.values.Date))].sort(),wide=[];
+ for(const date of dates){const day=rows.filter(r=>r.values.Date===date),values={Date:date};
+ for(const [label,meter] of meters){const matching=day.filter(r=>String(r.values['Meter Name']||'').trim().toUpperCase()===meter),amounts=matching.map(r=>r.values['Area Consumption (litres)']);
+ values[label]=!matching.length?'Not recorded':amounts.every(v=>Number.isFinite(Number(String(v).replace(/,/g,''))))?fmt(amounts.reduce((sum,v)=>sum+Number(String(v).replace(/,/g,'')),0)):amounts.filter(v=>!Number.isFinite(Number(String(v).replace(/,/g,'')))).join('; ');
+ }
+ wide.push({id:'',recordIds:day.map(r=>r.id),values});}
+ rows.splice(0,rows.length,...wide);columns=['Date',...meters.map(([label])=>label)];
+ // Old saved columns describe the vertical layout and must not hide the new meter columns.
+ return {columns,allColumns:columns,rows,totals:null,caption:'Water Meter · Area consumption (litres)'};
+ }
  const selected=options.visibleColumns;const visible=Array.isArray(selected)&&selected.length?columns.filter(k=>selected.includes(k)):columns;
  return {columns:visible.length?visible:columns,allColumns:columns,rows,totals,caption:type==='Boardline Production'?'BOARDLINE MACHINE (Standard 4000 m/hr)':type};
 }
