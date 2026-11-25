@@ -554,8 +554,9 @@ function reelWoHtml(r){const rows=(r&&r.reels)||[];if(!rows.length)return '<p>No
 /* ---- Glue Consumption (Reel): same starch as Glue Consumption, tonnage from ERP Reel Consumption (not Boardline). 25-11-2026 ---- */
 function glueReelHtml(){const f=$('#from').value,t=$('#to').value;if(reelKey!==f+'|'+t&&!reelBusy){setTimeout(loadReelData,0);return '<div class="card">Loading reel tonnage…</div>';}
  if(reelBusy||!reelData)return reelErr?`<div class="card">Reel tonnage could not load: ${esc(reelErr)} <button type="button" id="reelRetry">Try again</button></div>`:'<div class="card">Loading reel tonnage…</div>';
- const iso=p=>{const x=String(p||'');return /^\d{2}-\d{2}-\d{4}$/.test(x)?x.slice(6,10)+'-'+x.slice(3,5)+'-'+x.slice(0,2):x;},reel={};
- for(const x of (reelData.rows||[]))reel[iso(x.period)]=reelNum(x.kg)||reelNum(x.tons)*1000;
+ // ERP periods include weekday text, e.g. '02-11-2026 Mon'; starch dates use ISO.
+ const iso=p=>{const x=String(p||'').trim(),dmy=x.match(/^(\d{2})-(\d{2})-(\d{4})(?:\s|$)/),ymd=x.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s]|$)/);return dmy?dmy[3]+'-'+dmy[2]+'-'+dmy[1]:ymd?ymd[1]+'-'+ymd[2]+'-'+ymd[3]:null;},reel={};
+ for(const x of (reelData.rows||[])){const date=iso(x.period);if(date)reel[date]=(reel[date]||0)+(reelNum(x.kg)||reelNum(x.tons)*1000);}
  const n2=(v,d=2)=>v==null?'Unavailable':Number(v).toLocaleString('en-IN',{maximumFractionDigits:d});
  const days=glueDays(state.reports,state.batchChangeover).filter(g=>(!f||g.date>=f)&&(!t||g.date<=t)).map(g=>{const kg=reel[g.date]||0,starchOk=g.starch>0;return {date:g.date,starch:g.starch,batches:g.batches,tonnes:kg/1000,glue:starchOk&&kg>0?g.starch/(kg/1000):null,check:kg>0?(starchOk?'Reel data available':'Starch quantity missing'):'No reel consumption in ERP for this date'};});
  const ok=days.filter(d=>d.glue!=null),sk=ok.reduce((a,d)=>a+d.starch,0),tn=ok.reduce((a,d)=>a+d.tonnes,0);
