@@ -212,7 +212,7 @@ function empDetail(e,k){const cy=carryFor(k||'');const sh=$('#sheet');sh.hidden=
  sh.querySelectorAll('[data-redit]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.redit);closeD();openForm(r);});
  sh.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{const r=list.find(x=>x.id===b.dataset.rdel);if(!r||!confirm('Delete this work entry?\n'+r.machine+' · '+r.startTime+'–'+r.endTime))return;closeD();S.data.entries=(S.data.entries||[]).filter(x=>x.id!==r.id);S.data.openEntries=(S.data.openEntries||[]).filter(x=>x.id!==r.id);render();queueSave('delete '+r.machine,'deleteWorkLog',{id:r.id},()=>{});});
  $('#closeSheet').onclick=()=>{sh.hidden=true;sh.innerHTML='';document.body.style.overflow='';};}
-async function shareReport(){const b=$('#waShare');b.disabled=true;b.textContent='Preparing…';try{const f=await reportImage();const cap='Maintenance Work Report · '+dmy(S.day);
+async function shareReport(){const b=$('#waShare');b.disabled=true;b.textContent='Preparing…';try{const f=await reportImage();const cap='Maintenance Work Report - '+dmy(S.day);
  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:cap,text:cap});}catch(e){if(e&&e.name!=='AbortError')throw e;}}
  else{const u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);toast('Report image saved. Attach it in WhatsApp.');}}
  catch(e){toast(e.message);}finally{b.disabled=false;b.textContent='Share report on WhatsApp';}}
@@ -222,8 +222,8 @@ async function reportImage(){
  const all=(S.data.entries||[]).filter(r=>!r.deleted).slice().sort((a,b)=>(a.shift===b.shift?0:a.shift==='Day'?-1:1)||String(a.startTime).localeCompare(String(b.startTime)));
  const W=1100,P=28,F='Segoe UI, Roboto, Arial, sans-serif',c=document.createElement('canvas'),x=c.getContext('2d');
  const wrap=(t,w,font)=>{x.font=font;const out=[];String(t||'').split('\n').forEach(par=>{let line='';par.split(/\s+/).forEach(wd=>{const tr=line?line+' '+wd:wd;if(x.measureText(tr).width<=w||!line)line=tr;else{out.push(line);line=wd;}while(x.measureText(line).width>w&&line.length>1){let k=line.length;while(k>1&&x.measureText(line.slice(0,k)).width>w)k--;out.push(line.slice(0,k));line=line.slice(k);}});out.push(line);});return out.length?out:[''];};
- const jc=[{h:'#',w:40},{h:'Machine / Issue',w:190},{h:'Work done',w:330},{h:'Team',w:200},{h:'Shift · Time',w:130},{h:'Status',w:154}];
- const tm=r=>(r.shift||'')+'\n'+(r.startTime||'')+'–'+(r.endTime||'')+'\n'+fmt(r.minutes);
+ const jc=[{h:'#',w:40},{h:'Machine / Issue',w:190},{h:'Work done',w:330},{h:'Team',w:200},{h:'Shift / Time',w:130},{h:'Status',w:154}];
+ const tm=r=>(r.shift||'')+'\n'+(r.startTime||'')+' - '+(r.endTime||'')+'\n'+fmt(r.minutes);
  const jrows=all.map((r,i)=>[String(i+1),(r.machine||'')+'\n'+(r.issueType||''),String(r.description||'')+(r.reason?'\nReason: '+r.reason:''),(r.employees||[]).join(', '),tm(r),r.status||'']);
  const by={};all.forEach(r=>(r.employeeIds||[]).forEach((id,i)=>{const k=String(id).toLowerCase();(by[k]=by[k]||{n:(r.employees||[])[i]||id,l:[]}).l.push(r);}));
  const ec=[{h:'Employee',w:390},{h:'Jobs',w:110},{h:'Time',w:150},{h:'Completed',w:130},{h:'Hold',w:132},{h:'Pending',w:132}];
@@ -236,7 +236,7 @@ async function reportImage(){
  let H=P+34+26+34+20;H+=30+HH+(jl.length?jl.reduce((s,r)=>s+r.h,0):44)+24;H+=30+HH+(el.length?el.reduce((s,r)=>s+r.h,0):44)+P+20;
  const k=2;c.width=W*k;c.height=H*k;x.scale(k,k);x.fillStyle='#ffffff';x.fillRect(0,0,W,H);x.textBaseline='top';
  let y=P;x.fillStyle='#12304f';x.fillRect(0,0,W,6);x.font='bold 26px '+F;x.fillText('Maintenance Work Report',P,y);y+=34;
- x.font='16px '+F;x.fillStyle='#475569';x.fillText('Date: '+dmy(S.day)+'  ·  Day + Night shift',P,y);y+=30;
+ x.font='16px '+F;x.fillStyle='#475569';x.fillText('Date: '+dmy(S.day)+'  |  Day + Night shift',P,y);y+=30;
  const chips=[['Jobs',String(all.length),'#e8f0fb','#12304f'],['Completed',String(done),'#e3f6ea','#1f7a43'],['Hold / Pending',String(hp),'#fdf0e1','#a65b00'],['Man-hours',fmt(tot),'#efeafb','#5b3aa8']];
  let cx=P;chips.forEach(([l,v,bg,fg])=>{x.font='bold 15px '+F;const t=l+': '+v,w=x.measureText(t).width+24;x.fillStyle=bg;x.fillRect(cx,y,w,28);x.fillStyle=fg;x.fillText(t,cx+12,y+6);cx+=w+10;});y+=50;
  const SC={Completed:['#e3f6ea','#1f7a43'],Hold:['#fdf0e1','#a65b00'],Pending:['#fde8e8','#b42318']};
