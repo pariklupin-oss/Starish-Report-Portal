@@ -18,7 +18,13 @@ const plant=()=>state&&state.user.email==='pariklupin@gmail.com';
 const canViewTaskReport=()=>plant()||state?.user?.taskReportAccess===true;
 const admin=()=>state&&['Owner','Plant Head'].includes(state.user.role);
 const REEL='Reel Consumption', canViewReel=()=>admin()||plant();
-const PROD='Production Reports', canViewPend=()=>canViewReel();
+const PROD='Production Reports';
+// Extra Production Reports viewers by login mobile (SHA-256 of last 10 digits, so numbers are not stored in this public repo). 28-11-2026: Rajesh.
+const PROD_VIEWERS_SHA=['c5fc4504816fceacb9cc8a2a481df03a86c50355425ce69715869112319d1c9c'];
+let prodViewer=false,prodViewerFor=null;
+function checkProdViewer(){const ph=String(state?.user?.phone||'').replace(/\D/g,'').slice(-10);if(ph===prodViewerFor)return;prodViewerFor=ph;prodViewer=false;if(ph.length!==10||!globalThis.crypto?.subtle)return;
+ crypto.subtle.digest('SHA-256',new TextEncoder().encode(ph)).then(b=>{const x=[...new Uint8Array(b)].map(v=>v.toString(16).padStart(2,'0')).join('');if(prodViewerFor===ph&&PROD_VIEWERS_SHA.includes(x)){prodViewer=true;render();}}).catch(()=>{});}
+const canViewPend=()=>{checkProdViewer();return canViewReel()||prodViewer;};
 const GLUE_REEL='Glue Consumption (Reel)', canViewGlueReel=()=>canViewReel()&&visibleTypes().includes('Glue Consumption');
 const taskManager=()=>admin()||!!(state?.user?.managedDepartments||[]).length;
 const departmentManager=()=>!!(state?.user?.managedDepartments||[]).length;
