@@ -219,40 +219,42 @@ async function shareReport(){const b=$('#waShare');b.disabled=true;b.textContent
 async function shareReportText(){const b=$('#waText');b.disabled=true;try{const r=await api('workLogReport',{date:S.day});location.href='https://wa.me/?text='+encodeURIComponent(r.text);}catch(e){toast(e.message);}finally{b.disabled=false;}}
 function dmy(d){const t=new Date(d+'T00:00:00');return isNaN(t)?d:t.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',weekday:'short'}).replace(/,/g,'');}
 async function reportImage(){
- const all=(S.data.entries||[]).filter(r=>!r.deleted).slice().sort((a,b)=>(a.shift===b.shift?0:a.shift==='Day'?-1:1)||String(a.startTime).localeCompare(String(b.startTime)));
+ const ents=(S.data.entries||[]).filter(r=>!r.deleted),cmp=(S.data.complaints||[]).filter(c=>!['Completed','Closed','Removed'].includes(c.status));
+ const tokOf=r=>r.complaintToken||((String(r.description||'').match(/MC-\d{8}-\d{4}/)||[])[0])||'';
+ const clean=r=>String(r.description||'').replace(/^Complaint\s+MC-\d{8}-\d{4}:\s*/,'');
+ const cMap={'On Hold':'Hold','Waiting for Spares':'Pending','In Progress':'Pending','Assigned':'Not planned yet','Reopened':'Not planned yet','Open':'Not planned yet'};
+ const mk=()=>new Map(),gadd=(M,id,name)=>{const k=String(id||name||'').toLowerCase()||'~';if(!M.has(k))M.set(k,{n:name||id||'Not assigned',l:[],min:0});return M.get(k);};
+ const A=mk();
+ cmp.forEach(c=>{const t=(c.machine||'')+(c.unit?' / '+c.unit:'')+' - '+String(c.description||c.issueType||'')+' ('+c.tokenNo+')';const g=c.assignedTo?gadd(A,c.assigneeEmail||c.assignedTo,c.assignedTo):gadd(A,'~na','Not assigned');g.l.push({t,st:c.assignedTo?(cMap[c.status]||'Pending'):'Not planned yet',tok:c.tokenNo});});
+ ents.filter(r=>r.status==='Completed'&&tokOf(r)).forEach(r=>{const tok=tokOf(r);(r.employeeIds||[]).forEach((id,i)=>{const g=gadd(A,id,(r.employees||[])[i]);if(!g.l.some(x=>x.tok===tok))g.l.push({t:(r.machine||'')+' - '+clean(r)+' ('+tok+')',st:'Completed',tok});});});
+ const B=mk();
+ ents.slice().sort((a,b)=>(a.shift===b.shift?0:a.shift==='Day'?-1:1)||String(a.startTime).localeCompare(String(b.startTime))).forEach(r=>{(r.employeeIds||[]).forEach((id,i)=>{const g=gadd(B,id,(r.employees||[])[i]);g.min+=Number(r.minutes||0);g.l.push({t:(r.machine||'')+' - '+clean(r)+((r.employees||[]).length>1?'  [with '+(r.employees||[]).filter((_,j)=>j!==i).join(', ')+']':''),d:(r.startTime||'')+' - '+(r.endTime||'')+'\n'+fmt(r.minutes),st:r.status});});});
+ const ord={Pending:0,Hold:1,'Not planned yet':2,Completed:3},srt=M=>[...M.values()].sort((a,b)=>(a.n==='Not assigned')-(b.n==='Not assigned')||String(a.n).localeCompare(String(b.n)));
+ const GA=srt(A);GA.forEach(g=>g.l.sort((a,b)=>(ord[a.st]??9)-(ord[b.st]??9)));const GB=srt(B);
+ const allA=GA.flatMap(g=>g.l),cnt=s=>allA.filter(x=>x.st===s).length,totMin=GB.reduce((s,g)=>s+g.min,0);
  const W=1100,P=28,F='Segoe UI, Roboto, Arial, sans-serif',c=document.createElement('canvas'),x=c.getContext('2d');
  const wrap=(t,w,font)=>{x.font=font;const out=[];String(t||'').split('\n').forEach(par=>{let line='';par.split(/\s+/).forEach(wd=>{const tr=line?line+' '+wd:wd;if(x.measureText(tr).width<=w||!line)line=tr;else{out.push(line);line=wd;}while(x.measureText(line).width>w&&line.length>1){let k=line.length;while(k>1&&x.measureText(line.slice(0,k)).width>w)k--;out.push(line.slice(0,k));line=line.slice(k);}});out.push(line);});return out.length?out:[''];};
- const jc=[{h:'#',w:40},{h:'Machine / Issue',w:190},{h:'Work done',w:330},{h:'Team',w:200},{h:'Shift / Time',w:130},{h:'Status',w:154}];
- const tm=r=>(r.shift||'')+'\n'+(r.startTime||'')+' - '+(r.endTime||'')+'\n'+fmt(r.minutes);
- const jrows=all.map((r,i)=>[String(i+1),(r.machine||'')+'\n'+(r.issueType||''),String(r.description||'')+(r.reason?'\nReason: '+r.reason:''),(r.employees||[]).join(', '),tm(r),r.status||'']);
- const by={};all.forEach(r=>(r.employeeIds||[]).forEach((id,i)=>{const k=String(id).toLowerCase();(by[k]=by[k]||{n:(r.employees||[])[i]||id,l:[]}).l.push(r);}));
- const ec=[{h:'Employee',w:390},{h:'Jobs',w:110},{h:'Time',w:150},{h:'Completed',w:130},{h:'Hold',w:132},{h:'Pending',w:132}];
- const cnt=(l,s)=>l.filter(r=>r.status===s).length;
- const erows=Object.values(by).sort((a,b)=>b.l.length-a.l.length||String(a.n).localeCompare(String(b.n))).map(e=>[e.n,String(e.l.length),fmt(e.l.reduce((s,r)=>s+Number(r.minutes||0),0)),String(cnt(e.l,'Completed')),String(cnt(e.l,'Hold')),String(cnt(e.l,'Pending'))]);
- const fB='15px '+F,fH='bold 15px '+F,LH=21,PAD=8;
- const lay=(cols,rows)=>rows.map(r=>{const ls=r.map((t,i)=>wrap(t,cols[i].w-PAD*2,fB));return {ls,h:Math.max(...ls.map(l=>l.length))*LH+PAD*2};});
- const jl=lay(jc,jrows),el=lay(ec,erows),HH=36;
- const rdt=v=>{const t=new Date(v);return isNaN(t)?String(v||''):t.toLocaleString('en-GB',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}).replace(',','');};
- const un=(S.data.complaints||[]).filter(c=>!c.assignedTo&&!['Completed','Closed','Removed'].includes(c.status)).sort((a,b)=>String(a.raisedAt||'').localeCompare(String(b.raisedAt||'')));
- const uc=[{h:'#',w:40},{h:'Token',w:170},{h:'Machine / Issue',w:200},{h:'Problem',w:360},{h:'Raised',w:150},{h:'Raised by',w:124}];
- const urows=un.map((c,i)=>[String(i+1),String(c.tokenNo||'')+(c.priority==='Urgent'?'\nUrgent':''),(c.machine||'')+(c.unit?' - '+c.unit:'')+'\n'+(c.issueType||''),String(c.description||''),rdt(c.raisedAt),String(c.reportedBy||'')]),ul=lay(uc,urows);
- const tot=all.reduce((s,r)=>s+Number(r.minutes||0)*Math.max(1,(r.employees||[]).length),0),done=cnt(all,'Completed'),hp=all.length-done;
- let H=P+34+26+34+20;H+=30+HH+(jl.length?jl.reduce((s,r)=>s+r.h,0):44)+24;H+=30+HH+(ul.length?ul.reduce((s,r)=>s+r.h,0):44)+24;H+=30+HH+(el.length?el.reduce((s,r)=>s+r.h,0):44)+P+20;
- const k=2;c.width=W*k;c.height=H*k;x.scale(k,k);x.fillStyle='#ffffff';x.fillRect(0,0,W,H);x.textBaseline='top';
- let y=P;x.fillStyle='#12304f';x.fillRect(0,0,W,6);x.font='bold 26px '+F;x.fillText('Maintenance Work Report',P,y);y+=34;
+ const fB='16px '+F,fH='bold 16px '+F,LH=23,PAD=9,HH=40;
+ const SC={Completed:['#e3f6ea','#1f7a43'],Pending:['#fde8e8','#b42318'],Hold:['#fdf0e1','#a65b00'],'Not planned yet':['#ece9f7','#5b3aa8']};
+ const colsA=[{h:'Employee',w:250},{h:'Assigned job',w:604},{h:'Status',w:190}],colsB=[{h:'Employee',w:250},{h:'Work done today',w:614},{h:'Time / Duration',w:180}];
+ const prep=(G,cols,sub,third)=>{const rows=[];G.forEach(g=>g.l.forEach((it,i)=>{const r={first:i===0,lines:wrap((g.l.length>1?(i+1)+'. ':'')+it.t,cols[1].w-PAD*2,fB),nl:i===0?wrap(g.n,cols[0].w-PAD*2,fH):[],sub:i===0?sub(g):'',it};r.c3=third==='badge'?null:wrap(it.d,cols[2].w-PAD*2,fB);r.h=Math.max(r.lines.length,r.first?r.nl.length+1:1,r.c3?r.c3.length:1)*LH+PAD*2;rows.push(r);}));return rows;};
+ const RA=prep(GA,colsA,g=>g.l.length+' job'+(g.l.length===1?'':'s'),'badge'),RB=prep(GB,colsB,g=>'Total '+fmt(g.min),'text');
+ const th=R=>HH+(R.length?R.reduce((s,r)=>s+r.h,0):50);
+ const H=P+34+30+50+(32+th(RA))+28+(32+th(RB))+P+24,k=2;c.width=W*k;c.height=H*k;x.scale(k,k);x.fillStyle='#fff';x.fillRect(0,0,W,H);x.textBaseline='top';
+ let y=P;x.fillStyle='#12304f';x.fillRect(0,0,W,6);x.font='bold 26px '+F;x.fillText('Maintenance Report',P,y);y+=34;
  x.font='16px '+F;x.fillStyle='#475569';x.fillText('Date: '+dmy(S.day)+'  |  Day + Night shift',P,y);y+=30;
- const chips=[['Jobs',String(all.length),'#e8f0fb','#12304f'],['Completed',String(done),'#e3f6ea','#1f7a43'],['Hold / Pending',String(hp),'#fdf0e1','#a65b00'],['Man-hours',fmt(tot),'#efeafb','#5b3aa8'],['Not assigned',String(un.length),'#fde8e8','#b42318']];
- let cx=P;chips.forEach(([l,v,bg,fg])=>{x.font='bold 15px '+F;const t=l+': '+v,w=x.measureText(t).width+24;x.fillStyle=bg;x.fillRect(cx,y,w,28);x.fillStyle=fg;x.fillText(t,cx+12,y+6);cx+=w+10;});y+=50;
- const SC={Completed:['#e3f6ea','#1f7a43'],Hold:['#fdf0e1','#a65b00'],Pending:['#fde8e8','#b42318']};
- const table=(title,cols,rows,lays,statusCol,empty)=>{x.font='bold 18px '+F;x.fillStyle='#12304f';x.fillText(title,P,y);y+=30;
-  let xx=P;x.fillStyle='#12304f';x.fillRect(P,y,W-P*2,HH);x.fillStyle='#fff';x.font=fH;cols.forEach(cl=>{x.fillText(cl.h,xx+PAD,y+10);xx+=cl.w;});y+=HH;
-  if(!rows.length){x.strokeStyle='#d5dde8';x.strokeRect(P,y,W-P*2,44);x.fillStyle='#64748b';x.font=fB;x.fillText(empty||'No work entries recorded.',P+PAD,y+13);y+=44;return;}
-  lays.forEach((L,ri)=>{x.fillStyle=ri%2?'#f6f8fb':'#ffffff';x.fillRect(P,y,W-P*2,L.h);let xx=P;
-   L.ls.forEach((lines,ci)=>{const v=rows[ri][ci];if(ci===statusCol&&SC[v]){x.font=fH;const w=x.measureText(v).width+18;x.fillStyle=SC[v][0];x.fillRect(xx+PAD,y+PAD-2,w,LH+4);x.fillStyle=SC[v][1];x.fillText(v,xx+PAD+9,y+PAD+1);}
-    else{lines.forEach((ln,li)=>{x.font=(ci===0&&statusCol<0)||(ci===1&&li===0&&statusCol>=0)?fH:fB;x.fillStyle=li>0&&ci===1?'#64748b':'#1e293b';x.fillText(ln,xx+PAD,y+PAD+li*LH);});}
-    xx+=cols[ci].w;});
-   x.strokeStyle='#d5dde8';x.lineWidth=1;x.strokeRect(P,y,W-P*2,L.h);let vx=P;cols.slice(0,-1).forEach(cl=>{vx+=cl.w;x.beginPath();x.moveTo(vx,y);x.lineTo(vx,y+L.h);x.stroke();});y+=L.h;});};
- table('Jobs',jc,jrows,jl,5);y+=24;table('Not assigned complaints (open now)',uc,urows,ul,-1,'All open complaints are assigned.');y+=24;table('Employee summary',ec,erows,el,-1);
+ let cx=P;[['Jobs',allA.length,'#e8f0fb','#12304f'],['Completed',cnt('Completed')],['Pending',cnt('Pending')],['Hold',cnt('Hold')],['Not planned yet',cnt('Not planned yet')],['Man-hours',fmt(totMin),'#e8f0fb','#12304f']].forEach(([l,v,bg,fg])=>{const cc=SC[l]||[bg,fg];x.font='bold 15px '+F;const t=l+': '+v,w=x.measureText(t).width+24;x.fillStyle=cc[0];x.fillRect(cx,y,w,28);x.fillStyle=cc[1];x.fillText(t,cx+12,y+6);cx+=w+10;});y+=50;
+ const draw=(title,cols,R,empty)=>{x.font='bold 19px '+F;x.fillStyle='#12304f';x.fillText(title,P,y);y+=32;const top=y;let xx=P;x.fillStyle='#12304f';x.fillRect(P,y,W-P*2,HH);x.fillStyle='#fff';x.font=fH;cols.forEach(cl=>{x.fillText(cl.h,xx+PAD,y+11);xx+=cl.w;});y+=HH;
+  if(!R.length){x.fillStyle='#64748b';x.font=fB;x.fillText(empty,P+PAD,y+15);y+=50;}
+  let gi=0;R.forEach(r=>{if(r.first)gi++;x.fillStyle=gi%2?'#ffffff':'#f6f8fb';x.fillRect(P,y,W-P*2,r.h);
+   if(r.first){x.font=fH;x.fillStyle='#12304f';r.nl.forEach((ln,i)=>x.fillText(ln,P+PAD,y+PAD+i*LH));x.font='14px '+F;x.fillStyle='#64748b';x.fillText(r.sub,P+PAD,y+PAD+r.nl.length*LH);}
+   x.font=fB;x.fillStyle='#1e293b';r.lines.forEach((ln,i)=>x.fillText(ln,P+cols[0].w+PAD,y+PAD+i*LH));
+   const sx=P+cols[0].w+cols[1].w+PAD;if(r.c3){x.font=fB;x.fillStyle='#1e293b';r.c3.forEach((ln,i)=>{x.font=i?fH:fB;x.fillText(ln,sx,y+PAD+i*LH);});}else{const st=r.it.st,sc=SC[st]||['#eef2f7','#334155'];x.font=fH;const sw=x.measureText(st).width+20;x.fillStyle=sc[0];x.fillRect(sx,y+PAD-2,sw,LH+6);x.fillStyle=sc[1];x.fillText(st,sx+10,y+PAD+1);}
+   x.strokeStyle='#d5dde8';x.lineWidth=1;x.beginPath();x.moveTo(P+cols[0].w,y);x.lineTo(P+cols[0].w,y+r.h);x.moveTo(P+cols[0].w+cols[1].w,y);x.lineTo(P+cols[0].w+cols[1].w,y+r.h);x.stroke();
+   x.strokeStyle=r.first?'#9fb0c6':'#e2e8f0';x.beginPath();x.moveTo(r.first?P:P+cols[0].w,y);x.lineTo(W-P,y);x.stroke();y+=r.h;});
+  x.strokeStyle='#9fb0c6';x.strokeRect(P,top,W-P*2,y-top);};
+ draw('Assigned jobs - status',colsA,RA,'No open or completed complaint jobs.');y+=28;
+ draw("Today's work - employee-wise with duration",colsB,RB,'No work entries recorded.');
  x.font='12px '+F;x.fillStyle='#94a3b8';x.fillText('Starish Maintenance Work Log',P,H-P);
  const blob=await new Promise(r=>c.toBlob(r,'image/png'));return new File([blob],'Maintenance-Report-'+S.day+'.png',{type:'image/png'});}
 
