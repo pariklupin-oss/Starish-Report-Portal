@@ -335,3 +335,118 @@ dialog::backdrop{background:#25333B99}
 
 /* Compact supplied company logo; retain full artwork at every size. */
 header .brand-logo{flex:0 1 280px;flex-direction:row;align-items:center;gap:12px}header .brand-logo img{width:72px!important;height:72px;flex:none;object-fit:contain;border-radius:6px}header .brand-logo>small{max-width:160px;font-size:12px;font-weight:650}@media(max-width:700px){header .brand-logo{flex:1 1 100%}header .brand-logo img{width:64px!important;height:64px}}
+
+/* Compact mobile workspace — slate, kraft amber and clear touch targets. */
+.mobile-report-tools,.mobile-date-shortcuts,.mobile-nav-heading,#mobileQuickNav{display:none}
+@media(max-width:768px){
+ body{background:#f3f4f6}
+ body>header{display:flex;flex-wrap:nowrap;gap:9px;padding:10px 14px;min-height:68px;box-shadow:0 4px 18px #18232914}
+ body>header .brand-logo{flex:1 1 auto;min-width:0;max-width:none;gap:9px}
+ body>header .brand-logo img{width:40px!important;height:40px!important;flex:0 0 40px;border-radius:10px;object-fit:contain}
+ body>header .brand-logo>small{display:block;max-width:none;font-size:14px;line-height:1.25;color:#fff;font-weight:750}
+ body>header #identity{flex:0 1 auto;min-width:0;margin-left:auto;gap:7px}
+ body>header #identity>span{display:none}
+ body>header .notification-count{width:38px;height:38px;min-width:38px;line-height:1;padding:0;border:1px solid #ffffff38;background:#ffffff13}
+ body>header #logout{flex:0 0 auto;font-size:12px;padding:9px 10px;min-height:38px;background:#ffffff10;border:1px solid #ffffff35}
+ body>header #install:not([hidden]){display:none}
+ #shell main,body.owner-compact #shell main{padding:18px 14px calc(100px + env(safe-area-inset-bottom));background:transparent;width:100%}
+ .title-row{margin-bottom:16px;grid-template-columns:44px minmax(0,1fr) auto;gap:10px}
+ #mobileMenuToggle{width:44px;min-height:44px;padding:0;border-radius:13px;background:white;box-shadow:0 2px 7px #25333b08}
+ #mobileMenuToggle>span:last-child{display:none}
+ .title-row>div:first-of-type{grid-column:2}
+ .title-row .eyebrow{font-size:10px;letter-spacing:1.5px}
+ .title-row #pageTitle{font-size:23px;line-height:1.2;margin:2px 0 0}
+ .title-row .layout-actions{grid-column:3;grid-row:1;gap:0}
+ .title-row .layout-actions #fullscreenTable{display:none}
+ .title-row .layout-actions #refresh{min-height:44px;padding:9px 11px;font-size:13px;border-radius:12px}
+ #reportChooser{margin-bottom:12px}
+ #reportChooser label{gap:6px;font-size:13px}
+ #reportChooser select{background:#fff;min-height:50px;font-weight:700;border-radius:14px;box-shadow:0 3px 9px #25333b04;padding:12px}
+ .mobile-report-tools:not([hidden]){display:flex;gap:8px;margin-bottom:14px;min-width:0}
+ #mobileFilterToggle{display:flex;flex:1;flex-direction:column;align-items:flex-start;min-width:0;gap:3px;padding:10px 12px;text-align:left;border-radius:12px;background:#fff;font-size:13px}
+ #mobileFilterToggle small{font-size:12px;line-height:1.4;color:#5d6971;white-space:normal;font-weight:500}
+ #mobileFilterToggle[aria-expanded=true]{border-color:#b54708;background:#fff8f0}
+ #mobileTableToggle{flex:0 0 auto;padding:9px 12px;border-radius:12px;background:#fff;font-size:13px;min-height:44px}
+ body.mobile-filters-collapsed #filters{display:none!important}
+ #filters{grid-template-columns:repeat(2,minmax(0,1fr));border-radius:16px;box-shadow:0 6px 18px #25333b08;gap:12px}
+ #filters label{min-width:0}
+ #filters #apply{grid-column:2;align-self:end}
+ .mobile-date-shortcuts{display:flex;grid-column:1/-1;gap:7px;border-top:1px solid #e6e9eb;padding-top:12px}
+ .mobile-date-shortcuts button{flex:1;width:auto!important;padding:9px 5px!important;min-height:40px!important;font-size:12px;background:#f7f8f9;border-radius:9px}
+ #content>.toolbar{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+ #content>.toolbar>label,#content>.toolbar>input,#content>.toolbar>p{grid-column:1/-1}
+ #content>.toolbar>button{font-size:13px;padding:10px 8px;border-radius:11px;min-height:44px;white-space:normal}
+ main:has(#reportChooser label) #content>.toolbar>label:has(>select#reportType){display:none}
+ #content .report-kpi-panel{padding:13px 14px;border-radius:14px;background:#fff;border-color:#e0e4e7;box-shadow:none}
+ .report-kpi-panel>summary{font-size:13px;cursor:pointer;color:#3a4851}
+ #content .kpis{gap:9px;margin-bottom:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+ #content .kpis>.card{border-radius:14px;background:#fff;border:1px solid #e0e4e7;border-top:3px solid #d99951;box-shadow:0 4px 12px #25333b05;padding:13px;min-width:0;text-align:left}
+ #content .kpis strong{overflow-wrap:anywhere;font-variant-numeric:tabular-nums;line-height:1.25}
+ #content .kpis small{font-size:12px!important}
+ body.owner-compact #content .table-wrap,#content .table-wrap.excel-report{width:100%;max-width:100%;border-radius:16px;border-color:#e0e4e7;box-shadow:0 4px 16px #25333b05;padding:14px}
+ #content .excel-report h2{font-size:19px!important;line-height:1.35!important;margin:0;padding:0 0 12px;border-bottom:1px solid #edf0f2}
+ #content .excel-report>p{font-size:12px!important;margin:10px 0 14px}
+ #content .responsive-data-table tbody,#content .responsive-data-table tfoot{gap:12px}
+ #content .responsive-data-table tbody tr{background:#fff!important;border:1px solid #e0e4e7;border-radius:13px;box-shadow:none;padding:12px;gap:9px 12px}
+ #content .responsive-data-table tbody tr td{max-width:none;padding:3px 0;font-size:16px!important;font-weight:650!important}
+ #content .responsive-data-table tbody tr td:first-child{font-size:16px!important;padding:0 0 10px;margin:0 0 2px;border-bottom:1px solid #edf0f2}
+ #content .responsive-data-table td::before{color:#657078!important;font-size:12px!important;letter-spacing:0;text-transform:none;font-weight:550!important}
+ #content .responsive-data-table td[data-mobile-full=true]{padding-top:9px;border-top:1px solid #edf0f2}
+ #content .responsive-data-table td button{border-radius:10px;min-height:44px}
+ #content .responsive-data-table tfoot tr{background:#fff3e5;border-color:#e6c49f}
+ .task-list-feed,.production-card,.quality-card{border-radius:15px;border-color:#e0e4e7;box-shadow:0 3px 14px #25333b04}
+ .task-list-row{padding:13px 10px;gap:10px}
+ .task-list-row .task-card-actions-personal{gap:8px}
+ .task-list-row .task-card-actions-personal button{min-height:42px;padding:9px 13px}
+ .task-list-row .task-card-check input[type=checkbox]{min-height:26px;width:26px;height:26px;accent-color:#b54708}
+ input[type=checkbox]{min-height:0;accent-color:#b54708}
+ #nav .mobile-nav-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 5px 21px;margin-bottom:12px;border-bottom:1px solid #ffffff26}
+ .mobile-nav-heading>div{display:grid;gap:3px}
+ .mobile-nav-heading small{color:#efbd82;font-size:11px;letter-spacing:2px}
+ .mobile-nav-heading b{font-size:22px;color:#fff}
+ nav#nav .mobile-nav-heading button{width:auto;min-height:40px;margin:0;background:#ffffff15;color:#fff;border:1px solid #ffffff28;padding:8px 12px;border-radius:10px;font-size:13px}
+ body.mobile-nav-open{overflow:hidden}
+ body.mobile-nav-open #mobileQuickNav{visibility:hidden}
+ #mobileQuickNav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:40;display:flex;justify-content:space-around;align-items:stretch;gap:3px;padding:6px;background:#fff;border:1px solid #dfe4e7;border-radius:19px;box-shadow:0 8px 32px #18232924}
+ #mobileQuickNav button{display:flex;flex:1;min-width:0;min-height:56px;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:5px 3px;background:transparent;color:#69757b;font-size:11px;border-radius:13px;box-shadow:none}
+ #mobileQuickNav button svg{width:22px;height:22px}
+ #mobileQuickNav button[aria-current=page]{background:#fff0e1;color:#a13f08}
+ #mobileQuickNav button span{line-height:1.3}
+ #message{bottom:calc(92px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100% - 28px);box-shadow:0 8px 25px #18232930}
+ dialog{max-height:calc(100dvh - 24px);border-radius:20px;padding:20px 16px}
+ .dialog-head{top:-20px;padding:6px 0 12px;gap:10px}
+ .dialog-head h2{font-size:19px;margin:5px 0}
+ .dialog-head button{min-height:44px;border-radius:11px;font-size:13px}
+ .details{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px;padding-bottom:14px;border-bottom:1px solid #e5e9eb}
+ .details dd{margin-left:0;font-variant-numeric:tabular-nums}
+ .details dt{font-size:12px}
+ .form-actions{gap:9px}
+ .login{margin:24px 14px;padding:24px 20px;border-radius:20px;box-shadow:0 12px 35px #25333b0b}
+ .login .toolbar{display:flex;gap:7px;padding:5px;background:#f1f3f5;border-radius:13px}
+ .login .toolbar button{flex:1;min-height:44px;padding:9px 7px;border-radius:9px;font-size:13px}
+ .login .toolbar button.secondary{background:transparent;border-color:transparent;color:#53616a}
+ .footer{color:#6a767e;font-size:12px;margin:22px 4px 0}
+ /* Optional comparison mode preserves the original table headings and every value. */
+ body.mobile-table-view #content .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+ body.mobile-table-view #content .responsive-data-table{display:table;width:max-content;min-width:100%!important;border-collapse:collapse}
+ body.mobile-table-view #content .responsive-data-table thead{display:table-header-group}
+ body.mobile-table-view #content .responsive-data-table tbody{display:table-row-group}
+ body.mobile-table-view #content .responsive-data-table tfoot{display:table-footer-group}
+ body.mobile-table-view #content .responsive-data-table tr{display:table-row;border:0;padding:0;box-shadow:none}
+ body.mobile-table-view #content .responsive-data-table th,body.mobile-table-view #content .responsive-data-table td{display:table-cell;white-space:nowrap!important;padding:11px 12px;max-width:none;border:1px solid #e1e5e8;font-size:14px!important;font-weight:550!important;vertical-align:top}
+ body.mobile-table-view #content .responsive-data-table th{position:static;background:#f7e6d2}
+ body.mobile-table-view #content .responsive-data-table td:first-child{font-size:14px!important;font-weight:700!important;padding:11px 12px}
+ body.mobile-table-view #content .responsive-data-table td::before{display:none}
+ body.mobile-table-view #content .responsive-data-table td button{min-width:80px}
+}
+@media(max-width:360px){body>header{padding:9px 10px;gap:6px}body>header .brand-logo>small{font-size:12px}body>header .brand-logo img{width:34px!important;height:34px!important;flex-basis:34px}body>header #logout{font-size:11px;padding:8px}.mobile-date-shortcuts button{font-size:11px}}
+@media print{#mobileQuickNav,.mobile-report-tools,.mobile-nav-heading,.mobile-date-shortcuts{display:none!important}}
+
+/* Isolate the mark in a compact square; trim only its transparent display margin. */
+header .brand-logo{flex:0 1 auto;gap:11px}
+header .portal-logo-mark{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;overflow:hidden;border-radius:10px}
+header .portal-logo-mark img{display:block;width:48px!important;height:48px!important;max-width:none;transform:scale(1.45);object-fit:contain}
+@media(max-width:768px){body>header .portal-logo-mark{width:40px;height:40px;flex-basis:40px}body>header .portal-logo-mark img{width:40px!important;height:40px!important;flex-basis:40px}}
+@media(max-width:360px){body>header .portal-logo-mark{width:34px;height:34px;flex-basis:34px}body>header .portal-logo-mark img{width:34px!important;height:34px!important;flex-basis:34px}}
+
+@media(max-width:768px){nav#nav:not(:has(button:focus-visible)){scrollbar-width:thin}.filters label{font-size:13px}#filters input,#filters select{padding:10px 8px}.mobile-report-tools[hidden]{display:none!important}}
