@@ -4,7 +4,7 @@ import { stageDisplayFields } from './stage-format.js?v=95';
 export const REPORT_NAMES = ['Boardline Production', 'Printing Production', 'Folder Gluer Production', 'Auto Stitching Production', 'Manual Production', 'Water Meter', 'Maintenance Timesheet', 'Loading Timesheet', 'Daily Dispatch', 'DG Operation', 'Diesel Consumption', 'Boiler', 'Glue Consumption', 'Glue Kitchen Stock', 'Waste Bundle', 'Boiler Hourly Log', 'Boiler Water Tests', 'Stage Report', 'Employee Task', 'Sales Return'];
 export const fieldNames = (n) => n === 'Boardline Production' ? ['Tonnage (kg)', 'Metres', 'Start Time', 'End Time', 'Breakdown Minutes', 'Breakdown Reason'] : n.includes('Production') ? ['Machine / Process', 'Number of Jobs', 'Actual Quantity', 'Colour Changes', 'Start Time', 'End Time', 'Breakdown Minutes', 'Breakdown Reason'] : n === 'Sales Return' ? ['Customer', 'Item Code', 'Local Name', 'Item Name', 'Return Qty', 'Reason', 'Ref No', 'Remark', 'Operator'] : n === 'Water Meter' ? ['Meter Name', 'Opening Reading', 'Closing Reading', 'Reading Multiplier'] : n === 'Maintenance Timesheet' ? ['Employee Name', 'Machine', 'Work Description', 'Start Time', 'End Time', 'Status', 'Reason'] : n === 'Loading Timesheet' ? ['Employee Name', 'Vehicle Number', 'Customer', 'Start Time', 'End Time', 'Vehicle Feet', 'Helper Count', 'Source Total Hours', 'Report Check'] : n === 'Daily Dispatch' ? ['Vehicle Number', 'Customer', 'Invoice Number', 'Products', 'Quantity', 'Amount (Rs)', 'Weighbridge Net Kg'] : n === 'DG Operation' ? ['Duration (HH:MM)', 'Diesel Consumption (litres)'] : n === 'Diesel Consumption' ? ['Opening Cans', 'Opening Barrels', 'Received Cans', 'Received Barrels', 'Issued Cans', 'Issued Barrels', 'Receiver Name', 'Used For'] : n === 'Waste Bundle' ? ['Opening Bundles', 'In Bundles', 'Out Bundles'] : n === 'Glue Kitchen Stock' ? ['Material Name', 'Stock Unit', 'Opening Stock', 'Received Quantity', 'Issued Quantity', 'Starch per Bag (kg)', 'Starch per Batch (kg)'] : n === 'Boiler Hourly Log' ? ['Operator', 'Log Time', 'Steam Pressure (bar)', 'Feed Water Temperature (C)', 'Flue Gas T1 (C)', 'Flue Gas T2 (C)', 'Water Meter Reading', 'Fuel Meter Reading', 'Steam Meter Reading', 'Water Meter Unit', 'Fuel Meter Unit', 'Steam Meter Unit', 'Calculated Water (litres)', 'Calculated Fuel (kg)', 'Calculated Steam (kg)', 'Reading Day Offset'] : n === 'Boiler Water Tests' ? ['Operator', 'Test Time', 'Water Sample', 'TDS (ppm)', 'pH', 'Hardness (ppm)'] : ['Operator', 'Time Slot', 'Water Consumption (litres)', 'Fuel Consumption (kg)', 'Steam Consumption (kg)'];
 export function inputType(k) { return /^(Start Time|End Time|Log Time)$/.test(k) ? 'time' : k === 'Duration (HH:MM)' ? 'text' : /TDS|^pH$|Cans|Barrels|Quantity|Minutes|Reading|Litres|Litres|litres|Bundles|Stock$|Issued Quantity|Received Quantity|Tonnage|Metres|Number of Jobs|Colour Changes|Amount|Qty|Kg|Helper Count|Total Hours|\(kg\)|\(m3\)|\(tonnes\)|\(bar\)|\(C\)/.test(k) ? 'number' : 'text'; }
-export function number(f, k) { const raw = f[k]; return raw === undefined || raw.trim() === '' ? null : Number.isFinite(Number(raw)) ? Number(raw) : null; }
+export function number(f, k) { const raw = f[k]; if(raw===undefined||raw===null||String(raw).trim()==='')return null; const value=Number(String(raw).replace(/,/g,'')); return Number.isFinite(value)?value:null; }
 export function hours(start, end) { if (!/^\d{1,2}:\d{2}(:\d{2})?$/.test(start || '') || end !== undefined && !/^\d{1,2}:\d{2}(:\d{2})?$/.test(end || ''))
     return null; const val = (v) => { const a = v.split(':').map(Number); return a[0] + a[1] / 60 + (a[2] || 0) / 3600; }; if (end === undefined)
     return val(start); const a = val(start), b = val(end); return b >= a ? b - a : b - a + 24; }
@@ -47,37 +47,48 @@ export function glueDays(entries, changeover) { const dates = [...new Set(entrie
     const issued = number(r.fields, 'Issued Quantity');
     const bag = number(r.fields, 'Starch per Bag (kg)');
     const size = number(r.fields, 'Starch per Batch (kg)') ?? (changeover ? (date < changeover ? 200 : 150) : null);
-    const unit = String(r.fields['Stock Unit'] || '').toLowerCase();
+    const unit = String(r.fields['Stock Unit'] || '').trim().toLowerCase();
     const kg = issued === null ? null : unit === 'kg' ? issued : unit === 'bags' && bag !== null ? issued * bag : null;
-    if (kg !== null)
+    if (kg !== null && kg >= 0)
         starch += kg;
     else
         starchKnown = false;
-    if (kg === null || !size)
+    if (kg === null || kg < 0 || !(size > 0))
         batchKnown = false;
     else
         batches += kg / size;
-} const kg = total(board, 'Tonnage (kg)'); const missingShifts = ['DAY', 'NIGHT'].filter(sh => !board.some(r => r.shift.toUpperCase() === sh)); const complete = board.length > 0 && missingShifts.length < 2 && board.every(r => number(r.fields, 'Tonnage (kg)') !== null); return { date, starch, batches: batchKnown ? batches : null, tonnes: kg / 1000, consumption: complete && starchKnown && kg > 0 ? starch / (kg / 1000) : null, missingShifts }; }); }
+} const kg = total(board, 'Tonnage (kg)'); const missingShifts = ['DAY', 'NIGHT'].filter(sh => !board.some(r => r.shift.toUpperCase() === sh)); const complete = board.length > 0 && missingShifts.length < 2 && board.every(r => number(r.fields, 'Tonnage (kg)') !== null); return { date, starch, starchKnown, batches: batchKnown ? batches : null, tonnes: kg / 1000, consumption: complete && starchKnown && kg > 0 ? starch / (kg / 1000) : null, missingShifts }; }); }
 export const MATERIALS = ['Modified - Cold Pasting (PCM300-30)', 'Caustic Soda', 'Maize Starch', 'BORAX', 'CP/88/LV CHEMICAL', 'XLR8(50 KG S)', 'H2R (35 KGS CAN)'];
 export const METERS = ['MAIN', 'PRINTING', 'BOARDLINE', 'GLUE', 'CANTEEN', 'LABOUR', 'BOILER'];
 export const DEPARTMENTS = { Security: ['Water Meter', 'DG Operation', 'Diesel Consumption'], 'Glue Kitchen': ['Glue Kitchen Stock', 'Glue Consumption'], Boiler: ['Boiler', 'Boiler Hourly Log', 'Boiler Water Tests'], Maintenance: ['Maintenance Timesheet'], 'Loading & Dispatch': ['Loading Timesheet', 'Daily Dispatch', 'Waste Bundle'], Production: ['Boardline Production', 'Printing Production', 'Folder Gluer Production', 'Auto Stitching Production', 'Manual Production'] };
+
+/** One weighted ratio, from the same matched days in the numerator and denominator. */
+export function glueKpis(days, basis='Boardline') {
+ const matched=days.filter(d=>d.starchKnown!==false&&Number.isFinite(d.starch)&&d.starch>=0&&Number.isFinite(d.tonnes)&&d.tonnes>0&&Number.isFinite(basis==='Reel'?d.glue:d.consumption));
+ const kg=matched.reduce((n,d)=>n+d.starch,0),tonnes=matched.reduce((n,d)=>n+d.tonnes,0);
+ const recorded=days.reduce((n,d)=>n+(Number.isFinite(d.starch)?d.starch:0),0),unknown=days.filter(d=>d.starchKnown===false).length;
+ const unmatched=days.filter(d=>!matched.includes(d)),unmatchedKg=unmatched.reduce((n,d)=>n+(d.starchKnown!==false&&Number.isFinite(d.starch)?d.starch:0),0);
+ const fmt=(v,d=0)=>Number(v).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+ const batchKnown=days.length>0&&days.every(d=>Number.isFinite(d.batches)),batches=days.reduce((n,d)=>n+(d.batches||0),0);
+ const partial=basis==='Boardline'?matched.filter(d=>d.missingShifts?.length===1).length:0;
+ return [
+ {label:'Glue consumption',value:tonnes>0?fmt(kg/tonnes,2):'Not available',unit:'kg/ton',primary:true,hint:tonnes>0?fmt(kg)+' kg starch ÷ '+fmt(tonnes,3)+' '+basis.toLowerCase()+' tonnes. Weighted across matched days.':'Matching starch and '+basis.toLowerCase()+' tonnes are required.',tone:tonnes>0?'normal':'attention'},
+ {label:'Starch issued',value:days.length?fmt(recorded):'Not available',unit:'kg',hint:unknown?unknown+' day(s) have incomplete starch data; amount shown is only the recorded quantity.':'Recorded maize starch issued for all report days.',tone:unknown?'attention':'normal'},
+ {label:'Matched '+basis.toLowerCase()+' tonnage',value:matched.length?fmt(tonnes,3):'Not available',unit:'tonnes',hint:fmt(kg)+' kg matched starch; excludes days without a valid ratio.'},
+ {label:'Batches',value:batchKnown?fmt(batches,2):'Not available',unit:'equivalents',hint:'Based on each entry’s batch size; uses the configured date changeover when absent.'},
+ {label:'Matched days',value:matched.length+' / '+days.length,unit:'days',hint:(unmatched.length?unmatched.length+' day(s) excluded from kg/ton.':'All recorded starch days matched.')+(partial?' '+partial+' day(s) have only one Boardline shift; verify coverage.':''),tone:unmatched.length||partial?'attention':'normal'},
+ {label:'Unmatched starch',value:fmt(unmatchedKg),unit:'kg',hint:unknown?unknown+' day(s) also need starch verification; unmatched quantity may be incomplete.':'Recorded starch on excluded days; not used in kg/ton.',tone:unmatched.length?'attention':'normal'}
+ ];
+}
+
 export function summary(type, entries, changeover = '2026-09-10') {
     const rows = reportInputs(type,entries);
-    const sum = (key) => rows.reduce((a, r) => a + (number(r.fields, key) || 0), 0);
-    const fmt = (n, d = 0) => n.toLocaleString('en-IN', { maximumFractionDigits: d });
+    const sum = (key) => { const values=rows.map(r=>number(r.fields,key));return values.every(v=>v!==null)?values.reduce((a,b)=>a+b,0):NaN; };
+    const fmt = (n, d = 0) => Number.isFinite(n)?n.toLocaleString('en-IN', { maximumFractionDigits: d }):'Not available';
     const out = [];
     const add = (label, value) => out.push({ label, value: String(value) });
     if (type === 'Sales Return') { add('Returned quantity', fmt(sum('Return Qty'))); add('Return entries', rows.length); add('Customers', new Set(rows.map(r => String(r.fields.Customer || '').trim()).filter(Boolean)).size); add('Items', new Set(rows.map(r => String(r.fields['Item Code'] || r.fields['Item Name'] || '').trim()).filter(Boolean)).size); }
-    else if (type === 'Glue Consumption') {
-        const gs = glueDays(entries, changeover);
-        const complete = gs.filter(g => g.consumption !== null);
-        const kg = complete.reduce((a, g) => a + g.starch, 0), ton = complete.reduce((a, g) => a + g.tonnes, 0);
-        add('Starch issued (kg)', fmt(gs.reduce((a, g) => a + g.starch, 0)));
-        add('Batch equivalents', gs.some(g => g.batches === null) ? 'Pending batch size' : fmt(gs.reduce((a, g) => a + (g.batches || 0), 0), 2));
-        add('Glue (kg/ton)', ton ? fmt(kg / ton, 2) : 'Unavailable');
-        add('Matched production days', complete.length + ' / ' + gs.length);
-        return out;
-    }
+    else if (type === 'Glue Consumption') return glueKpis(glueDays(entries, changeover), 'Boardline');
     if (type === 'Stage Report')
         return stageMetrics(rows);
     if (!rows.length)
@@ -100,15 +111,15 @@ export function summary(type, entries, changeover = '2026-09-10') {
     else if (type === 'DG Operation') {
         const hrs = rows.map(r => hours(r.fields['Duration (HH:MM)'])).map(h => h === null ? NaN : h);
         const h = hrs.filter(Number.isFinite).reduce((a, b) => a + b, 0), fuel = sum('Diesel Consumption (litres)');
-        add('Running (hours)', fmt(h, 2));
+        add('Running (hours)', hrs.every(Number.isFinite)?fmt(h, 2):'Not available');
         add('Diesel (litres)', fmt(fuel, 2));
-        add('Rate (litres/hour)', h ? fmt(fuel / h, 2) : 'Unavailable');
+        add('Rate (litres/hour)', h>0&&hrs.every(Number.isFinite) ? fmt(fuel / h, 2) : 'Unavailable');
         if (hrs.some(v => !Number.isFinite(v)))
             add('Invalid durations', hrs.filter(v => !Number.isFinite(v)).length);
     }
     else if (type === 'Water Meter') {
         const days = [...new Set(rows.map(r => r.date))];
-        const meters = [...new Set(rows.map(r => (r.fields['Meter Name'] || '').toUpperCase()))];
+        const meters = [...new Set(rows.map(r => (r.fields['Meter Name'] || '').toUpperCase()))].sort((a,b)=>(METERS.includes(a)?METERS.indexOf(a):999)-(METERS.includes(b)?METERS.indexOf(b):999));
         for (const meter of meters) {
             let value = 0, missing = 0;
             for (const day of days) {
@@ -121,7 +132,7 @@ export function summary(type, entries, changeover = '2026-09-10') {
                 else
                     value += area;
             }
-            add(meter + ' area (litres)', missing ? fmt(value) + '; ' + missing + ' days unavailable' : fmt(value));
+            add(meter + ' area (litres)', missing===days.length?'Not available':missing ? fmt(value) + '; ' + missing + ' days unavailable' : fmt(value));
             const validDays = days.length - missing;
             add(meter + ' average (litres/day)', validDays ? fmt(value / validDays, 2) + ' (' + validDays + ' valid days)' : 'Unavailable');
         }
@@ -130,30 +141,34 @@ export function summary(type, entries, changeover = '2026-09-10') {
         const hs = rows.map(r => Number(derived(r)['Elapsed Hours']));
         add('Recorded hours', fmt(hs.filter(Number.isFinite).reduce((a, b) => a + b, 0), 2));
         add('Jobs / entries', rows.length);
+        if(type==='Maintenance Timesheet'){add('Completed jobs',rows.filter(r=>/^(complete|completed|closed|done|resolved)$/i.test(String(r.fields.Status||'').trim())).length);add('Employees',new Set(rows.map(r=>String(r.fields['Employee Name']||'').trim()).filter(Boolean)).size);}
+        else add('Vehicles',new Set(rows.map(r=>String(r.fields['Vehicle Number']||'').trim()).filter(Boolean)).size);
         if (hs.some(v => !Number.isFinite(v)))
             add('Invalid times', hs.filter(v => !Number.isFinite(v)).length);
     }
     else if (type === 'Diesel Consumption') {
         add('Received (litres)', fmt(sum('Received Litres'), 2));
         add('Issued (litres)', fmt(sum('Issued Litres'), 2));
-        const last = [...rows].sort((a, b) => b.date.localeCompare(a.date) || b.at.localeCompare(a.at))[0];
+        const last = [...rows].sort((a, b) => b.date.localeCompare(a.date) || String(b.at||'').localeCompare(String(a.at||'')))[0];
         add('Latest closing (litres)', derived(last)['Closing Litres']);
     }
     else if (type === 'Waste Bundle') {
         add('Bundles in', fmt(sum('In Bundles')));
         add('Bundles out', fmt(sum('Out Bundles')));
-        const last = [...rows].sort((a, b) => b.date.localeCompare(a.date) || b.at.localeCompare(a.at))[0];
+        const last = [...rows].sort((a, b) => b.date.localeCompare(a.date) || String(b.at||'').localeCompare(String(a.at||'')))[0];
         add('Latest closing', derived(last)['Closing Bundles']);
     }
     else if (type === 'Daily Dispatch') {
         add('Invoices', rows.length);
         add('Quantity', fmt(sum('Quantity')));
         add('Amount (Rs)', fmt(sum('Amount (Rs)'), 2));
-        add('Vehicles', new Set(rows.map(r => r.fields['Vehicle Number'] || r.fields['Vehicle'])).size);
+        add('Vehicles', new Set(rows.map(r => String(r.fields['Vehicle Number'] || r.fields.Vehicle || '').trim().toUpperCase()).filter(Boolean)).size);
+        add('Customers',new Set(rows.map(r=>String(r.fields.Customer||'').trim().toUpperCase()).filter(Boolean)).size);
     }
     else if (type === 'Glue Kitchen Stock') {
         add('Material entries', rows.length);
-        add('Materials', new Set(rows.map(r => r.fields['Material Name'])).size);
+        add('Materials', new Set(rows.map(r => r.fields['Material Name']).filter(Boolean)).size);
+        add('Stock records needing check',rows.filter(r=>{const value=Number(derived(r)['Closing Stock']);return !Number.isFinite(value)||value<0;}).length);
     }
     else {
         add('Saved records', rows.length);

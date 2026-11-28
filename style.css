@@ -450,3 +450,48 @@ header .portal-logo-mark img{display:block;width:48px!important;height:48px!impo
 @media(max-width:360px){body>header .portal-logo-mark{width:34px;height:34px;flex-basis:34px}body>header .portal-logo-mark img{width:34px!important;height:34px!important;flex-basis:34px}}
 
 @media(max-width:768px){nav#nav:not(:has(button:focus-visible)){scrollbar-width:thin}.filters label{font-size:13px}#filters input,#filters select{padding:10px 8px}.mobile-report-tools[hidden]{display:none!important}}
+
+/* Clear hierarchy: bold for results, quiet labels and readable explanatory text. */
+body,button,input,select,textarea{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{font-size:16px;line-height:1.55}
+h1,h2,h3{font-weight:750}
+label{font-size:14px;font-weight:600}
+button{font-size:14px;font-weight:650}
+#content table{font-variant-numeric:tabular-nums}
+#content .excel-report th{font-size:13px;font-weight:700}
+#content .excel-report td{font-size:14px;font-weight:500;line-height:1.5}
+#content .excel-report td:first-child{font-weight:700}
+#content .excel-report tfoot td{font-weight:750}
+#content .report-kpi-panel{background:transparent;border:0;padding:0;box-shadow:none;margin-bottom:20px}
+.kpi-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 12px}
+.kpi-section-heading h2{font-size:19px;margin:0;font-weight:750}
+.kpi-section-heading>span{font-size:13px;color:#5c6971}
+.report-kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 14px}
+#content .report-kpi-grid .metric-card{display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:9px;min-width:0;border:1px solid #dce2e6;border-top:3px solid #c2cbd0;border-radius:15px;padding:17px;background:#fff;color:var(--ink);box-shadow:0 3px 12px #25333b05;font-weight:400}
+#content .report-kpi-grid .metric-card .kpi-label{font-size:14px!important;color:#46545d!important;font-weight:650!important;line-height:1.4}
+.kpi-number{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;min-width:0}
+#content .report-kpi-grid .metric-card .kpi-number strong{font-size:30px!important;line-height:1.2;font-weight:800!important;color:#25333b;letter-spacing:-.7px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#content .report-kpi-grid .metric-card .kpi-unit{font-size:13px;color:#596770;font-weight:600;letter-spacing:0}
+#content .report-kpi-grid .metric-card .kpi-note{font-size:13px!important;line-height:1.5!important;color:#5a6871;margin:0;font-weight:450;overflow-wrap:anywhere}
+.kpi-detail-link{display:block;margin-top:auto;padding-top:5px;font-size:12px;color:#8f3c0c;font-weight:650}
+#content .report-kpi-grid .kpi-primary{background:#fff6eb;border-color:#e8c59e;border-top-color:#b54708}
+#content .report-kpi-grid .kpi-primary .kpi-number strong{color:#9e3e07}
+#content .report-kpi-grid .kpi-attention{border-top-color:#d99b35}
+.kpi-more{margin:5px 0 14px}
+.kpi-more>summary{padding:10px 2px;color:#49565f;font-size:14px;font-weight:650;cursor:pointer}
+.kpi-more[open] .report-kpi-grid{margin-top:10px}
+@media(max-width:1000px){.report-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:768px){
+ #content .report-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .kpi-section-heading{align-items:flex-start;flex-direction:column;gap:3px}
+ #content .report-kpi-grid .metric-card{padding:14px 12px;gap:8px;border-top-width:3px}
+ #content .report-kpi-grid .metric-card.kpi-primary{grid-column:1/-1}
+ #content .report-kpi-grid .metric-card .kpi-number strong{font-size:26px!important}
+ #content .report-kpi-grid .metric-card.kpi-primary .kpi-number strong{font-size:34px!important}
+ #content .report-kpi-grid .metric-card .kpi-label{font-size:13px!important}
+ #content .report-kpi-grid .metric-card .kpi-note{font-size:13px!important}
+ #content .responsive-data-table td{font-weight:600!important}
+ #content .responsive-data-table td::before{font-weight:500!important;color:#5d6b74!important}
+ #content .responsive-data-table td:first-child{font-weight:750!important}
+}
+@media(max-width:360px){#content .report-kpi-grid .metric-card{padding:12px 10px}#content .report-kpi-grid .metric-card .kpi-number strong{font-size:23px!important}}
